@@ -8,7 +8,7 @@ Facturación Electrónica V2.0
 5. Open your ```.env``` file and change the following parameters: ```DB_DATABASE```, ```DB_USERNAME```, ```DB_PASSWORD```, and other parameters that you consider.
 6. Create your database in your MySQL server with the previous parameters.
 7. Run ```php artisan key:generate```.
-8. Run ```php artisan migrate.
+8. Run ```php artisan migrate```.
 9. Run ```php artisan serve```.
 10. Go to ```localhost:8000```
 
