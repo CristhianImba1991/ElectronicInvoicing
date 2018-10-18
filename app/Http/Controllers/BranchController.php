@@ -2,7 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\{Branch, Company};
+use ElectronicInvoicing\{Branch, Company, EmissionPoint};
 use ElectronicInvoicing\Http\Requests\StoreBranchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -142,5 +142,18 @@ class BranchController extends Controller
         $branchOld = Branch::withTrashed()->where('id', $branch)->first();
         $branchOld->forceDelete();
         return redirect()->route('branches.index')->with(['status' => 'Branch deleted successfully.']);
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function emissionPoints(Request $request) {
+        if (is_array($request->id)) {
+            $emissionPoints = EmissionPoint::whereIn('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
+            return $emissionPoints->toJson();
+        } else if (is_string($request->id)) {
+            $emissionPoints = EmissionPoint::where('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
+            return $emissionPoints->toJson();
+        }
     }
 }

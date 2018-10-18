@@ -75,7 +75,7 @@ $(document).ready(function(){
                         </div>
                         <div class="form-group">
                             <label for="code">Code</label>
-                            <input class="form-control" type="number" id="code" name="code" value="{{ old('code') }}">
+                            <input class="form-control" type="number" id="code" name="code" value="{{ old('code') | 1 }}">
                         </div>
 
                     </div>

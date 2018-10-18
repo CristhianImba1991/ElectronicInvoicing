@@ -5,8 +5,8 @@
 <script type="text/javascript">
 $.noConflict();
 jQuery(document).ready(function($) {
-    $('#customers-table').DataTable();
-    $('#customerModal').on('show.bs.modal', function(event) {
+    $('#users-table').DataTable();
+    $('#userModal').on('show.bs.modal', function(event) {
         $(this).find('#modal-title').text($(event.relatedTarget).data('title'))
         $(this).find('#modal-body').text($(event.relatedTarget).data('body'))
         $(this).find("#modal-form").attr("action", $(event.relatedTarget).data('form'))
@@ -28,9 +28,9 @@ jQuery(document).ready(function($) {
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Customers
-                    @if(auth()->user()->can('create_branches'))
-                        <a href="{{ route('customers.create') }}" class="btn btn-sm btn-primary float-right">New</a>
+                    Users
+                    @if(auth()->user()->can('create_users'))
+                        <a href="{{ route('users.create') }}" class="btn btn-sm btn-primary float-right">New</a>
                     @endif
                 </div>
 
@@ -40,65 +40,65 @@ jQuery(document).ready(function($) {
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="customers-table" class="display">
+                    <table id="users-table" class="display">
                         <thead>
                             <tr>
-                                <th>Identification</th>
-                                <th>Social reason</th>
+                                <th>Name</th>
                                 <th>Email</th>
+                                <th>Role</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($customers as $customer)
+                            @forelse($users as $user)
                                 <tr>
-                                    <td>{{ $customer->identification }}</td>
+                                    <td>{{ $user->name }}</td>
                                     <td>
-                                        @if($customer->deleted_at !== NULL)
-                                            {{ $customer->social_reason }}
+                                        @if($user->deleted_at !== NULL)
+                                            {{ $user->email }}
                                         @else
-                                            @if(auth()->user()->can('update_customers'))
-                                                <a href="{{ route('customers.edit', $customer) }}">{{ $customer->social_reason }}</a>
-                                            @elseif(auth()->user()->can('read_customers'))
-                                                <a href="{{ route('customers.show', $customer) }}">{{ $customer->social_reason }}</a>
+                                            @if(auth()->user()->can('update_users'))
+                                                <a href="{{ route('users.edit', $user) }}">{{ $user->email }}</a>
+                                            @elseif(auth()->user()->can('read_users'))
+                                                <a href="{{ route('users.show', $user) }}">{{ $user->email }}</a>
                                             @else
-                                                {{ $customer->social_reason }}
+                                                {{ $user->email }}
                                             @endif
                                         @endif
                                     </td>
-                                    <td>{{ $customer->email }}</td>
+                                    <td>{{ strtoupper(implode(', ', json_decode(json_encode($user->getRoleNames()), true))) }}</td>
                                     <td>
-                                        @if($customer->deleted_at !== NULL)
-                                            @if(auth()->user()->can('delete_hard_customers'))
-                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#customerModal"
-                                                    data-title="Are you sure you want to activate the customer {{ $customer->social_reason }}?"
-                                                    data-body="All customer data will be restored."
-                                                    data-form="{{ route('customers.restore', $customer->id) }}"
+                                        @if($user->deleted_at !== NULL)
+                                            @if(auth()->user()->can('delete_hard_users'))
+                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#userModal"
+                                                    data-title="Are you sure you want to activate the user {{ $user->name }}?"
+                                                    data-body="All user data will be restored."
+                                                    data-form="{{ route('users.restore', $user->id) }}"
                                                     data-method="POST"
                                                     data-class="btn btn-sm btn-success"
                                                     data-action="Activate">Activate</button>
-                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#customerModal"
-                                                    data-title="Are you sure you want to delete the customer {{ $customer->social_reason }}?"
-                                                    data-body="WARNING: All customer data will be deleted. This action can not be undone."
-                                                    data-form="{{ route('customers.destroy', $customer->id) }}"
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#userModal"
+                                                    data-title="Are you sure you want to delete the user {{ $user->name }}?"
+                                                    data-body="WARNING: All user data will be deleted. This action can not be undone."
+                                                    data-form="{{ route('users.destroy', $user->id) }}"
                                                     data-method="DELETE"
                                                     data-class="btn btn-sm btn-danger"
                                                     data-action="Delete">Delete</button>
                                             @endif
                                         @else
-                                            @if(auth()->user()->can('delete_hard_customers'))
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#customerModal"
-                                                    data-title="Are you sure you want to deactivate the customer {{ $customer->social_reason }}?"
-                                                    data-body="The data of the customer will remain in the application, but the users that depend on it will not be able to access the data."
-                                                    data-form="{{ route('customers.delete', $customer) }}"
+                                            @if(auth()->user()->can('delete_hard_users'))
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#userModal"
+                                                    data-title="Are you sure you want to deactivate the user {{ $user->name }}?"
+                                                    data-body="The data of the user will remain in the application, but the users that depend on it will not be able to access the data."
+                                                    data-form="{{ route('users.delete', $user) }}"
                                                     data-method="DELETE"
                                                     data-class="btn btn-sm btn-warning"
                                                     data-action="Deactivate">Deactivate</button>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#customerModal"
-                                                    data-title="Are you sure you want to deactivate the customer {{ $customer->social_reason }}?"
-                                                    data-body="The data of the customer will remain in the application, but the users that depend on it will not be able to access the data."
-                                                    data-form="{{ route('customers.delete', $customer) }}"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#userModal"
+                                                    data-title="Are you sure you want to deactivate the user {{ $user->name }}?"
+                                                    data-body="The data of the user will remain in the application, but the users that depend on it will not be able to access the data."
+                                                    data-form="{{ route('users.delete', $user) }}"
                                                     data-method="DELETE"
                                                     data-class="btn btn-sm btn-warning"
                                                     data-action="Delete">Delete</button>
@@ -119,7 +119,7 @@ jQuery(document).ready(function($) {
     </div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="customerModal">
+<div class="modal fade" tabindex="-1" role="dialog" id="userModal">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">

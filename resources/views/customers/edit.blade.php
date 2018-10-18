@@ -9,11 +9,11 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Edit branch
-                    <a href="{{ route('branches.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    Edit customer
+                    <a href="{{ route('customers.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('branches.update', $branch) }}" method="post" enctype="multipart/form-data">
+                <form action="{{ route('customers.update', $customer) }}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
 
@@ -31,24 +31,33 @@
 
                         <div class="form-group">
                             <label for="ruc">Company</label>
-                            <input class="form-control" type="text" id="company_branch" name="company_branch" value="{{ $branch->company->tradename }} - {{ $branch->company->social_reason }}" readonly>
-                            <input type="hidden" name="company" value="{{ $branch->company->id }}">
+                            <input class="form-control" type="text" id="ruc" name="ruc" value="{{ $customer->companies()->first()->tradename }} - {{ $customer->companies()->first()->social_reason }}" readonly>
+                            <input type="hidden" name="company" value="{{ $customer->companies()->first()->id }}">
                         </div>
                         <div class="form-group">
-                            <label for="establishment">Establishment</label>
-                            <input class="form-control" type="text" id="establishment" name="establishment" value="{{ $branch->establishment }}" readonly>
+                            <label for="identification_type_name">Identification type</label>
+                            <input class="form-control" type="text" id="identification_type_name" name="identification_type_name" value="{{ $customer->identificationType->name }}" readonly>
+                            <input type="hidden" name="identification_type" value="{{ $customer->identificationType->id }}">
                         </div>
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input class="form-control" type="text" id="name" name="name" value="{{ $branch->name }}">
+                            <label for="identification">Identification</label>
+                            <input class="form-control" type="text" id="identification" name="identification" value="{{ $customer->identification }}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="social_reason">Social reason</label>
+                            <input class="form-control" type="text" id="social_reason" name="social_reason" value="{{ $customer->social_reason }}">
                         </div>
                         <div class="form-group">
                             <label for="address">Address</label>
-                            <input class="form-control" type="text" id="address" name="address" value="{{ $branch->address }}">
+                            <input class="form-control" type="text" id="address" name="address" value="{{ $customer->address }}">
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone</label>
-                            <input class="form-control" type="text" id="phone" name="phone" value="{{ $branch->phone }}">
+                            <input class="form-control" type="text" id="phone" name="phone" value="{{ $customer->phone }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="text" id="email" name="email" value="{{ $customer->email }}">
                         </div>
                     </div>
 

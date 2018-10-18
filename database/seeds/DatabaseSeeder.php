@@ -22,11 +22,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /*DB::table('voucher_states')->insert([
-            ['name' => 'SAVED'],
-            ['name' => 'SIGNED'],
-            ['name' => 'SENDED'],
-            ['name' => 'AUTHORIZED'],
-            ['name' => 'REJECTED']
+            ['name' => 'GENERATED', 'created_at' => Carbon::now()],
+            ['name' => 'SIGNED', 'created_at' => Carbon::now()],
+            ['name' => 'SENDED', 'created_at' => Carbon::now()],
+            ['name' => 'AUTHORIZED', 'created_at' => Carbon::now()],
+            ['name' => 'UNAUTHORIZED', 'created_at' => Carbon::now()],
+            ['name' => 'IN_PROCESS', 'created_at' => Carbon::now()],
+            ['name' => 'REJECTED', 'created_at' => Carbon::now()]
         ]);*/
 
         DB::table('environments')->insert([
