@@ -14,7 +14,7 @@
                         </div>
                     @endif
 
-                    <!--<a href="{{ route('grantallprivileges') }}">SA</a>-->
+                    <!-- <a href="{{ route('grantallprivileges') }}">SA</a> -->
 
                     @if(auth()->user()->can('read_companies') || auth()->user()->can('read_branches') || auth()->user()->can('read_emission_points') || auth()->user()->can('read_customers') || auth()->user()->can('read_users') || auth()->user()->can('read_products'))
                         <h4>Site administration</h4>
@@ -36,7 +36,7 @@
                                 <a href="#" class="list-group-item list-group-item-action" style="border: none">Users</a>
                             @endcan
                             @can('read_products')
-                                <a href="#" class="list-group-item list-group-item-action" style="border: none">Products</a>
+                                <a href="{{ route('products.index') }}" class="list-group-item list-group-item-action" style="border: none">Products</a>
                             @endcan
                         </div>
                     @endif

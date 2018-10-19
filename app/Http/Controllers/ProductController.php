@@ -5,6 +5,18 @@ namespace ElectronicInvoicing\Http\Controllers;
 use ElectronicInvoicing\Product;
 use Illuminate\Http\Request;
 
+
+use ElectronicInvoicing\{Company, Branch};
+use ElectronicInvoicing\Http\Requests\StoreProductRequest;
+use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Image;
+use Storage;
+use Validator;
+
+
+
 class ProductController extends Controller
 {
     /**
@@ -12,9 +24,9 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->middleware('auth');
     }
 
     /**
@@ -22,9 +34,22 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function index()
+    {
+        $user = Auth::user();
+        if ($user->hasPermissionTo('delete_hard_companies')) {
+            $products = Product::withTrashed()->get()->sortBy(['description']);
+        } else {
+            $products = Product::all()->sortBy(['description']);
+        }
+        return view('products.index', compact('products'));
+    }
+
+    
     public function create()
     {
-        //
+        return view('products.create');
     }
 
     /**

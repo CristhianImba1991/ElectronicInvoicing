@@ -16,7 +16,7 @@ class SysAdminController extends Controller
      */
     public function index()
     {
-        /*Role::create(['name' => 'admin']);
+        Role::create(['name' => 'admin']);
         Role::create(['name' => 'owner']);
         Role::create(['name' => 'supervisor']);
         Role::create(['name' => 'employee']);
@@ -56,13 +56,13 @@ class SysAdminController extends Controller
         Permission::create(['name' => 'update_vouchers']);
         Permission::create(['name' => 'delete_vouchers']);
         Permission::create(['name' => 'send_vouchers']);
-        Permission::create(['name' => 'report_vouchers']);*/
+        Permission::create(['name' => 'report_vouchers']);
 
 
 
 
 
-        /*$role_admin = Role::findByName('admin');
+        $role_admin = Role::findByName('admin');
         $role_owner = Role::findByName('owner');
         $role_supervisor = Role::findByName('supervisor');
         $role_employee = Role::findByName('employee');
@@ -215,10 +215,10 @@ class SysAdminController extends Controller
         $role_owner->givePermissionTo($permission_report_vouchers);
         $role_supervisor->givePermissionTo($permission_report_vouchers);
         $role_employee->givePermissionTo($permission_report_vouchers);
-        $role_customer->givePermissionTo($permission_report_vouchers);*/
+        $role_customer->givePermissionTo($permission_report_vouchers);
 
         $user = Auth::user();
-        $user->assignRole('customer');
+        $user->assignRole('admin');
 
         return 'PERMISOS ASIGNADOS CON EXITO';
     }

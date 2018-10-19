@@ -164,4 +164,42 @@ Route::group(['prefix' => 'manage'], function () {
     Route::group(['middleware' => ['permission:delete_soft_customers']], function () {
         Route::post('/customers/{customer}/restore', 'CustomerController@restore')->name('customers.restore');
     });
+
+
+
+
+    /**
+     * Routes for products
+     */
+    Route::group(['middleware' => ['permission:read_products']], function () {
+        Route::get('/products', 'ProductController@index')->name('products.index');
+    });
+    Route::group(['middleware' => ['permission:create_products']], function () {
+        Route::get('/products/create', 'ProductController@create')->name('products.create');
+    });
+    Route::group(['middleware' => ['permission:create_products']], function () {
+        Route::post('/products', 'ProductController@store')->name('products.store');
+    });
+    Route::group(['middleware' => ['permission:read_products']], function () {
+        Route::get('/products/{product}', 'ProductController@show')->name('products.show');
+    });
+    Route::group(['middleware' => ['permission:update_products']], function () {
+        Route::get('/products/{product}/edit', 'ProductController@edit')->name('products.edit');
+    });
+    Route::group(['middleware' => ['permission:update_products']], function () {
+        Route::put('/products/{product}', 'ProductController@update')->name('products.update');
+    });
+    Route::group(['middleware' => ['permission:delete_soft_products']], function () {
+        Route::delete('/products/{product}/delete', 'ProductController@delete')->name('products.delete');
+    });
+    Route::group(['middleware' => ['permission:delete_hard_products']], function () {
+        Route::delete('/products/{product}/destroy', 'ProductController@destroy')->name('products.destroy');
+    });
+    Route::group(['middleware' => ['permission:delete_soft_products']], function () {
+        Route::post('/products/{product}/restore', 'ProductController@restore')->name('products.restore');
+    });
+
+
+
+    
 });
