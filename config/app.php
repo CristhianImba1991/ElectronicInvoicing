@@ -152,6 +152,7 @@ return [
          */
         Intervention\Image\ImageServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        ElectronicInvoicing\Providers\UniqueCustomerServiceProvider::class,
         ElectronicInvoicing\Providers\UniqueMultipleServiceProvider::class,
         ElectronicInvoicing\Providers\ValidRUCServiceProvider::class,
         ElectronicInvoicing\Providers\ValidSignServiceProvider::class,

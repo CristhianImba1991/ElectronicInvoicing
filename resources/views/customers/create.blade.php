@@ -14,11 +14,11 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    New branch
-                    <a href="{{ route('branches.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    New customer
+                    <a href="{{ route('customers.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('branches.store') }}" method="post">
+                <form action="{{ route('customers.store') }}" method="post">
                     {{ csrf_field() }}
 
                     <div class="card-body">
@@ -42,12 +42,20 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="establishment">Establishment</label>
-                            <input class="form-control" type="number" id="establishment" name="establishment" value="{{ old('establishment') | 1 }}">
+                            <label for="identification_type">Identification type</label>
+                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="Select a identification type ...">
+                                @foreach($identificationTypes as $identificationType)
+                                    <option value="{{ $identificationType->id }}" {{ $identificationType->id === old('identification_type') ? "selected" : "" }}>{{ $identificationType->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input class="form-control" type="text" id="name" name="name" value="{{ old('name') }}">
+                            <label for="identification">Identification</label>
+                            <input class="form-control" type="text" id="identification" name="identification" value="{{ old('identification') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="social_reason">Social reason</label>
+                            <input class="form-control" type="text" id="social_reason" name="social_reason" value="{{ old('social_reason') }}">
                         </div>
                         <div class="form-group">
                             <label for="name">Address</label>
@@ -56,6 +64,10 @@
                         <div class="form-group">
                             <label for="phone">Phone</label>
                             <input class="form-control" type="text" id="phone" name="phone" value="{{ old('phone') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="email" id="email" name="email" value="{{ old('email') }}" multiple>
                         </div>
 
                     </div>

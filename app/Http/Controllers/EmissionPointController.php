@@ -52,8 +52,7 @@ class EmissionPointController extends Controller
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }
-        $branches = Branch::all()->whereIn('company_id', $companies->pluck('id')->toArray())->sortBy(['company_id', 'establishment']);
-        return view('emission_points.create', compact(['companies', 'branches']));
+        return view('emission_points.create', compact('companies'));
     }
 
     /**

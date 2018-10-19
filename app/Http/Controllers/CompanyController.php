@@ -211,7 +211,22 @@ class CompanyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      */
     public function branches(Request $request) {
-        $branches = Branch::where('company_id', $request->id)->get();
-        return json_encode($branches);
+        if (is_array($request->id)) {
+            $branches = Branch::whereIn('company_id', $request->id)->with('company')->get();
+            return $branches->toJson();
+        } else if (is_string($request->id)) {
+            $branches = Branch::where('company_id', $request->id)->with('company')->get();
+            return $branches->toJson();
+        }
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function customers(Request $request) {
+        if (is_string($request->id)) {
+            $customers = Company::where('id', $request->id)->first()->customers()->get();
+            return $customers->toJson();
+        }
     }
 }

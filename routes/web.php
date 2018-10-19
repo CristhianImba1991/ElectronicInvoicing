@@ -34,9 +34,24 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/grantallprivileges', 'SysAdminController@index')->name('grantallprivileges');
 
+Route::group(['prefix' => 'voucher'], function () {
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/create', 'VoucherController@create')->name('vouchers.create');
+    });
+});
+
 Route::group(['prefix' => 'resource'], function () {
     Route::group(['middleware' => ['permission:read_companies']], function () {
         Route::post('/company/branches', 'CompanyController@branches')->name('companies.branches');
+    });
+    Route::group(['middleware' => ['permission:read_companies']], function () {
+        Route::post('/company/customers', 'CompanyController@customers')->name('companies.customers');
+    });
+    Route::group(['middleware' => ['permission:read_branches']], function () {
+        Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
+    });
+    Route::group(['middleware' => ['permission:read_customers']], function () {
+        Route::post('/customers/customer', 'CustomerController@customers')->name('customers.customer');
     });
 });
 
@@ -163,6 +178,37 @@ Route::group(['prefix' => 'manage'], function () {
     });
     Route::group(['middleware' => ['permission:delete_soft_customers']], function () {
         Route::post('/customers/{customer}/restore', 'CustomerController@restore')->name('customers.restore');
+    });
+
+    /**
+     * Routes for users
+     */
+    Route::group(['middleware' => ['permission:read_users']], function () {
+        Route::get('/users', 'UserController@index')->name('users.index');
+    });
+    Route::group(['middleware' => ['permission:create_users']], function () {
+        Route::get('/users/create', 'UserController@create')->name('users.create');
+    });
+    Route::group(['middleware' => ['permission:create_users']], function () {
+        Route::post('/users', 'UserController@store')->name('users.store');
+    });
+    Route::group(['middleware' => ['permission:read_users']], function () {
+        Route::get('/users/{user}', 'UserController@show')->name('users.show');
+    });
+    Route::group(['middleware' => ['permission:update_users']], function () {
+        Route::get('/users/{user}/edit', 'UserController@edit')->name('users.edit');
+    });
+    Route::group(['middleware' => ['permission:update_users']], function () {
+        Route::put('/users/{user}', 'UserController@update')->name('users.update');
+    });
+    Route::group(['middleware' => ['permission:delete_soft_users']], function () {
+        Route::delete('/users/{user}/delete', 'UserController@delete')->name('users.delete');
+    });
+    Route::group(['middleware' => ['permission:delete_hard_users']], function () {
+        Route::delete('/users/{user}/destroy', 'UserController@destroy')->name('users.destroy');
+    });
+    Route::group(['middleware' => ['permission:delete_soft_users']], function () {
+        Route::post('/users/{user}/restore', 'UserController@restore')->name('users.restore');
     });
 
 

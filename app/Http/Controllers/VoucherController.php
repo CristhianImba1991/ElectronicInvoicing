@@ -2,11 +2,20 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\Voucher;
+use ElectronicInvoicing\{Company, Environment, Voucher, VoucherType};
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VoucherController extends Controller
 {
+    /**
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -24,7 +33,11 @@ class VoucherController extends Controller
      */
     public function create()
     {
-        //
+        $user = Auth::user();
+        $companies = Company::all();
+        $environments = Environment::all();
+        $voucherTypes = VoucherType::all();
+        return view('vouchers.create', compact(['companies', 'environments', 'voucherTypes']));
     }
 
     /**

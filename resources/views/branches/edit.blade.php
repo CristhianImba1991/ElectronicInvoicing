@@ -30,7 +30,7 @@
                         @endif
 
                         <div class="form-group">
-                            <label for="ruc">Company</label>
+                            <label for="company_branch">Company</label>
                             <input class="form-control" type="text" id="company_branch" name="company_branch" value="{{ $branch->company->tradename }} - {{ $branch->company->social_reason }}" readonly>
                             <input type="hidden" name="company" value="{{ $branch->company->id }}">
                         </div>
