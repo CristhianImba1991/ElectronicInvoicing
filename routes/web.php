@@ -210,4 +210,13 @@ Route::group(['prefix' => 'manage'], function () {
     Route::group(['middleware' => ['permission:delete_soft_users']], function () {
         Route::post('/users/{user}/restore', 'UserController@restore')->name('users.restore');
     });
+
+    /**
+     * Routes for vouchers
+     */
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/vouchers/{id}', function ($id) {
+            return view('vouchers.' . $id);
+        })->where('id', '[1-5]{1}');
+    });
 });

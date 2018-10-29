@@ -2,6 +2,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
+<script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function(){
     $('#company').change(function() {
@@ -99,12 +100,24 @@ $(document).ready(function(){
             })
         }
     });
+    $('#voucher_type').change(function() {
+        if($(this).val() != '') {
+            $.ajax({
+                url: "{{ url('/manage/vouchers') }}/" + $(this).val(),
+                method: "GET",
+                success: function(result) {
+                    $("#voucher-information").html(result);
+                }
+            })
+        }
+    });
 });
 </script>
 @endsection
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
+<link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -201,7 +214,12 @@ $(document).ready(function(){
                             <div class="col-sm-12">
                                 <div class="card mb-3">
                                     <div class="card-body">
-                                        <h5 class="card-title">3. Customer information</h5>
+                                        <h5 class="card-title">
+                                            3. Customer information
+                                            @if(auth()->user()->can('create_customers'))
+                                                <button type="button" class="btn btn-sm btn-success float-right" data-toggle="modal" data-target="#customerModal">New customer</button>
+                                            @endif
+                                        </h5>
                                         <div class="form-group">
                                             <label for="customer">Customer</label>
                                             <select class="form-control selectpicker input-lg dynamic" id="customer" name="customer" data-live-search="true" data-dependent="branch" title="Select a customer ...">
@@ -237,7 +255,7 @@ $(document).ready(function(){
                                         </div>
                                         <div class="form-group">
                                             <label for="voucher_type">Voucher type</label>
-                                            <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="Select a voucher_type ...">
+                                            <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="Select a voucher type ...">
                                                 @foreach($voucherTypes as $voucherType)
                                                     <option value="{{ $voucherType->id }}" {{ $voucherType->id === old('voucher_type') ? "selected" : "" }}>{{ $voucherType->name }}</option>
                                                 @endforeach
@@ -246,6 +264,9 @@ $(document).ready(function(){
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div id="voucher-information" class="row">
+
                         </div>
 
                     </div>
@@ -260,4 +281,74 @@ $(document).ready(function(){
         </div>
     </div>
 </div>
+
+@if(auth()->user()->can('create_customers'))
+    <div class="modal fade" tabindex="-1" role="dialog" id="customerModal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <strong>New customer</strong>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="customer-create">
+                    {{ csrf_field() }}
+                    <div class="modal-body">
+                        @if ($errors->count() > 0)
+                            <div class="alert alert-danger" role="alert">
+                                <h5>The following errors were found:</h5>
+                                <ul>
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <select class="form-control selectpicker" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
+                                @foreach($companies as $company)
+                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="identification_type">Identification type</label>
+                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="Select a identification type ...">
+                                @foreach($identificationTypes as $identificationType)
+                                    <option value="{{ $identificationType->id }}" {{ $identificationType->id === old('identification_type') ? "selected" : "" }}>{{ $identificationType->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="identification">Identification</label>
+                            <input class="form-control" type="text" id="identification" name="identification" value="{{ old('identification') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="social_reason">Social reason</label>
+                            <input class="form-control" type="text" id="social_reason" name="social_reason" value="{{ old('social_reason') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Address</label>
+                            <input class="form-control" type="text" id="address" name="address" value="{{ old('address') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input class="form-control" type="text" id="phone" name="phone" value="{{ old('phone') }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="email" id="email" name="email" value="{{ old('email') }}" multiple>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-sm btn-success">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection
