@@ -248,4 +248,13 @@ Route::group(['prefix' => 'manage'], function () {
 
 
     
+
+    /**
+     * Routes for vouchers
+     */
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/vouchers/{id}', function ($id) {
+            return view('vouchers.' . $id);
+        })->where('id', '[1-5]{1}');
+    });
 });

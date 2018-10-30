@@ -22,17 +22,6 @@
                     {{ csrf_field() }}
 
                     <div class="card-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
                         <div class="form-group">
                             <label for="company">Company</label>
                             <select class="form-control selectpicker" id="company" name="company" data-live-search="true" title="Select a company ...">
