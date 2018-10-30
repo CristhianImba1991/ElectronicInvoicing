@@ -6,7 +6,7 @@ use ElectronicInvoicing\Product;
 use Illuminate\Http\Request;
 
 
-use ElectronicInvoicing\{Company, Branch};
+use ElectronicInvoicing\{Company, Branch, IvaTax, IceTax, IrbpnrTax, ProductTax};
 use ElectronicInvoicing\Http\Requests\StoreProductRequest;
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
 use Illuminate\Support\Facades\Auth;
@@ -38,18 +38,28 @@ class ProductController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->hasPermissionTo('delete_hard_companies')) {
-            $products = Product::withTrashed()->get()->sortBy(['description']);
+        if ($user->hasPermissionTo('delete_hard_products')) {
+            $products = Product::withTrashed()->get()->sortBy(['main_code']);
         } else {
-            $products = Product::all()->sortBy(['description']);
+            $products = Product::all()->sortBy(['main_code']);
         }
         return view('products.index', compact('products'));
+
     }
 
     
     public function create()
     {
-        return view('products.create');
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+        $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+        $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+        return view('products.create',compact(['companies','iva_taxes','ice_taxes','irbpnr_taxes']));
     }
 
     /**
@@ -58,9 +68,20 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        //
+        Validator::make($request->all(), [
+            'code' => 'uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code
+        ], array('uniquemultiple' => 'The :attribute has already been taken.'))->validate();
+        $input = $request->except(['company', 'branch']);
+        $input['branch_id'] = $request->branch;
+        $product = Product::create($input);
+        $input_product_taxes['product_id']=$product->id;
+        $input_product_taxes['iva_tax_id']=$request->iva_tax;
+        $input_product_taxes['ice_tax_id']=$request->ice_tax;
+        $input_product_taxes['irbpnr_tax_id']=$request->irbpnr_tax;
+        $product = ProductTax::create($input_product_taxes);
+        return redirect()->route('products.index')->with(['status' => 'Products added successfully.']);
     }
 
     /**
@@ -71,7 +92,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        return view('products.show', compact('product'));
     }
 
     /**
@@ -82,7 +103,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        return view('products.edit', compact('produt'));
     }
 
     /**
@@ -106,5 +127,11 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         //
+    }
+
+    public function delete(Product $product)
+    {
+        $product->delete();
+        return redirect()->route('emission_points.index')->with(['status' => 'Product deactivated successfully.']);
     }
 }

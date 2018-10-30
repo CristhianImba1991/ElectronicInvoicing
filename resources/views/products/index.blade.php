@@ -1,4 +1,4 @@
-<@extends('layouts.app')
+@extends('layouts.app')
 
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
@@ -43,11 +43,8 @@ jQuery(document).ready(function($) {
                     <table id="products-table" class="display">
                         <thead>
                             <tr>
-                                <th></th>
                                 <th>Main Code</th>
                                 <th>Auxiliary Code</th>
-                                <th>Unit price</th>
-                                <th>Description</th>
                                 <th>Stock</th>
                                 <th></th>
                             </tr>
@@ -55,33 +52,33 @@ jQuery(document).ready(function($) {
                         <tbody>
                             @forelse($products as $product)
                                 <tr>
-                                    <td align="center"><img class="img-thumbnail" src="{{ url('storage/logo/thumbnail/'.$product->logo) }}" alt="{{ $product->tradename }}"></td>
-                                    <td>{{ $product->ruc }}</td>
                                     <td>
-                                        @if($product->deleted_at !== NULL)
-                                            {{ $product->tradename }} - {{ $product->social_reason }}
-                                        @else
-                                            @if(auth()->user()->can('update_products'))
-                                                <a href="{{ route('products.edit', $product) }}">{{ $product->tradename }} - {{ $product->social_reason }}</a>
-                                            @elseif(auth()->user()->can('read_products'))
-                                                <a href="{{ route('products.show', $product) }}">{{ $product->tradename }} - {{ $product->social_reason }}</a>
-                                            @else
-                                                {{ $product->tradename }} - {{ $product->social_reason }}
-                                            @endif
-                                        @endif
+                                    @if($product->deleted_at !== NULL)
+                                           {{ $product->main_code }} 
+                                       @else
+                                           @if(auth()->user()->can('update_products'))
+                                                <a href="{{ route('products.edit', $product) }}">{{ $product->main_code }}</a>
+                                           @elseif(auth()->user()->can('read_products'))
+                                                <a href="{{ route('products.show', $product) }}">{{ $product->main_code }}</a>
+                                           @else
+                                                {{ $product->main_code }}
+                                           @endif
+                                    @endif
                                     </td>
+                                    <td>{{ $product->auxiliary_code }}</td>
+                                    <td>{{ $product->stock }}</td>
                                     <td>
                                         @if($product->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_products'))
                                                 <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#productModal"
-                                                    data-title="Are you sure you want to activate the product {{ $product->tradename }} - {{ $product->social_reason }}?"
+                                                    data-title="Are you sure you want to activate the product {{ $product->main_code }}?"
                                                     data-body="All product data will be restored."
                                                     data-form="{{ route('products.restore', $product->id) }}"
                                                     data-method="POST"
                                                     data-class="btn btn-sm btn-success"
                                                     data-action="Activate">Activate</button>
                                                 <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#productModal"
-                                                    data-title="Are you sure you want to delete the product {{ $product->tradename }} - {{ $product->social_reason }}?"
+                                                    data-title="Are you sure you want to delete the product {{ $product->main_code }}?"
                                                     data-body="WARNING: All product data will be deleted. This action can not be undone."
                                                     data-form="{{ route('products.destroy', $product->id) }}"
                                                     data-method="DELETE"
@@ -91,7 +88,7 @@ jQuery(document).ready(function($) {
                                         @else
                                             @if(auth()->user()->can('delete_hard_products'))
                                                 <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#productModal"
-                                                    data-title="Are you sure you want to deactivate the product {{ $product->tradename }} - {{ $product->social_reason }}?"
+                                                    data-title="Are you sure you want to deactivate the product {{ $product->main_code }}?"
                                                     data-body="The data of the product will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('products.delete', $product) }}"
                                                     data-method="DELETE"
@@ -99,7 +96,7 @@ jQuery(document).ready(function($) {
                                                     data-action="Deactivate">Deactivate</button>
                                             @else
                                                 <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#productModal"
-                                                    data-title="Are you sure you want to deactivate the product {{ $product->tradename }} - {{ $product->social_reason }}?"
+                                                    data-title="Are you sure you want to deactivate the product {{ $product->main_code }}?"
                                                     data-body="The data of the product will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('products.delete', $product) }}"
                                                     data-method="DELETE"

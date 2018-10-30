@@ -25,11 +25,13 @@ class StoreProductRequest extends FormRequest
     {
         if ($this->method() === 'POST') {
             return [
-                'main_code' => 'required|max:3',
-                'establishment' => 'required|min:1|max:999|integer',
-                'name' => 'required|max:300',
-                'address' => 'required|max:300',
-                'phone' => 'required|max:30',
+                'main_code' => 'required|max:25',
+                'auxiliary_code' => 'required|max:25',
+                'company' => 'required|exists:companies,id',
+                'branch' => 'required|exists:branches,id',
+                'unit_price' => 'required|gt:0',
+                'stock' => 'required|gt:0',
+                'description'=> 'required|max:300'
             ];
         } else {
             return [
