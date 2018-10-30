@@ -46,6 +46,8 @@ jQuery(document).ready(function($) {
                                 <th>Main Code</th>
                                 <th>Auxiliary Code</th>
                                 <th>Stock</th>
+                                <th>Branch</th>
+                                <th>Company</th>
                                 <th></th>
                             </tr>
                         </thead>

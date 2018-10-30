@@ -16,27 +16,7 @@
 
                     <!-- <a href="{{ route('grantallprivileges') }}">SA</a> -->
 
-                    @if(auth()->user()->can('read_companies') || auth()->user()->can('read_branches') || auth()->user()->can('read_emission_points') || auth()->user()->can('read_customers') || auth()->user()->can('read_users') || auth()->user()->can('read_products'))
-                        <h4>Site administration</h4>
-
-                        <div class="list-group">
-                            @can('read_companies')
-                                <a href="{{ route('companies.index') }}" class="list-group-item list-group-item-action" style="border: none">Companies</a>
-                            @can('read_branches')
-                            @endcan
-                                <a href="{{ route('branches.index') }}" class="list-group-item list-group-item-action" style="border: none">Branches</a>
-                            @can('read_emission_points')
-                                <a href="{{ route('emission_points.index') }}" class="list-group-item list-group-item-action" style="border: none">Emission points</a>
-                            @endcan
-                            @endcan
-                                <a href="#" class="list-group-item list-group-item-action" style="border: none">Customers</a>
-                            @can('read_customers')
-                            @endcan
-                            @can('read_users')
-                                <a href="#" class="list-group-item list-group-item-action" style="border: none">Users</a>
-                            @endcan
-                            @can('read_products')
-                                <a href="{{ route('products.index') }}" class="list-group-item list-group-item-action" style="border: none">Products</a>
+                   
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="card mb-3">
@@ -79,7 +59,7 @@
                                                 <a href="{{ route('customers.index') }}" class="list-group-item list-group-item-action" style="border: none">Customers</a>
                                             @endcan
                                             @can('read_products')
-                                                <a href="#" class="list-group-item list-group-item-action" style="border: none">Products</a>
+                                                <a href="{{ route('products.index') }}" class="list-group-item list-group-item-action" style="border: none">Products</a>
                                             @endcan
                                         </div>
                                     </div>
