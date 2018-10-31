@@ -69,6 +69,8 @@ jQuery(document).ready(function($) {
                                     </td>
                                     <td>{{ $product->auxiliary_code }}</td>
                                     <td>{{ $product->stock }}</td>
+                                    <td>{{ $product->branch->name }}</td>
+                                    <td>{{ $product->branch->company->tradename }}</td>
                                     <td>
                                         @if($product->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_products'))

@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('scripts')
-@endsection
 
 @section('content')
 <div class="container">
@@ -12,7 +10,30 @@
                     Edit branch
                     <a href="{{ route('branches.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
-
+                    <table id="branches-table" class="display">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Iva Tax</th>
+                                <th>Ice Tax</th>
+                                <th>Isbpnr Tax</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($products as $product)
+                                <tr>
+                                    <td>{{ $product->description }}</td>
+                                    <td>{{ $product->product_taxes->iva_tax_id }}</td>
+                                    <td>{{ $product->product_taxes->ice_tax_id }}</td>
+                                    <td>{{ $product->product_taxes->isbpnr_tax_id }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4"><center>No records found.</center></td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 <form action="{{ route('branches.update', $branch) }}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">

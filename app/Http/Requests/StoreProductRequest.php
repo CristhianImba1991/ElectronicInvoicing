@@ -31,16 +31,18 @@ class StoreProductRequest extends FormRequest
                 'branch' => 'required|exists:branches,id',
                 'unit_price' => 'required|gt:0',
                 'stock' => 'required|gt:0',
-                'description'=> 'required|max:300'
+                'description'=> 'required|max:300',
+                'iva_tax'=> 'required'
             ];
         } else {
             return [
+                'main_code' => 'required|max:25',
+                'auxiliary_code' => 'required|max:25',
                 'company' => 'required|exists:companies,id',
-                'establishment' => 'required|min:1|max:999|integer',
-                'name' => 'required|max:300',
-                'address' => 'required|max:300',
-                'phone' => 'required|max:30',
-                'main_code' => 'required|max:3'
+                'branch' => 'required|exists:branches,id',
+                'unit_price' => 'required|gt:0',
+                'stock' => 'required|gt:0',
+                'description'=> 'required|max:300',
             ];
         }
     }

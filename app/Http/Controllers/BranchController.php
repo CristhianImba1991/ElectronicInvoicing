@@ -2,7 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\{Branch, Company, EmissionPoint};
+use ElectronicInvoicing\{Branch, Company, EmissionPoint, Product, ProductTax};
 use ElectronicInvoicing\Http\Requests\StoreBranchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,7 +91,11 @@ class BranchController extends Controller
      */
     public function edit(Branch $branch)
     {
-        return view('branches.edit', compact('branch'));
+        //return $request;
+        // $products = Product::where('branch_id', $branch->id)->with(['taxes', 'taxes.iva', 'taxes.ice', 'taxes.irbpnr']);
+        $products = Product::where('branch_id', $branch->id)->get()->first()->branch_id;
+        return $products;
+        // return view('branches.edit', compact(['branch','products']));
     }
 
     /**
@@ -154,6 +158,19 @@ class BranchController extends Controller
         } else if (is_string($request->id)) {
             $emissionPoints = EmissionPoint::where('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
             return $emissionPoints->toJson();
+        }
+    }
+
+    public function products(Request $request){
+        if (is_array($request->id)) {
+            $products = Product::whereIn('branch_id', $request->id);
+            return $products->toJson();
+        } else if (is_string($request->id)) {
+            $products = Product::where('branch_id', $request->id)->with(['taxes', 'taxes.iva', 'taxes.ice', 'taxes.irbpnr']);
+            // foreach($products as $product){
+            //     $product['product_taxes']=ProductTax::where('product_id',$product->id)->with(['ice_taxes','iva_taxes','irbpnr_taxes']);
+            // }
+            return $products->toJson();
         }
     }
 }

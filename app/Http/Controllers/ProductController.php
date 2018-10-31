@@ -103,7 +103,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        return view('products.edit', compact('produt'));
+        return view('products.edit', compact('product'));
     }
 
     /**
@@ -113,9 +113,10 @@ class ProductController extends Controller
      * @param  \ElectronicInvoicing\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(StoreProductRequest $request, Product $product)
     {
-        //
+        $product->fill($request->except(['company', 'branch']))->save();
+        return redirect()->route('products.index')->with(['status' => 'Product updated successfully.']);
     }
 
     /**
@@ -132,6 +133,14 @@ class ProductController extends Controller
     public function delete(Product $product)
     {
         $product->delete();
-        return redirect()->route('emission_points.index')->with(['status' => 'Product deactivated successfully.']);
+        return redirect()->route('products.index')->with(['status' => 'Product deactivated successfully.']);
     }
+    public function products(Request $request) {
+        if (is_string($request->id)) {
+            $product = Product::where('id', $request->id)->with(['branch', 'branch.company'])->get();
+            return $product->toJson();
+        }
+    }
+
+    
 }
