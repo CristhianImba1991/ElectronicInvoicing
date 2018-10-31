@@ -1,22 +1,34 @@
 <script type="text/javascript">
 $(document).ready(function(){
     var invoiceTable = $('#invoice-table').DataTable({
-        "paging": false
+        paging: false,
+        dom: 'Bfrtip',
+        buttons: [{
+            text: 'Add row',
+            action: function(e, dt, node, config){
+                
+                invoiceTable.row.add([
+                    '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' +
+                        '<option value="1">VALUE</option>' +
+                    '</select>',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
+                ]).draw(false);
+                $('select[id *= product]').selectpicker();
+            }
+        }]
     });
-    $('#add_product').on('click', function() {
-        invoiceTable.row.add([
-            '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' +
-                '<option value="1">VALUE</option>' +
-            '</select>',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-        ]).draw(false);
-        $('select[id*=product]').selectpicker();
-    });
+    $('#invoice-table tbody').on('click', 'button.btn-danger', function(){
+        invoiceTable
+            .row($(this).parents('tr') )
+            .remove()
+            .draw();
+    } );
 });
 </script>
 <div class="col-sm-12">
@@ -27,18 +39,16 @@ $(document).ready(function(){
                 <thead>
                     <tr>
                         <th>Main code</th>
-                        <th>Auxiliary code</th>
-                        <th>Quantity</th>
                         <th>Description</th>
-                        <th>Unit price</th>
+                        <th>Quantity</th>
+                        <th>U. price</th>
+                        <th>IVA</th>
                         <th>Discount</th>
-                        <th>Total price</th>
+                        <th>Subtotal</th>
+                        <th></th>
                     </tr>
                 </thead>
             </table>
-            <div class="form-group">
-                <button type="button" id="add_product" name="add_product" class="btn btn-sm">Add product</button>
-            </div>
         </div>
     </div>
 </div>
