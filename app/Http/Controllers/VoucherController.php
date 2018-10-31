@@ -50,7 +50,7 @@ class VoucherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $request;
     }
 
     /**

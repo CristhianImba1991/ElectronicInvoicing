@@ -49,7 +49,8 @@ $(document).ready(function(){
                             }
                             $("#customer").html(options).selectpicker('refresh');
                         }
-                    })
+                    });
+                    $('#invoice-table').DataTable().clear().draw();
                 }
             })
         }
@@ -77,6 +78,7 @@ $(document).ready(function(){
                     }
                     $("#branch_address").val(branch['address']);
                     $("#emission_point").html(options).selectpicker('refresh');
+                    $('#invoice-table').DataTable().clear().draw();
                 }
             })
         }
@@ -102,6 +104,7 @@ $(document).ready(function(){
     });
     $('#voucher_type').change(function() {
         if($(this).val() != '') {
+            $("#voucher-information").html('');
             $.ajax({
                 url: "{{ url('/manage/vouchers') }}/" + $(this).val(),
                 method: "GET",
@@ -130,7 +133,7 @@ $(document).ready(function(){
                     <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="#" method="post">
+                <form action="{{ route('vouchers.store') }}" method="post">
                     {{ csrf_field() }}
 
                     <div class="card-body">

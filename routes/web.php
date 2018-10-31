@@ -50,6 +50,11 @@ Route::group(['prefix' => 'resource'], function () {
     Route::group(['middleware' => ['permission:read_branches']], function () {
         Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
     });
+    Route::group(['middleware' => ['permission:read_branches']], function () {
+        Route::get('/branch/products/{id}', function ($id) {
+            return "[{\"id\": 1, \"name\": \"EDGAR SALGUERO\"},{\"id\": 2, \"name\": \"LUIS DOROKHIN\"}]";
+        })->where('id', '[0-9]*');
+    });
     Route::group(['middleware' => ['permission:read_customers']], function () {
         Route::post('/customers/customer', 'CustomerController@customers')->name('customers.customer');
     });
@@ -247,7 +252,7 @@ Route::group(['prefix' => 'manage'], function () {
 
 
 
-    
+
 
     /**
      * Routes for vouchers
@@ -256,5 +261,8 @@ Route::group(['prefix' => 'manage'], function () {
         Route::get('/vouchers/{id}', function ($id) {
             return view('vouchers.' . $id);
         })->where('id', '[1-5]{1}');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::post('/vouchers', 'VoucherController@store')->name('vouchers.store');
     });
 });
