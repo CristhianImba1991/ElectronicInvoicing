@@ -161,15 +161,15 @@ class BranchController extends Controller
         }
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
     public function products(Request $request){
         if (is_array($request->id)) {
-            $products = Product::whereIn('branch_id', $request->id);
+            $products = Product::whereIn('branch_id', $request->id)->get();
             return $products->toJson();
         } else if (is_string($request->id)) {
-            $products = Product::where('branch_id', $request->id)->with(['taxes', 'taxes.iva', 'taxes.ice', 'taxes.irbpnr']);
-            // foreach($products as $product){
-            //     $product['product_taxes']=ProductTax::where('product_id',$product->id)->with(['ice_taxes','iva_taxes','irbpnr_taxes']);
-            // }
+            $products = Product::where('branch_id', $request->id)->get();
             return $products->toJson();
         }
     }

@@ -82,4 +82,8 @@ class TimeUnitController extends Controller
     {
         //
     }
+
+    public function timeUnits(Request $request) {
+        return TimeUnit::all()->toJson();
+    }
 }

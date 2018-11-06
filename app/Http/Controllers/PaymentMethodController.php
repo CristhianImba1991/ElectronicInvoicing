@@ -82,4 +82,8 @@ class PaymentMethodController extends Controller
     {
         //
     }
+
+    public function paymentMethods(Request $request) {
+        return PaymentMethod::all()->toJson();
+    }
 }

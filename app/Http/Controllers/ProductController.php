@@ -47,7 +47,7 @@ class ProductController extends Controller
 
     }
 
-    
+
     public function create()
     {
         $user = Auth::user();
@@ -135,12 +135,27 @@ class ProductController extends Controller
         $product->delete();
         return redirect()->route('products.index')->with(['status' => 'Product deactivated successfully.']);
     }
-    public function products(Request $request) {
-        if (is_string($request->id)) {
-            $product = Product::where('id', $request->id)->with(['branch', 'branch.company'])->get();
-            return $product->toJson();
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function taxes(Request $request) {
+        if (is_array($request->id)) {
+            $taxes = ProductTax::whereIn('product_id', $request->id)->with('product')->get();
+            for ($i = 0; $i < count($taxes); $i++) {
+                $taxes[$i]['iva'] = IvaTax::find($taxes[$i]['iva_tax_id']);
+                $taxes[$i]['ice'] = IceTax::find($taxes[$i]['ice_tax_id']);
+                $taxes[$i]['irbpnr'] = IrbpnrTax::find($taxes[$i]['irbpnr_tax_id']);
+            }
+            return $taxes->toJson();
+        } else if (is_string($request->id)) {
+            $taxes = ProductTax::where('product_id', $request->id)->with('product')->get();
+            for ($i = 0; $i < count($taxes); $i++) {
+                $taxes[$i]['iva'] = IvaTax::find($taxes[$i]['iva_tax_id']);
+                $taxes[$i]['ice'] = IceTax::find($taxes[$i]['ice_tax_id']);
+                $taxes[$i]['irbpnr'] = IrbpnrTax::find($taxes[$i]['irbpnr_tax_id']);
+            }
+            return $taxes->toJson();
         }
     }
-
-    
 }

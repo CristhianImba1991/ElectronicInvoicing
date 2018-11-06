@@ -51,13 +51,16 @@ Route::group(['prefix' => 'resource'], function () {
         Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
     });
     Route::group(['middleware' => ['permission:read_branches']], function () {
-        Route::get('/branch/products/{id}', function ($id) {
-            return "[{\"id\": 1, \"name\": \"EDGAR SALGUERO\"},{\"id\": 2, \"name\": \"LUIS DOROKHIN\"}]";
-        })->where('id', '[0-9]*');
+        Route::post('/branch/products/', 'BranchController@products')->name('branches.products');
+    });
+    Route::group(['middleware' => ['permission:read_products']], function () {
+        Route::post('/product/taxes/', 'ProductController@taxes')->name('products.taxes');
     });
     Route::group(['middleware' => ['permission:read_customers']], function () {
         Route::post('/customers/customer', 'CustomerController@customers')->name('customers.customer');
     });
+    Route::get('/paymentmethods', 'PaymentMethodController@paymentMethods')->name('paymentmethods');
+    Route::get('/timeunits', 'TimeUnitController@timeUnits')->name('timeunits');
 });
 
 Route::group(['prefix' => 'manage'], function () {
