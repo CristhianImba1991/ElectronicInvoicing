@@ -48,6 +48,8 @@ $(document).ready(function(){
                                 options += '<option value="' + customers[i]['id'] + '">' + customers[i]['social_reason'] + '</option>';
                             }
                             $("#customer").html(options).selectpicker('refresh');
+                            $("#customer_identification").val('');
+                            $("#customer_address").val('');
                         }
                     });
                     $('#invoice-table').DataTable().clear().draw();

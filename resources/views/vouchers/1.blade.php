@@ -40,6 +40,52 @@ $(document).ready(function(){
     function loadProductData(reference, elementChanged) {
         var _token = $('input[name = "_token"]').val();
         var id = reference.closest('tr').find('select[id *= product]').val();
+        if (id != '') {
+            $.ajax({
+                url: "{{ route('products.taxes') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var taxes = JSON.parse(result);
+                    var productQuantity = elementChanged == '' ? 1.0 : (elementChanged == 'productQuantity' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-quantity]').val()));
+                    productQuantity = isNaN(productQuantity) ? 1.0 : productQuantity;
+                    var productUnitPrice = elementChanged == '' ? Number(taxes[0]['product']['unit_price']) : (elementChanged == 'productUnitPrice' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-unitprice]').val()));
+                    productUnitPrice = isNaN(productUnitPrice) ? taxes[0]['product']['unit_price'] : productUnitPrice;
+                    var productIva = elementChanged == '' ? (taxes[0]['iva'] != null ? Number(taxes[0]['iva']['rate']) : 0.0) : Number(reference.closest('tr').find('input[id *= product-iva]').val());
+                    productIva = isNaN(productIva) ? (taxes[0]['iva'] != null ? Number(taxes[0]['iva']['rate']) : 0.0) : productIva;
+                    var productIce = taxes[0]['ice'] != null ? Number(taxes[0]['ice']['specific_rate']) + Number(taxes[0]['ice']['ad_valorem_rate']) : 0.0;
+                    var productDiscount = elementChanged == '' ? 0.0 : (elementChanged == 'productDiscount' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-discount]').val()));
+                    productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
+                    var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0) * (1 + productIce / 100.0);
+                    reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
+                    reference.closest('tr').find('input[id *= product-quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                    reference.closest('tr').find('input[id *= product-unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                    reference.closest('tr').find('input[id *= product-iva]').val(productIva.toFixed(2));
+                    reference.closest('tr').find('input[id *= product-discount]').val(productDiscount.toFixed(2));
+                    reference.closest('tr').find('input[id *= product-subtotal]').val(productSubtotal.toFixed(2));
+                    updateTotal();
+                }
+            });
+        }
+    }
+    function updateTotal() {
+        var details = $('select[id *= product]');
+        var _token = $('input[name = "_token"]').val();
+        var id = $.map(details, function(option) {
+            return option.value;
+        });
+        var quantities = $.map($('input[id *= product-quantity]'), function(option) {
+            return Number(option.value);
+        });
+        var unitPrices = $.map($('input[id *= product-unitprice]'), function(option) {
+            return Number(option.value);
+        });
+        var discounts = $.map($('input[id *= product-discount]'), function(option) {
+            return Number(option.value);
+        });
         $.ajax({
             url: "{{ route('products.taxes') }}",
             method: "POST",
@@ -48,23 +94,55 @@ $(document).ready(function(){
                 id: id,
             },
             success: function(result) {
-                var taxes = JSON.parse(result);
-                var quantity = elementChanged == '' ? 1.0 : (elementChanged == 'quantity' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-quantity]').val()));
-                quantity = isNaN(quantity) ? 1.0 : quantity;
-                var unitprice = elementChanged == '' ? Number(taxes[0]['product']['unit_price']) : (elementChanged == 'unitprice' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-unitprice]').val()));
-                unitprice = isNaN(unitprice) ? taxes[0]['product']['unit_price'] : unitprice;
-                var iva = elementChanged == '' ? (taxes[0]['iva'] != null ? Number(taxes[0]['iva']['rate']) : 0.0) : Number(reference.closest('tr').find('input[id *= product-iva]').val());
-                iva = isNaN(iva) ? (taxes[0]['iva'] != null ? Number(taxes[0]['iva']['rate']) : 0.0) : iva;
-                var ice = taxes[0]['ice'] != null ? Number(taxes[0]['ice']['specific_rate']) + Number(taxes[0]['ice']['ad_valorem_rate']) : 0.0;
-                var discount = elementChanged == '' ? 0.0 : (elementChanged == 'discount' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-discount]').val()));
-                discount = isNaN(discount) ? 0.0 : discount;
-                var subtotal = (quantity * unitprice - discount) * (1 + iva / 100.0) * (1 + ice / 100.0)
-                reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
-                reference.closest('tr').find('input[id *= product-quantity]').val(quantity);
-                reference.closest('tr').find('input[id *= product-unitprice]').val(unitprice);
-                reference.closest('tr').find('input[id *= product-iva]').val(iva);
-                reference.closest('tr').find('input[id *= product-discount]').val(discount);
-                reference.closest('tr').find('input[id *= product-subtotal]').val(subtotal);
+                const arrayToObject = (array) => array.reduce((object, item) => {
+                    object[item.id] = item
+                    return object
+                }, {});
+                var products = arrayToObject(JSON.parse(result));
+                var ivaSubtotal = 0.0;
+                var iva0Subtotal = 0.0;
+                var notSubjectIvaSubtotal = 0.0;
+                var exemptIvaSubtotal = 0.0;
+                var iceValue = 0.0;
+                var irbpnrValue = 0.0;
+                var ivaValue = 0.0;
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i] != "") {
+                        if (products[id[i]]['iva'] != null) {
+                            switch (products[id[i]]['iva']['auxiliary_code']) {
+                                case 0: iva0Subtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                case 2:
+                                    ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
+                                    ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
+                                    break;
+                                case 3:
+                                    ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
+                                    ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
+                                    break;
+                                case 6: notSubjectIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                case 7: exemptIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                            }
+                        }
+                    }
+                }
+                var subtotal = iva0Subtotal + ivaSubtotal + notSubjectIvaSubtotal + exemptIvaSubtotal;
+                var totalDiscount = discounts.reduce(function(a, b) {
+                    return a + b;
+                }, 0.0);
+                var tip = Number($('#tip').val());
+                tip = isNaN(tip) ? 0.0 : tip;
+                var total = subtotal + iceValue + irbpnrValue + ivaValue + tip;
+                $('#iva0subtotal').val(iva0Subtotal.toFixed(2));
+                $('#ivasubtotal').val(ivaSubtotal.toFixed(2));
+                $('#notsubjectivasubtotal').val(notSubjectIvaSubtotal.toFixed(2));
+                $('#exemptivasubtotal').val(exemptIvaSubtotal.toFixed(2));
+                $('#subtotal').val(subtotal.toFixed(2));
+                $('#totaldiscount').val(totalDiscount.toFixed(2));
+                //$('#icevalue').val(iceValue.toFixed(2));
+                //$('#irbpnrvalue').val(irbpnrValue.toFixed(2));
+                $('#ivavalue').val(ivaValue.toFixed(2));
+                $('#tip').val(tip.toFixed(2));
+                $('#total').val(total.toFixed(2));
             }
         });
     }
@@ -72,13 +150,13 @@ $(document).ready(function(){
         loadProductData($(this), '');
     });
     $('#invoice-table tbody').on('change', 'input[id *= product-quantity]', function(){
-        loadProductData($(this), 'quantity');
+        loadProductData($(this), 'productQuantity');
     });
     $('#invoice-table tbody').on('change', 'input[id *= product-unitprice]', function(){
-        loadProductData($(this), 'unitprice');
+        loadProductData($(this), 'productUnitPrice');
     });
     $('#invoice-table tbody').on('change', 'input[id *= product-discount]', function(){
-        loadProductData($(this), 'discount');
+        loadProductData($(this), 'productDiscount');
     });
     $('#invoice-table tbody').on('click', 'button.btn.btn-danger.btn-sm', function(){
         invoiceTable
@@ -132,6 +210,9 @@ $(document).ready(function(){
             .row($(this).parents('tr'))
             .remove()
             .draw();
+    });
+    $('#tip').change(function() {
+        updateTotal();
     });
 });
 </script>
@@ -190,39 +271,39 @@ $(document).ready(function(){
                     </tr>
                     <tr>
                         <td>Not subject to IVA subtotal</td>
-                        <td><input class="form-control" type="text" id="notsubjectivasubtotal" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="notsubjectivasubtotal" name="notsubjectivasubtotal" value="" readonly></td>
                     </tr>
                     <tr>
                         <td>Exempt from IVA subtotal</td>
-                        <td><input class="form-control" type="text" id="exemptivasubtotal" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="exemptivasubtotal" name="exemptivasubtotal" value="" readonly></td>
                     </tr>
                     <tr>
                         <td>Subtotal</td>
-                        <td><input class="form-control" type="text" id="subtotal" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="subtotal" name="subtotal" value="" readonly></td>
                     </tr>
                     <tr>
                         <td>Total discount</td>
-                        <td><input class="form-control" type="text" id="totaldiscount" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="totaldiscount" name="totaldiscount" value="" readonly></td>
                     </tr>
-                    <tr>
+                    <!--<tr>
                         <td>ICE value</td>
-                        <td><input class="form-control" type="text" id="icevalue" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="icevalue" name="icevalue" value="" readonly></td>
                     </tr>
                     <tr>
                         <td>IRBPNR value</td>
-                        <td><input class="form-control" type="text" id="irbpnrvalue" name="iva0subtotal" value="" readonly></td>
-                    </tr>
+                        <td><input class="form-control" type="text" id="irbpnrvalue" name="irbpnrvalue" value="" readonly></td>
+                    </tr>-->
                     <tr>
                         <td>IVA 12% value</td>
-                        <td><input class="form-control" type="text" id="ivavalue" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="ivavalue" name="ivavalue" value="" readonly></td>
                     </tr>
                     <tr>
                         <td>Tip</td>
-                        <td><input class="form-control" type="text" id="tip" name="iva0subtotal" value=""></td>
+                        <td><input class="form-control" type="text" id="tip" name="tip" value="0.0"></td>
                     </tr>
                     <tr>
                         <td>Total</td>
-                        <td><input class="form-control" type="text" id="total" name="iva0subtotal" value="" readonly></td>
+                        <td><input class="form-control" type="text" id="total" name="total" value="" readonly></td>
                     </tr>
                 </tbody>
             </table>
