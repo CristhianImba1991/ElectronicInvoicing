@@ -53,6 +53,7 @@ $(document).ready(function(){
                         }
                     });
                     $('#invoice-table').DataTable().clear().draw();
+                    $('#paymentmethod-table').DataTable().clear().draw();
                 }
             })
         }
@@ -80,9 +81,10 @@ $(document).ready(function(){
                     }
                     $("#branch_address").val(branch['address']);
                     $("#emission_point").html(options).selectpicker('refresh');
-                    $('#invoice-table').DataTable().clear().draw();
                 }
-            })
+            });
+            $('#invoice-table').DataTable().clear().draw();
+            $('#paymentmethod-table').DataTable().clear().draw();
         }
     });
     $('#customer').change(function() {
@@ -104,6 +106,8 @@ $(document).ready(function(){
             })
         }
     });
+    $('#currency').selectpicker('val', 1);
+    $('#environment').selectpicker('val', 2);
     $('#voucher_type').change(function() {
         if($(this).val() != '') {
             $("#voucher-information").html('');
@@ -249,6 +253,14 @@ $(document).ready(function(){
                                         <div class="form-group">
                                             <label for="emission">Emission</label>
                                             <input class="form-control" type="text" id="emission" name="emission" value="NORMAL" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="currency">Currency</label>
+                                            <select class="form-control selectpicker" id="currency" name="currency" data-live-search="true" data-dependent="branch" title="Select a currency ...">
+                                                @foreach($currencies as $currency)
+                                                    <option value="{{ $currency->id }}" {{ $currency->id === old('currency') ? "selected" : "" }}>{{ $currency->name }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label for="environment">Environment</label>

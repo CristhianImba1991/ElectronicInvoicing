@@ -8,32 +8,34 @@ $(document).ready(function(){
             action: function(e, dt, node, config){
                 var _token = $('input[name = "_token"]').val();
                 var id = $("#branch").val();
-                $.ajax({
-                    url: "{{ route('branches.products') }}",
-                    method: "POST",
-                    data: {
-                        _token: _token,
-                        id: id,
-                    },
-                    success: function(result) {
-                        var options = '';
-                        var products = JSON.parse(result);
-                        for (var i = 0; i < products.length; i++) {
-                            options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
+                if (id != '') {
+                    $.ajax({
+                        url: "{{ route('branches.products') }}",
+                        method: "POST",
+                        data: {
+                            _token: _token,
+                            id: id,
+                        },
+                        success: function(result) {
+                            var options = '';
+                            var products = JSON.parse(result);
+                            for (var i = 0; i < products.length; i++) {
+                                options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
+                            }
+                            invoiceTable.row.add([
+                                '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' + options + '</select>',
+                                '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
+                                '<input class="form-control" type="text" id="product-quantity[]" name="product-quantity[]" value="">',
+                                '<input class="form-control" type="text" id="product-unitprice[]" name="product-unitprice[]" value="">',
+                                '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
+                                '<input class="form-control" type="text" id="product-discount[]" name="product-discount[]" value="">',
+                                '<input class="form-control" type="text" id="product-subtotal[]" name="product-subtotal[]" value="" readonly>',
+                                '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
+                            ]).draw(false);
+                            $('select[id *= product]').selectpicker();
                         }
-                        invoiceTable.row.add([
-                            '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' + options + '</select>',
-                            '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
-                            '<input class="form-control" type="text" id="product-quantity[]" name="product-quantity[]" value="">',
-                            '<input class="form-control" type="text" id="product-unitprice[]" name="product-unitprice[]" value="">',
-                            '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
-                            '<input class="form-control" type="text" id="product-discount[]" name="product-discount[]" value="">',
-                            '<input class="form-control" type="text" id="product-subtotal[]" name="product-subtotal[]" value="" readonly>',
-                            '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
-                        ]).draw(false);
-                        $('select[id *= product]').selectpicker();
-                    }
-                });
+                    });
+                }
             }
         }]
     });
@@ -86,65 +88,67 @@ $(document).ready(function(){
         var discounts = $.map($('input[id *= product-discount]'), function(option) {
             return Number(option.value);
         });
-        $.ajax({
-            url: "{{ route('products.taxes') }}",
-            method: "POST",
-            data: {
-                _token: _token,
-                id: id,
-            },
-            success: function(result) {
-                const arrayToObject = (array) => array.reduce((object, item) => {
-                    object[item.id] = item
-                    return object
-                }, {});
-                var products = arrayToObject(JSON.parse(result));
-                var ivaSubtotal = 0.0;
-                var iva0Subtotal = 0.0;
-                var notSubjectIvaSubtotal = 0.0;
-                var exemptIvaSubtotal = 0.0;
-                var iceValue = 0.0;
-                var irbpnrValue = 0.0;
-                var ivaValue = 0.0;
-                for (var i = 0; i < id.length; i++) {
-                    if (id[i] != "") {
-                        if (products[id[i]]['iva'] != null) {
-                            switch (products[id[i]]['iva']['auxiliary_code']) {
-                                case 0: iva0Subtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
-                                case 2:
+        if (id.length > 0) {
+            $.ajax({
+                url: "{{ route('products.taxes') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    const arrayToObject = (array) => array.reduce((object, item) => {
+                        object[item.id] = item
+                        return object
+                    }, {});
+                    var products = arrayToObject(JSON.parse(result));
+                    var ivaSubtotal = 0.0;
+                    var iva0Subtotal = 0.0;
+                    var notSubjectIvaSubtotal = 0.0;
+                    var exemptIvaSubtotal = 0.0;
+                    var iceValue = 0.0;
+                    var irbpnrValue = 0.0;
+                    var ivaValue = 0.0;
+                    for (var i = 0; i < id.length; i++) {
+                        if (id[i] != "") {
+                            if (products[id[i]]['iva'] != null) {
+                                switch (products[id[i]]['iva']['auxiliary_code']) {
+                                    case 0: iva0Subtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                    case 2:
                                     ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
                                     ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
                                     break;
-                                case 3:
+                                    case 3:
                                     ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
                                     ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
                                     break;
-                                case 6: notSubjectIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
-                                case 7: exemptIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                    case 6: notSubjectIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                    case 7: exemptIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                }
                             }
                         }
                     }
+                    var subtotal = iva0Subtotal + ivaSubtotal + notSubjectIvaSubtotal + exemptIvaSubtotal;
+                    var totalDiscount = discounts.reduce(function(a, b) {
+                        return a + b;
+                    }, 0.0);
+                    var tip = Number($('#tip').val());
+                    tip = isNaN(tip) ? 0.0 : tip;
+                    var total = subtotal + iceValue + irbpnrValue + ivaValue + tip;
+                    $('#iva0subtotal').val(iva0Subtotal.toFixed(2));
+                    $('#ivasubtotal').val(ivaSubtotal.toFixed(2));
+                    $('#notsubjectivasubtotal').val(notSubjectIvaSubtotal.toFixed(2));
+                    $('#exemptivasubtotal').val(exemptIvaSubtotal.toFixed(2));
+                    $('#subtotal').val(subtotal.toFixed(2));
+                    $('#totaldiscount').val(totalDiscount.toFixed(2));
+                    //$('#icevalue').val(iceValue.toFixed(2));
+                    //$('#irbpnrvalue').val(irbpnrValue.toFixed(2));
+                    $('#ivavalue').val(ivaValue.toFixed(2));
+                    $('#tip').val(tip.toFixed(2));
+                    $('#total').val(total.toFixed(2));
                 }
-                var subtotal = iva0Subtotal + ivaSubtotal + notSubjectIvaSubtotal + exemptIvaSubtotal;
-                var totalDiscount = discounts.reduce(function(a, b) {
-                    return a + b;
-                }, 0.0);
-                var tip = Number($('#tip').val());
-                tip = isNaN(tip) ? 0.0 : tip;
-                var total = subtotal + iceValue + irbpnrValue + ivaValue + tip;
-                $('#iva0subtotal').val(iva0Subtotal.toFixed(2));
-                $('#ivasubtotal').val(ivaSubtotal.toFixed(2));
-                $('#notsubjectivasubtotal').val(notSubjectIvaSubtotal.toFixed(2));
-                $('#exemptivasubtotal').val(exemptIvaSubtotal.toFixed(2));
-                $('#subtotal').val(subtotal.toFixed(2));
-                $('#totaldiscount').val(totalDiscount.toFixed(2));
-                //$('#icevalue').val(iceValue.toFixed(2));
-                //$('#irbpnrvalue').val(irbpnrValue.toFixed(2));
-                $('#ivavalue').val(ivaValue.toFixed(2));
-                $('#tip').val(tip.toFixed(2));
-                $('#total').val(total.toFixed(2));
-            }
-        });
+            });
+        }
     }
     $('#invoice-table tbody').on('changed.bs.select', 'select[id *= product]', function(){
         loadProductData($(this), '');
@@ -167,6 +171,7 @@ $(document).ready(function(){
     var paymentMethodTable = $('#paymentmethod-table').DataTable({
         paging: false,
         dom: 'Bfrtip',
+        searching: false,
         buttons: [{
             text: 'Add row',
             action: function(e, dt, node, config){
@@ -210,6 +215,42 @@ $(document).ready(function(){
             .row($(this).parents('tr'))
             .remove()
             .draw();
+    });
+    var additionalDetailCount = 0;
+    var additionalDetailTable = $('#additionaldetail-table').DataTable({
+        paging: false,
+        dom: 'Bfrtip',
+        searching: false,
+        buttons: [{
+            text: 'Add row',
+            action: function(e, dt, node, config){
+                if (additionalDetailCount < 3) {
+                    additionalDetailTable.row.add([
+                        '<input class="form-control" type="text" id="additionaldetail-name[]" name="additionaldetail-name[]" value="">',
+                        '<input class="form-control" type="text" id="additionaldetail-value[]" name="additionaldetail-value[]" value="">',
+                        '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
+                    ]).draw(false);
+                    additionalDetailCount++;
+                }
+            }
+        }]
+    });
+    $('#additionaldetail-table tbody').on('click', 'button.btn.btn-danger.btn-sm', function(){
+        additionalDetailTable
+            .row($(this).parents('tr'))
+            .remove()
+            .draw();
+        additionalDetailCount--;
+    });
+    $("#ivaRetention").change(function() {
+        $('#ivaRetentionValue')
+            .prop('readonly', !this.checked)
+            .val('');
+    });
+    $("#rentRetention").change(function() {
+        $('#rentRetentionValue')
+            .prop('readonly', !this.checked)
+            .val('');
     });
     $('#tip').change(function() {
         updateTotal();
@@ -255,10 +296,61 @@ $(document).ready(function(){
         </div>
     </div>
 </div>
-<div class="col-sm-12">
+<div class="col-sm-6">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">7. Total</h5>
+            <h5 class="card-title">7. Additional information</h5>
+            <table id="additionaldetail-table" class="display">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Extra detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><textarea class="form-control" type="text" id="additional-detail" name="additional-detail" value=""></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">8. Retentions</h5>
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td>
+                            <input class="form-check-input" type="checkbox" value="" id="ivaRetention" name="ivaRetention">
+                            <label class="form-check-label" for="ivaRetention">IVA retention</label>
+                        </td>
+                        <td><input class="form-control" type="text" id="ivaRetentionValue" name="ivaRetentionValue" value="" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input class="form-check-input" type="checkbox" value="" id="rentRetention" name="rentRetention">
+                            <label class="form-check-label" for="rentRetention">Rent retention</label>
+                        </td>
+                        <td><input class="form-control" type="text" id="rentRetentionValue" name="rentRetentionValue" value="" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="col-sm-6">
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">9. Total</h5>
             <table class="table table-striped">
                 <tbody>
                     <tr>
