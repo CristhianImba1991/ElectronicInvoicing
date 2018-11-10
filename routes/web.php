@@ -38,6 +38,9 @@ Route::group(['prefix' => 'voucher'], function () {
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/create', 'VoucherController@create')->name('vouchers.create');
     });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::post('/create/{state}', 'VoucherController@store')->where('state', '(save|sign|send)')->name('vouchers.store');
+    });
 });
 
 Route::group(['prefix' => 'resource'], function () {
@@ -264,8 +267,5 @@ Route::group(['prefix' => 'manage'], function () {
         Route::get('/vouchers/{id}', function ($id) {
             return view('vouchers.' . $id);
         })->where('id', '[1-5]{1}');
-    });
-    Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::post('/vouchers', 'VoucherController@store')->name('vouchers.store');
     });
 });

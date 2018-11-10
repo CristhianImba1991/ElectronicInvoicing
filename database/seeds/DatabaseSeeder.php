@@ -22,13 +22,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /*DB::table('voucher_states')->insert([
-            ['name' => 'GENERATED', 'created_at' => Carbon::now()],
-            ['name' => 'SIGNED', 'created_at' => Carbon::now()],
-            ['name' => 'SENDED', 'created_at' => Carbon::now()],
-            ['name' => 'AUTHORIZED', 'created_at' => Carbon::now()],
-            ['name' => 'UNAUTHORIZED', 'created_at' => Carbon::now()],
-            ['name' => 'IN_PROCESS', 'created_at' => Carbon::now()],
-            ['name' => 'REJECTED', 'created_at' => Carbon::now()]
+            ['name' => 'GENERATED', 'created_at' => Carbon::now()],     // Voucher is stored in the database, it might has empty or null values in some fields
+            ['name' => 'SIGNED', 'created_at' => Carbon::now()],        // Same as the previous, but all fields are fill and a XML file is created with sign
+            ['name' => 'ACCEPTED', 'created_at' => Carbon::now()]       // Same as the previous, but the voucher has been accepted by supervisor
+            ['name' => 'REJECTED', 'created_at' => Carbon::now()]       // Same as the SIGNED state, but the voucher has not been accepted by supervisor
+            ['name' => 'SENDED', 'created_at' => Carbon::now()],        // Same as the SIGNED state, but the voucher is sended to SRI and it does not have response
+            ['name' => 'AUTHORIZED', 'created_at' => Carbon::now()],    // Same as the previous, but the voucher has been authorized by SRI
+            ['name' => 'IN_PROCESS', 'created_at' => Carbon::now()],    // Same as the SENDED state, but the voucher has not been received a response by SRI
+            ['name' => 'UNAUTHORIZED', 'created_at' => Carbon::now()],  // Same as the SENDED state, but the voucher has not been authorized by SRI
         ]);*/
 
         DB::table('environments')->insert([

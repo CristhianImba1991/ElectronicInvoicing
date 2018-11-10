@@ -1,3 +1,5 @@
 *
 !public/
+!signs/
+!xmls/
 !.gitignore

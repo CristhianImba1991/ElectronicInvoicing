@@ -120,6 +120,19 @@ $(document).ready(function(){
             })
         }
     });
+    @can('create_vouchers')
+        $('#save').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', 'save') }}").submit();
+        });
+        $('#sign').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', 'sign') }}").submit();
+        });
+    @endcan
+    @can('send_vouchers')
+        $('#send').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', 'send') }}").submit();
+        });
+    @endcan
 });
 </script>
 @endsection
@@ -139,7 +152,7 @@ $(document).ready(function(){
                     <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('vouchers.store') }}" method="post">
+                <form id="voucher-form" method="post">
                     {{ csrf_field() }}
 
                     <div class="card-body">
@@ -263,6 +276,10 @@ $(document).ready(function(){
                                             </select>
                                         </div>
                                         <div class="form-group">
+                                            <label for="issue_date">Issue date</label>
+                                            <input class="form-control" type="date" id="issue_date" name="issue_date">
+                                        </div>
+                                        <div class="form-group">
                                             <label for="environment">Environment</label>
                                             <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="Select a environment ...">
                                                 @foreach($environments as $environment)
@@ -289,7 +306,13 @@ $(document).ready(function(){
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-sm btn-success">Add</button>
+                        @can('create_vouchers')
+                            <button type="button" id="save" class="btn btn-sm btn-dark">Save</button>
+                            <button type="button" id="sign" class="btn btn-sm btn-info">Sign</button>
+                        @endcan
+                        @can('send_vouchers')
+                            <button type="button" id="send" class="btn btn-sm btn-primary">Send</button>
+                        @endcan
                     </div>
 
                 </form>

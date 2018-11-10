@@ -5,6 +5,8 @@ namespace ElectronicInvoicing\Http\Controllers;
 use ElectronicInvoicing\{Company, Currency, Environment, IdentificationType, Product, Voucher, VoucherType};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\ArrayToXml\ArrayToXml;
+use Storage;
 
 class VoucherController extends Controller
 {
@@ -48,10 +50,26 @@ class VoucherController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $state)
     {
-        $cadena = self::generateRandomNumericCode();
-        return $cadena . ' ' . self::getCheckDigit($cadena);
+        /*$voucher = [
+            '_attributes' => ['id' => 'comprobante', 'version' => '1.0.0'],
+            'infoTributaria' => [
+                'ambiente'          => 1,
+                'tipoEmision'       => 1,
+                'razonSocial'       => 'Distribuidora de Suministros Nacional S.A.',
+                'nombreComercial'   => 'Empresa Importadora y Exportadora de Piezas',
+                'ruc'               => '1792146739001',
+                'claveAcceso'       => '2110201101179214673900110020010000000011234567813',
+                'codDoc'            => '01',
+                'estab'             => '002',
+                'ptoEmi'            => '001',
+                'secuencial'        => '000000001',
+                'dirMatriz'         => 'Enrique Guerrero Portilla OE1-34 AV. Galo Plaza Lasso',
+            ],
+        ];
+        Storage::put('xmls/1792146739001/AUTHORIZED/2018/10/2110201101179214673900110020010000000011234567813.xml', ArrayToXml::convert($voucher, 'factura', false, 'UTF-8'));*/
+        return $request;
     }
 
     /**
@@ -116,6 +134,6 @@ class VoucherController extends Controller
             $factor = $factor == 1 ? 7 : $factor;
         }
         $checkDigit = 11 - $summation % 11;
-        return $checkDigit == 10 ? 1 : ($checkDigit == 11 ? 0 : $checkDigit;
+        return $checkDigit == 10 ? 1 : ($checkDigit == 11 ? 0 : $checkDigit);
     }
 }
