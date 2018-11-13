@@ -1,7 +1,10 @@
 <?php
 
 use Carbon\Carbon;
+use ElectronicInvoicing\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\{Role, Permission};
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,16 +24,16 @@ class DatabaseSeeder extends Seeder
             ['code' => 7, 'name' => 'COMPROBANTE DE RETENCIÓN', 'created_at' => Carbon::now()]
         ]);
 
-        /*DB::table('voucher_states')->insert([
-            ['name' => 'GENERATED', 'created_at' => Carbon::now()],     // Voucher is stored in the database, it might has empty or null values in some fields
-            ['name' => 'SIGNED', 'created_at' => Carbon::now()],        // Same as the previous, but all fields are fill and a XML file is created with sign
-            ['name' => 'ACCEPTED', 'created_at' => Carbon::now()]       // Same as the previous, but the voucher has been accepted by supervisor
-            ['name' => 'REJECTED', 'created_at' => Carbon::now()]       // Same as the SIGNED state, but the voucher has not been accepted by supervisor
-            ['name' => 'SENDED', 'created_at' => Carbon::now()],        // Same as the SIGNED state, but the voucher is sended to SRI and it does not have response
+        DB::table('voucher_states')->insert([
+            ['name' => 'SAVED', 'created_at' => Carbon::now()],         // Voucher is stored in the database, it might has empty or null values in some fields
+            ['name' => 'ACCEPTED', 'created_at' => Carbon::now()],      // Same as the previous, but the voucher has been accepted by supervisor and XML file is created and signed
+            ['name' => 'REJECTED', 'created_at' => Carbon::now()],      // Same as the SAVED state, but the voucher has been rejected by supervisor
+            ['name' => 'SENDED', 'created_at' => Carbon::now()],        // Same as the ACCEPTED state, but the voucher is sended to SRI and it does not have response
             ['name' => 'AUTHORIZED', 'created_at' => Carbon::now()],    // Same as the previous, but the voucher has been authorized by SRI
             ['name' => 'IN_PROCESS', 'created_at' => Carbon::now()],    // Same as the SENDED state, but the voucher has not been received a response by SRI
             ['name' => 'UNAUTHORIZED', 'created_at' => Carbon::now()],  // Same as the SENDED state, but the voucher has not been authorized by SRI
-        ]);*/
+            ['name' => 'CANCELED', 'created_at' => Carbon::now()],      // Same as the AUTHORIZED state, but the voucher has been canceled in the system
+        ]);
 
         DB::table('environments')->insert([
             ['code' => 1, 'name' => 'PRUEBAS', 'created_at' => Carbon::now()],
@@ -256,5 +259,166 @@ class DatabaseSeeder extends Seeder
             ['retention_tax_id' => 1, 'code' => '523A', 'description' => 'Pago a no residentes - Seguros y reaseguros (primas y cesiones)', 'created_at' => Carbon::now()],
             ['retention_tax_id' => 1, 'code' => '525', 'description' => 'Pago a no residentes- Donaciones en dinero -Impuesto a la donaciones', 'created_at' => Carbon::now()]
         ]);
+
+        $role_admin = Role::create(['name' => 'admin']);
+        $role_owner = Role::create(['name' => 'owner']);
+        $role_supervisor = Role::create(['name' => 'supervisor']);
+        $role_employee = Role::create(['name' => 'employee']);
+        $role_customer = Role::create(['name' => 'customer']);
+
+        $permission_create_companies = Permission::create(['name' => 'create_companies']);
+        $permission_read_companies = Permission::create(['name' => 'read_companies']);
+        $permission_update_companies = Permission::create(['name' => 'update_companies']);
+        $permission_delete_soft_companies = Permission::create(['name' => 'delete_soft_companies']);
+        $permission_delete_hard_companies = Permission::create(['name' => 'delete_hard_companies']);
+        $permission_create_branches = Permission::create(['name' => 'create_branches']);
+        $permission_read_branches = Permission::create(['name' => 'read_branches']);
+        $permission_update_branches = Permission::create(['name' => 'update_branches']);
+        $permission_delete_soft_branches = Permission::create(['name' => 'delete_soft_branches']);
+        $permission_delete_hard_branches = Permission::create(['name' => 'delete_hard_branches']);
+        $permission_create_emission_points = Permission::create(['name' => 'create_emission_points']);
+        $permission_read_emission_points = Permission::create(['name' => 'read_emission_points']);
+        $permission_update_emission_points = Permission::create(['name' => 'update_emission_points']);
+        $permission_delete_soft_emission_points = Permission::create(['name' => 'delete_soft_emission_points']);
+        $permission_delete_hard_emission_points = Permission::create(['name' => 'delete_hard_emission_points']);
+        $permission_create_customers = Permission::create(['name' => 'create_customers']);
+        $permission_read_customers = Permission::create(['name' => 'read_customers']);
+        $permission_update_customers = Permission::create(['name' => 'update_customers']);
+        $permission_delete_soft_customers = Permission::create(['name' => 'delete_soft_customers']);
+        $permission_delete_hard_customers = Permission::create(['name' => 'delete_hard_customers']);
+        $permission_create_users = Permission::create(['name' => 'create_users']);
+        $permission_read_users = Permission::create(['name' => 'read_users']);
+        $permission_update_users = Permission::create(['name' => 'update_users']);
+        $permission_delete_soft_users = Permission::create(['name' => 'delete_soft_users']);
+        $permission_delete_hard_users = Permission::create(['name' => 'delete_hard_users']);
+        $permission_create_products = Permission::create(['name' => 'create_products']);
+        $permission_read_products = Permission::create(['name' => 'read_products']);
+        $permission_update_products = Permission::create(['name' => 'update_products']);
+        $permission_delete_soft_products = Permission::create(['name' => 'delete_soft_products']);
+        $permission_delete_hard_products = Permission::create(['name' => 'delete_hard_products']);
+        $permission_create_vouchers = Permission::create(['name' => 'create_vouchers']);
+        $permission_read_vouchers = Permission::create(['name' => 'read_vouchers']);
+        $permission_update_vouchers = Permission::create(['name' => 'update_vouchers']);
+        $permission_delete_vouchers = Permission::create(['name' => 'delete_vouchers']);
+        $permission_send_vouchers = Permission::create(['name' => 'send_vouchers']);
+        $permission_report_vouchers = Permission::create(['name' => 'report_vouchers']);
+
+        $role_admin->givePermissionTo($permission_create_companies);
+        $role_admin->givePermissionTo($permission_read_companies);
+        $role_admin->givePermissionTo($permission_update_companies);
+        $role_admin->givePermissionTo($permission_delete_soft_companies);
+        $role_admin->givePermissionTo($permission_delete_hard_companies);
+        $role_owner->givePermissionTo($permission_read_companies);
+        $role_owner->givePermissionTo($permission_update_companies);
+
+        $role_admin->givePermissionTo($permission_create_branches);
+        $role_admin->givePermissionTo($permission_read_branches);
+        $role_admin->givePermissionTo($permission_update_branches);
+        $role_admin->givePermissionTo($permission_delete_soft_branches);
+        $role_admin->givePermissionTo($permission_delete_hard_branches);
+        $role_owner->givePermissionTo($permission_create_branches);
+        $role_owner->givePermissionTo($permission_read_branches);
+        $role_owner->givePermissionTo($permission_update_branches);
+        $role_owner->givePermissionTo($permission_delete_soft_branches);
+        $role_owner->givePermissionTo($permission_delete_hard_branches);
+
+        $role_admin->givePermissionTo($permission_create_emission_points);
+        $role_admin->givePermissionTo($permission_read_emission_points);
+        $role_admin->givePermissionTo($permission_update_emission_points);
+        $role_admin->givePermissionTo($permission_delete_soft_emission_points);
+        $role_admin->givePermissionTo($permission_delete_hard_emission_points);
+        $role_owner->givePermissionTo($permission_create_emission_points);
+        $role_owner->givePermissionTo($permission_read_emission_points);
+        $role_owner->givePermissionTo($permission_update_emission_points);
+        $role_owner->givePermissionTo($permission_delete_soft_emission_points);
+        $role_owner->givePermissionTo($permission_delete_hard_emission_points);
+
+        $role_admin->givePermissionTo($permission_create_customers);
+        $role_admin->givePermissionTo($permission_read_customers);
+        $role_admin->givePermissionTo($permission_update_customers);
+        $role_admin->givePermissionTo($permission_delete_soft_customers);
+        $role_admin->givePermissionTo($permission_delete_hard_customers);
+        $role_owner->givePermissionTo($permission_create_customers);
+        $role_owner->givePermissionTo($permission_read_customers);
+        $role_owner->givePermissionTo($permission_update_customers);
+        $role_owner->givePermissionTo($permission_delete_soft_customers);
+        $role_owner->givePermissionTo($permission_delete_hard_customers);
+        $role_supervisor->givePermissionTo($permission_create_customers);
+        $role_supervisor->givePermissionTo($permission_read_customers);
+        $role_supervisor->givePermissionTo($permission_update_customers);
+        $role_supervisor->givePermissionTo($permission_delete_soft_customers);
+        $role_employee->givePermissionTo($permission_create_customers);
+        $role_employee->givePermissionTo($permission_read_customers);
+        $role_employee->givePermissionTo($permission_update_customers);
+
+        $role_admin->givePermissionTo($permission_create_users);
+        $role_admin->givePermissionTo($permission_read_users);
+        $role_admin->givePermissionTo($permission_update_users);
+        $role_admin->givePermissionTo($permission_delete_soft_users);
+        $role_admin->givePermissionTo($permission_delete_hard_users);
+        $role_owner->givePermissionTo($permission_create_users);
+        $role_owner->givePermissionTo($permission_read_users);
+        $role_owner->givePermissionTo($permission_update_users);
+        $role_owner->givePermissionTo($permission_delete_soft_users);
+        $role_owner->givePermissionTo($permission_delete_hard_users);
+        $role_supervisor->givePermissionTo($permission_create_users);
+        $role_supervisor->givePermissionTo($permission_read_users);
+        $role_supervisor->givePermissionTo($permission_update_users);
+        $role_supervisor->givePermissionTo($permission_delete_soft_users);
+        $role_employee->givePermissionTo($permission_create_users);
+        $role_employee->givePermissionTo($permission_read_users);
+        $role_employee->givePermissionTo($permission_update_users);
+
+        $role_admin->givePermissionTo($permission_create_products);
+        $role_admin->givePermissionTo($permission_read_products);
+        $role_admin->givePermissionTo($permission_update_products);
+        $role_admin->givePermissionTo($permission_delete_soft_products);
+        $role_admin->givePermissionTo($permission_delete_hard_products);
+        $role_owner->givePermissionTo($permission_create_products);
+        $role_owner->givePermissionTo($permission_read_products);
+        $role_owner->givePermissionTo($permission_update_products);
+        $role_owner->givePermissionTo($permission_delete_soft_products);
+        $role_owner->givePermissionTo($permission_delete_hard_products);
+        $role_supervisor->givePermissionTo($permission_create_products);
+        $role_supervisor->givePermissionTo($permission_read_products);
+        $role_supervisor->givePermissionTo($permission_update_products);
+        $role_supervisor->givePermissionTo($permission_delete_soft_products);
+        $role_employee->givePermissionTo($permission_create_products);
+        $role_employee->givePermissionTo($permission_read_products);
+        $role_employee->givePermissionTo($permission_update_products);
+
+        $role_admin->givePermissionTo($permission_create_vouchers);
+        $role_admin->givePermissionTo($permission_read_vouchers);
+        $role_admin->givePermissionTo($permission_update_vouchers);
+        $role_admin->givePermissionTo($permission_delete_vouchers);
+        $role_owner->givePermissionTo($permission_create_vouchers);
+        $role_owner->givePermissionTo($permission_read_vouchers);
+        $role_owner->givePermissionTo($permission_update_vouchers);
+        $role_owner->givePermissionTo($permission_delete_vouchers);
+        $role_supervisor->givePermissionTo($permission_create_vouchers);
+        $role_supervisor->givePermissionTo($permission_read_vouchers);
+        $role_supervisor->givePermissionTo($permission_update_vouchers);
+        $role_supervisor->givePermissionTo($permission_delete_vouchers);
+        $role_employee->givePermissionTo($permission_create_vouchers);
+        $role_employee->givePermissionTo($permission_read_vouchers);
+        $role_employee->givePermissionTo($permission_update_vouchers);
+        $role_employee->givePermissionTo($permission_delete_vouchers);
+        $role_customer->givePermissionTo($permission_read_vouchers);
+
+        $role_admin->givePermissionTo($permission_send_vouchers);
+        $role_owner->givePermissionTo($permission_send_vouchers);
+        $role_supervisor->givePermissionTo($permission_send_vouchers);
+
+        $role_admin->givePermissionTo($permission_report_vouchers);
+        $role_owner->givePermissionTo($permission_report_vouchers);
+        $role_supervisor->givePermissionTo($permission_report_vouchers);
+        $role_employee->givePermissionTo($permission_report_vouchers);
+        $role_customer->givePermissionTo($permission_report_vouchers);
+
+        $input['name'] = 'Edgar Salguero';
+        $input['email'] = 'edgar.salguero@taotechideas.com';
+        $input['password'] = Hash::make('edgar1234');
+        $user = User::create($input);
+        $user->assignRole('admin');
     }
 }

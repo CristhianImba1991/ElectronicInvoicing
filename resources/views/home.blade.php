@@ -16,7 +16,7 @@
 
                     <!-- <a href="{{ route('grantallprivileges') }}">SA</a> -->
 
-                   
+
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="card mb-3">

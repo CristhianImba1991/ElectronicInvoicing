@@ -39,7 +39,7 @@ Route::group(['prefix' => 'voucher'], function () {
         Route::get('/create', 'VoucherController@create')->name('vouchers.create');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::post('/create/{state}', 'VoucherController@store')->where('state', '(save|sign|send)')->name('vouchers.store');
+        Route::post('/create/{state}', 'VoucherController@store')->where('state', '[1-8]{1}')->name('vouchers.store');
     });
 });
 

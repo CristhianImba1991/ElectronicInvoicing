@@ -122,15 +122,15 @@ $(document).ready(function(){
     });
     @can('create_vouchers')
         $('#save').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', 'save') }}").submit();
-        });
-        $('#sign').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', 'sign') }}").submit();
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', 1) }}").submit();
         });
     @endcan
     @can('send_vouchers')
+        $('#accept').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', 2) }}").submit();
+        });
         $('#send').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', 'send') }}").submit();
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', 4) }}").submit();
         });
     @endcan
 });
@@ -307,11 +307,11 @@ $(document).ready(function(){
 
                     <div class="card-footer">
                         @can('create_vouchers')
-                            <button type="button" id="save" class="btn btn-sm btn-dark">Save</button>
-                            <button type="button" id="sign" class="btn btn-sm btn-info">Sign</button>
+                            <button type="button" id="save" class="btn btn-sm btn-info">Save</button>
                         @endcan
                         @can('send_vouchers')
-                            <button type="button" id="send" class="btn btn-sm btn-primary">Send</button>
+                            <button type="button" id="accept" class="btn btn-sm btn-primary">Save and accept</button>
+                            <button type="button" id="send" class="btn btn-sm btn-success">Save, accept and send</button>
                         @endcan
                     </div>
 

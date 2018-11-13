@@ -25,10 +25,10 @@ $(document).ready(function(){
                             invoiceTable.row.add([
                                 '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' + options + '</select>',
                                 '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
-                                '<input class="form-control" type="text" id="product-quantity[]" name="product-quantity[]" value="">',
-                                '<input class="form-control" type="text" id="product-unitprice[]" name="product-unitprice[]" value="">',
+                                '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
+                                '<input class="form-control" type="text" id="product_unitprice[]" name="product_unitprice[]" value="">',
                                 '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
-                                '<input class="form-control" type="text" id="product-discount[]" name="product-discount[]" value="">',
+                                '<input class="form-control" type="text" id="product_discount[]" name="product_discount[]" value="">',
                                 '<input class="form-control" type="text" id="product-subtotal[]" name="product-subtotal[]" value="" readonly>',
                                 '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
                             ]).draw(false);
@@ -52,21 +52,21 @@ $(document).ready(function(){
                 },
                 success: function(result) {
                     var taxes = JSON.parse(result);
-                    var productQuantity = elementChanged == '' ? 1.0 : (elementChanged == 'productQuantity' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-quantity]').val()));
+                    var productQuantity = elementChanged == '' ? 1.0 : (elementChanged == 'productQuantity' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product_quantity]').val()));
                     productQuantity = isNaN(productQuantity) ? 1.0 : productQuantity;
-                    var productUnitPrice = elementChanged == '' ? Number(taxes[0]['product']['unit_price']) : (elementChanged == 'productUnitPrice' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-unitprice]').val()));
+                    var productUnitPrice = elementChanged == '' ? Number(taxes[0]['product']['unit_price']) : (elementChanged == 'productUnitPrice' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product_unitprice]').val()));
                     productUnitPrice = isNaN(productUnitPrice) ? taxes[0]['product']['unit_price'] : productUnitPrice;
                     var productIva = elementChanged == '' ? (taxes[0]['iva'] != null ? Number(taxes[0]['iva']['rate']) : 0.0) : Number(reference.closest('tr').find('input[id *= product-iva]').val());
                     productIva = isNaN(productIva) ? (taxes[0]['iva'] != null ? Number(taxes[0]['iva']['rate']) : 0.0) : productIva;
-                    var productIce = taxes[0]['ice'] != null ? Number(taxes[0]['ice']['specific_rate']) + Number(taxes[0]['ice']['ad_valorem_rate']) : 0.0;
-                    var productDiscount = elementChanged == '' ? 0.0 : (elementChanged == 'productDiscount' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product-discount]').val()));
+                    //var productIce = taxes[0]['ice'] != null ? Number(taxes[0]['ice']['specific_rate']) + Number(taxes[0]['ice']['ad_valorem_rate']) : 0.0;
+                    var productDiscount = elementChanged == '' ? 0.0 : (elementChanged == 'productDiscount' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product_discount]').val()));
                     productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
-                    var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0) * (1 + productIce / 100.0);
+                    var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0);
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
-                    reference.closest('tr').find('input[id *= product-quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
-                    reference.closest('tr').find('input[id *= product-unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                    reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                    reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     reference.closest('tr').find('input[id *= product-iva]').val(productIva.toFixed(2));
-                    reference.closest('tr').find('input[id *= product-discount]').val(productDiscount.toFixed(2));
+                    reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
                     reference.closest('tr').find('input[id *= product-subtotal]').val(productSubtotal.toFixed(2));
                     updateTotal();
                 }
@@ -79,13 +79,13 @@ $(document).ready(function(){
         var id = $.map(details, function(option) {
             return option.value;
         });
-        var quantities = $.map($('input[id *= product-quantity]'), function(option) {
+        var quantities = $.map($('input[id *= product_quantity]'), function(option) {
             return Number(option.value);
         });
-        var unitPrices = $.map($('input[id *= product-unitprice]'), function(option) {
+        var unitPrices = $.map($('input[id *= product_unitprice]'), function(option) {
             return Number(option.value);
         });
-        var discounts = $.map($('input[id *= product-discount]'), function(option) {
+        var discounts = $.map($('input[id *= product_discount]'), function(option) {
             return Number(option.value);
         });
         if (id.length > 0) {
@@ -153,13 +153,13 @@ $(document).ready(function(){
     $('#invoice-table tbody').on('changed.bs.select', 'select[id *= product]', function(){
         loadProductData($(this), '');
     });
-    $('#invoice-table tbody').on('change', 'input[id *= product-quantity]', function(){
+    $('#invoice-table tbody').on('change', 'input[id *= product_quantity]', function(){
         loadProductData($(this), 'productQuantity');
     });
-    $('#invoice-table tbody').on('change', 'input[id *= product-unitprice]', function(){
+    $('#invoice-table tbody').on('change', 'input[id *= product_unitprice]', function(){
         loadProductData($(this), 'productUnitPrice');
     });
-    $('#invoice-table tbody').on('change', 'input[id *= product-discount]', function(){
+    $('#invoice-table tbody').on('change', 'input[id *= product_discount]', function(){
         loadProductData($(this), 'productDiscount');
     });
     $('#invoice-table tbody').on('click', 'button.btn.btn-danger.btn-sm', function(){
@@ -196,13 +196,13 @@ $(document).ready(function(){
                                 }
                                 paymentMethodTable.row.add([
                                     '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="Select a payment method ...">' + optionsPaymentMethod + '</select>',
-                                    '<input class="form-control" type="text" id="paymentMethod-value[]" name="paymentMethod-value[]" value="">',
-                                    '<select class="form-control selectpicker" id="paymentMethod-timeunit[]" name="paymentMethod-timeunit[]" data-live-search="true" title="Select a time unit ...">' + optionsTimeUnit + '</select>',
-                                    '<input class="form-control" type="text" id="paymentMethod-term[]" name="paymentMethod-term[]" value="0">',
+                                    '<input class="form-control" type="text" id="paymentMethod_value[]" name="paymentMethod_value[]" value="">',
+                                    '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="Select a time unit ...">' + optionsTimeUnit + '</select>',
+                                    '<input class="form-control" type="text" id="paymentMethod_term[]" name="paymentMethod_term[]" value="0">',
                                     '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
                                 ]).draw(false);
                                 $('select[id *= paymentMethod]').selectpicker('val', 1);
-                                $('select[id *= paymentMethod-timeunit]').selectpicker('val', 1);
+                                $('select[id *= paymentMethod_timeunit]').selectpicker('val', 1);
                             }
                         });
                     }
@@ -226,8 +226,8 @@ $(document).ready(function(){
             action: function(e, dt, node, config){
                 if (additionalDetailCount < 3) {
                     additionalDetailTable.row.add([
-                        '<input class="form-control" type="text" id="additionaldetail-name[]" name="additionaldetail-name[]" value="">',
-                        '<input class="form-control" type="text" id="additionaldetail-value[]" name="additionaldetail-value[]" value="">',
+                        '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="">',
+                        '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="">',
                         '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
                     ]).draw(false);
                     additionalDetailCount++;
@@ -317,7 +317,7 @@ $(document).ready(function(){
                 </thead>
                 <tbody>
                     <tr>
-                        <td><textarea class="form-control" type="text" id="additional-detail" name="additional-detail" value=""></textarea></td>
+                        <td><textarea class="form-control" type="text" id="extra_detail" name="extra_detail" value=""></textarea></td>
                     </tr>
                 </tbody>
             </table>

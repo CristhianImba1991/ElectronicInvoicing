@@ -10,7 +10,7 @@
                     <a href="{{ route('companies.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form method="post" enctype="multipart/form-data">
+                <form action="{{ route('companies.store') }}" method="post" enctype="multipart/form-data">
                     {{ csrf_field() }}
 
                     <div class="card-body">
@@ -67,7 +67,7 @@
                         </div>
                     </div>
 
-                    <div class="card-footer"><button type="button" id="" class="btn btn-sm btn-success">Add</button></div>
+                    <div class="card-footer"><button type="submit" class="btn btn-sm btn-success">Add</button></div>
 
                 </form>
 

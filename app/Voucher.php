@@ -16,7 +16,7 @@ class Voucher extends Model
         'customer_id',
         'issue_date',
         'authorization_date',
-        'currecy_id',
+        'currency_id',
         'tip',
         'xml',
         'extra_detail',
