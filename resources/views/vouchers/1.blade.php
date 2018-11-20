@@ -312,6 +312,30 @@ $(document).ready(function(){
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Waybill</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <input class="form-control" type="text" id="waybill_establishment" name="waybill_establishment" size="3" value="" >
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <input class="form-control" type="text" id="waybill_emissionpoint" name="waybill_emissionpoint" size="3" value="" >
+                                </div>
+                                <div class="form-group col-md-5">
+                                    <input class="form-control" type="text" id="waybill_sequential" name="waybill_sequential" size="9" value="" >
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
                         <th>Extra detail</th>
                     </tr>
                 </thead>

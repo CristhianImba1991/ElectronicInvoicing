@@ -18,10 +18,13 @@ class Voucher extends Model
         'authorization_date',
         'currency_id',
         'tip',
+        'iva_retention',
+        'rent_retention',
         'xml',
         'extra_detail',
         'user_id',
-        'support_document'
+        'support_document',
+        'support_document_date'
     ];
 
     public function emissionPoint()
@@ -66,7 +69,7 @@ class Voucher extends Model
 
     public function aditionalFields()
     {
-        return $this->hasMany('ElectronicInvoicing\AditionalField');
+        return $this->hasMany('ElectronicInvoicing\AdditionalField');
     }
 
     public function payments()
@@ -92,5 +95,32 @@ class Voucher extends Model
     public function waybills()
     {
         return $this->hasMany('ElectronicInvoicing\Waybill');
+    }
+
+    public function subtotalWithoutTaxes()
+    {
+        $subtotalWithoutTaxes = 0.0;
+        foreach ($this->details()->get() as $detail) {
+            $subtotalWithoutTaxes += $detail->quantity * $detail->unit_price - $detail->discount;
+        }
+        return $subtotalWithoutTaxes;
+    }
+
+    public function totalDiscounts()
+    {
+        $discounts = 0.0;
+        foreach ($this->details()->get() as $detail) {
+            $discounts += $detail->discount;
+        }
+        return $discounts;
+    }
+
+    public function total()
+    {
+        $total = self::subtotalWithoutTaxes();
+        foreach ($this->details()->get() as $detail) {
+            $total += $detail->taxDetails()->first()->value;
+        }
+        return $total;
     }
 }

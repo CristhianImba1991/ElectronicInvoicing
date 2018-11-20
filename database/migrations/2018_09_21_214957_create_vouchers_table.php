@@ -32,6 +32,7 @@ class CreateVouchersTable extends Migration
             $table->string('extra_detail', 300)->nullable();
             $table->unsignedInteger('user_id');
             $table->string('support_document', 49)->nullable();
+            $table->date('support_document_date')->nullable();
             $table->timestamps();
             $table->foreign('emission_point_id')->references('id')->on('emission_points');
             $table->foreign('voucher_type_id')->references('id')->on('voucher_types');

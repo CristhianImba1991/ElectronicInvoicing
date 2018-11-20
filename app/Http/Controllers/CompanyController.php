@@ -158,9 +158,8 @@ class CompanyController extends Controller
             $cert = $results['cert'];
     		$pkey = $results['pkey'];
     		openssl_x509_export($cert, $certout);
-            openssl_pkey_export($pkey, $pkeyout, $request->password);
             Storage::put('signs/' . $request->ruc . '_cert.pem', $certout);
-            Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkeyout);
+            Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
         }
         $company->fill($input)->save();
         return redirect()->route('companies.index')->with(['status' => 'Company updated successfully.']);

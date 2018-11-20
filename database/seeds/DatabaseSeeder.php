@@ -26,10 +26,12 @@ class DatabaseSeeder extends Seeder
 
         DB::table('voucher_states')->insert([
             ['name' => 'SAVED', 'created_at' => Carbon::now()],         // Voucher is stored in the database, it might has empty or null values in some fields
-            ['name' => 'ACCEPTED', 'created_at' => Carbon::now()],      // Same as the previous, but the voucher has been accepted by supervisor and XML file is created and signed
+            ['name' => 'ACCEPTED', 'created_at' => Carbon::now()],      // Same as the previous, but the voucher has been accepted by supervisor
             ['name' => 'REJECTED', 'created_at' => Carbon::now()],      // Same as the SAVED state, but the voucher has been rejected by supervisor
-            ['name' => 'SENDED', 'created_at' => Carbon::now()],        // Same as the ACCEPTED state, but the voucher is sended to SRI and it does not have response
-            ['name' => 'AUTHORIZED', 'created_at' => Carbon::now()],    // Same as the previous, but the voucher has been authorized by SRI
+            ['name' => 'SENDED', 'created_at' => Carbon::now()],        // Same as the ACCEPTED state, but the XML file is created and signed and the voucher is sended to SRI and it does not have response
+            ['name' => 'RECEIVED', 'created_at' => Carbon::now()],      // Same as the previous state, but the voucher has been validated by SRI
+            ['name' => 'RETURNED', 'created_at' => Carbon::now()],      // Same as the SENDED state, but the voucher has been returned by SRI for bad structure
+            ['name' => 'AUTHORIZED', 'created_at' => Carbon::now()],    // Same as the SENDED, but the voucher has been authorized by SRI
             ['name' => 'IN_PROCESS', 'created_at' => Carbon::now()],    // Same as the SENDED state, but the voucher has not been received a response by SRI
             ['name' => 'UNAUTHORIZED', 'created_at' => Carbon::now()],  // Same as the SENDED state, but the voucher has not been authorized by SRI
             ['name' => 'CANCELED', 'created_at' => Carbon::now()],      // Same as the AUTHORIZED state, but the voucher has been canceled in the system
@@ -47,6 +49,10 @@ class DatabaseSeeder extends Seeder
             ['code' => 7, 'name' => 'VENTA A CONSUMIDOR FINAL', 'created_at' => Carbon::now()],
             ['code' => 8, 'name' => 'IDENTIFICACIÓN DEL EXTERIOR', 'created_at' => Carbon::now()],
             ['code' => 9, 'name' => 'PLACA', 'created_at' => Carbon::now()]
+        ]);
+
+        DB::table('customers')->insert([
+            ['identification_type_id' => 4, 'identification' => '9999999999999', 'social_reason' => 'CONSUMIDOR FINAL', 'address' => NULL, 'phone' => NULL, 'email' => NULL, 'created_at' => Carbon::now()]
         ]);
 
         DB::table('iva_taxes')->insert([

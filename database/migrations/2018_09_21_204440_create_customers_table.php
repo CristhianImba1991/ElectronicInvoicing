@@ -18,9 +18,9 @@ class CreateCustomersTable extends Migration
             $table->unsignedInteger('identification_type_id');
             $table->string('identification', 20);
             $table->string('social_reason', 300);
-            $table->string('address', 300);
-            $table->string('phone', 30);
-            $table->string('email', 300);
+            $table->string('address', 300)->nullable();
+            $table->string('phone', 30)->nullable();
+            $table->string('email', 300)->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('identification_type_id')->references('id')->on('identification_types');
