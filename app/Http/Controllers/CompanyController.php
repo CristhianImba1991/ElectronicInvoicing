@@ -2,7 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\{Company, Branch};
+use ElectronicInvoicing\{Company, Customer, Branch};
 use ElectronicInvoicing\Http\Requests\StoreCompanyRequest;
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
 use Illuminate\Http\Request;
@@ -85,9 +85,8 @@ class CompanyController extends Controller
         $cert = $results['cert'];
 		$pkey = $results['pkey'];
 		openssl_x509_export($cert, $certout);
-        openssl_pkey_export($pkey, $pkeyout, $request->password);
         Storage::put('signs/' . $request->ruc . '_cert.pem', $certout);
-        Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkeyout);
+        Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
         Company::create($input);
         return redirect()->route('companies.index')->with(['status' => 'Company added successfully.']);
     }
@@ -225,6 +224,7 @@ class CompanyController extends Controller
     public function customers(Request $request) {
         if (is_string($request->id)) {
             $customers = Company::where('id', $request->id)->first()->customers()->get();
+            $customers->push(Customer::where('identification', '=', '9999999999999')->first());
             return $customers->toJson();
         }
     }

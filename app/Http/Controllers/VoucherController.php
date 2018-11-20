@@ -150,6 +150,15 @@ class VoucherController extends Controller
         return "" . rand(pow(10, $digits - 1), pow(10, $digits) - 1);
     }
 
+    private static function moveXmlFile($voucher, $to)
+    {
+        $fromFolder = substr($voucher->xml, 19, strpos(substr($voucher->xml, 19), '/'));
+        $toFolder = VoucherState::find($to)->name;
+        Storage::move($voucher->xml, str_replace('/' . $fromFolder . '/', '/' . $toFolder . '/', $voucher->xml));
+        $voucher->xml = str_replace('/' . $fromFolder . '/', '/' . $toFolder . '/', $voucher->xml);
+        $voucher->save();
+    }
+
     private static function saveVoucher($request, $state)
     {
         $company = Company::find($request->company);
@@ -246,6 +255,12 @@ class VoucherController extends Controller
 
     private static function acceptVoucher($voucher)
     {
+        $voucher->voucher_state_id = VoucherStates::ACCEPTED;
+        $voucher->save();
+    }
+
+    private static function signVoucher($voucher)
+    {
         $version = '1.0.0';
         foreach ($voucher->details as $detail) {
             if (strlen(substr(strrchr(strval(floatval($detail->quantity)), "."), 1)) > 2 || strlen(substr(strrchr(strval(floatval($detail->unit_price)), "."), 1)) > 2) {
@@ -284,7 +299,7 @@ class VoucherController extends Controller
             'guiaRemision'                  => $voucher->support_document,
             'razonSocialComprador'          => $voucher->customer->social_reason,
             'identificacionComprador'       => $voucher->customer->identification,
-            'direccionComprador'            => $voucher->customer->address,
+            'direccionComprador'            => NULL,
             'totalSinImpuestos'             => number_format($voucher->subtotalWithoutTaxes(), 2, '.', ''),
             'totalDescuento'                => number_format($voucher->totalDiscounts(), 2, '.', ''),
             'totalConImpuestos'             => [
@@ -299,6 +314,12 @@ class VoucherController extends Controller
             'valRetIva'                     => NULL,
             'valRetRenta'                   => NULL,
         ];
+        if ($voucher->customer->address === NULL) {
+            unset($xml['infoFactura']['direccionComprador']);
+        } else {
+            $xml['infoFactura']['direccionComprador'] = $voucher->customer->address;
+        }
+
         if ($voucher->support_document === NULL) {
             unset($xml['infoFactura']['guiaRemision']);
         } else {
@@ -398,11 +419,9 @@ class VoucherController extends Controller
         Storage::put($xmlPath, ArrayToXml::convert($xml, 'factura', false, 'UTF-8'));
         $voucher->xml = $xmlPath;
         $voucher->save();
-        self::signVoucher($voucher);
-    }
 
-    private static function signVoucher($voucher)
-    {
+
+
         $xml = new \DOMDocument('1.0', 'UTF-8');
         $xml->preserveWhiteSpace = true;
 		$xml->formatOutput = false;
@@ -585,8 +604,6 @@ class VoucherController extends Controller
 
             $xml->save(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
         }
-        $voucher->voucher_state_id = VoucherStates::ACCEPTED;
-        $voucher->save();
     }
 
     private static function rejectVoucher()
@@ -605,6 +622,8 @@ class VoucherController extends Controller
         ])->max('sequential') + 1;
         $voucher->sequential = $sequential;
         $voucher->save();
+        self::signVoucher($voucher);
+        self::moveXmlFile($voucher, VoucherStates::SENDED);
         $wsdlReceipt = '';
         $wsdlValidation = '';
         switch ($voucher->environment->code) {
@@ -626,13 +645,16 @@ class VoucherController extends Controller
 
         switch ($resultReceipt['RespuestaRecepcionComprobante']['estado']) {
             case 'RECIBIDA':
-                dd('RECIBIDA');
+                $voucher->voucher_state_id = VoucherStates::RECEIVED;
+                $voucher->save();
                 break;
             case 'DEVUELTA':
+                $voucher->voucher_state_id = VoucherStates::RETURNED;
+                $voucher->save();
                 $message = $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['tipo'] . ' ' .
                     $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['identificador'] . ': ' .
                     $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['mensaje'];
-                if (array_key_exists('informacionAdiccional', $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje'])) {
+                if (array_key_exists('informacionAdicional', $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje'])) {
                     $message .= '. ' . $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['informacionAdiccional'];
                 }
                 dd($message);
@@ -654,8 +676,8 @@ class VoucherController extends Controller
                 'claveAccesoComprobante' =>  $voucherAccessKey . self::getCheckDigit($voucherAccessKey)
             )
         );
-        //$resultValidation = $soapClientValidation->__soapCall("autorizacionComprobante", $accessKey);
-        $resultValidation = $soapClientValidation->autorizacionComprobante($voucherAccessKey . self::getCheckDigit($voucherAccessKey));
+        $resultValidation = $soapClientValidation->__soapCall("autorizacionComprobante", $accessKey);
+        //$resultValidation = $soapClientValidation->autorizacionComprobante($voucherAccessKey . self::getCheckDigit($voucherAccessKey));
         dd($resultValidation);
     }
 

@@ -28,9 +28,9 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         if ($user->hasPermissionTo('delete_hard_customers')) {
-            $customers = Customer::withTrashed()->get()->sortBy(['social_reason']);
+            $customers = Customer::withTrashed()->where('identification', '!=', '9999999999999')->get()->sortBy(['social_reason']);
         } else {
-            $customers = Customer::all()->sortBy(['social_reason']);
+            $customers = Customer::where('identification', '!=', '9999999999999')->sortBy(['social_reason']);
         }
         return view('customers.index', compact('customers'));
     }
@@ -48,7 +48,7 @@ class CustomerController extends Controller
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }
-        $identificationTypes = IdentificationType::all();
+        $identificationTypes = IdentificationType::where('code', '!=', 7)->get();
         return view('customers.create', compact(['companies', 'identificationTypes']));
     }
 
