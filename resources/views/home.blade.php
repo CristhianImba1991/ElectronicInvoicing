@@ -26,14 +26,19 @@
                                         @can('create_vouchers')
                                             <a href="{{ route('vouchers.create') }}" class="list-group-item list-group-item-action" style="border: none">New voucher</a>
                                         @endcan
-                                </div>
                                     </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title">Reports</h5>
+                                    <div class="list-group">
+                                        @can('report_vouchers')
+                                            <a href="{{ route('vouchers.index') }}" class="list-group-item list-group-item-action" style="border: none">Vouchers</a>
+                                        @endcan
+                                    </div>
                                 </div>
                             </div>
                         </div>

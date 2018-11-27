@@ -123,4 +123,33 @@ class Voucher extends Model
         }
         return $total;
     }
+
+    public function ivaBreakdown()
+    {
+        $iva = array();
+        foreach (IvaTax::all() as $ivaTax) {
+            $iva[strval($ivaTax->auxiliary_code)] = 0.00;
+        }
+        foreach ($this->details()->get() as $detail) {
+            foreach ($detail->taxDetails()->get() as $tax) {
+                if ($tax->code === 2) {
+                    $iva[strval($tax->percentage_code)] += $detail->quantity * $detail->unit_price - $detail->discount;
+                }
+            }
+        }
+        return $iva;
+    }
+
+    public function iva()
+    {
+        $iva = 0.00;
+        foreach ($this->details()->get() as $detail) {
+            foreach ($detail->taxDetails()->get() as $tax) {
+                if ($tax->code === 2 && ($tax->percentage_code === 2 || $tax->percentage_code === 3)) {
+                    $iva += $tax->value;
+                }
+            }
+        }
+        return $iva;
+    }
 }

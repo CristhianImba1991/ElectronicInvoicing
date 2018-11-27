@@ -8,6 +8,7 @@ use ElectronicInvoicing\{AdditionalField, Branch, Company, Currency, Customer, D
 use ElectronicInvoicing\StaticClasses\VoucherStates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PDF;
 use SoapClient;
 use Spatie\ArrayToXml\ArrayToXml;
 use Storage;
@@ -29,7 +30,8 @@ class VoucherController extends Controller
      */
     public function index()
     {
-        //
+        $vouchers = Voucher::all();
+        return view('vouchers.index', compact('vouchers'));
     }
 
     /**
@@ -65,7 +67,7 @@ class VoucherController extends Controller
                 }
             }
         }
-        return 'TRUE';
+        return redirect()->route('home');
     }
 
     /**
@@ -121,7 +123,7 @@ class VoucherController extends Controller
     	return implode($numericCode);
     }
 
-    private static function getCheckDigit($accessKey)
+    public static function getCheckDigit($accessKey)
     {
         $summation = 0;
         $factor = 7;
@@ -647,21 +649,101 @@ class VoucherController extends Controller
             case 'RECIBIDA':
                 $voucher->voucher_state_id = VoucherStates::RECEIVED;
                 $voucher->save();
+                self::moveXmlFile($voucher, VoucherStates::RECEIVED);
                 break;
             case 'DEVUELTA':
                 $voucher->voucher_state_id = VoucherStates::RETURNED;
-                $voucher->save();
                 $message = $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['tipo'] . ' ' .
                     $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['identificador'] . ': ' .
                     $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['mensaje'];
                 if (array_key_exists('informacionAdicional', $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje'])) {
                     $message .= '. ' . $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['informacionAdiccional'];
                 }
-                dd($message);
+                $voucher->extra_detail = $message;
+                $voucher->save();
+                self::moveXmlFile($voucher, VoucherStates::RETURNED);
                 break;
         }
 
-        $soapClientValidation = new SoapClient($wsdlValidation);
+        if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
+            $soapClientValidation = new SoapClient($wsdlValidation);
+            $voucherAccessKey = DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('dmY') .
+                str_pad(strval(VoucherType::find($voucher->voucher_type_id)->code), 2, '0', STR_PAD_LEFT) .
+                $voucher->emissionPoint->branch->company->ruc .
+                $voucher->environment->code .
+                str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) .
+                str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) .
+                str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) .
+                str_pad(strval($voucher->numeric_code), 8, '0', STR_PAD_LEFT) .
+                '1';
+            $accessKey = array(
+                'autorizacionComprobante' => array(
+                    'claveAccesoComprobante' =>  $voucherAccessKey . self::getCheckDigit($voucherAccessKey)
+                )
+            );
+            $resultValidation = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
+            $xmlReponse = [
+                'estado' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
+                'numeroAutorizacion' => NULL,
+                'fechaAutorizacion' => array(
+                    '_attributes' => ['class' => 'fechaAutorizacion'],
+                    '_value' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                ),
+                'comprobante' => array(
+                    '_cdata' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                ),
+                'mensajes' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
+            ];
+
+            switch ($resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
+                case 'AUTORIZADO':
+                    $xmlReponse['numeroAutorizacion'] = $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
+                    $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
+                    break;
+                case 'NO AUTORIZADO':
+                    unset($xmlReponse['numeroAutorizacion']);
+                    $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
+                    break;
+                default:
+                    $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
+                    break;
+            }
+            $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+            $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
+            $voucher->save();
+            $xmlPath = 'xmls/' .
+                $voucher->emissionPoint->branch->company->ruc . '/' .
+                VoucherState::find($voucher->voucher_state_id)->name . '/' .
+                DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y/m') . '/' .
+                $voucherAccessKey . self::getCheckDigit($voucherAccessKey) . '.xml';
+            Storage::put($xmlPath, ArrayToXml::convert($xmlReponse, 'autorizacion', false, 'UTF-8'));
+            Storage::delete($voucher->xml);
+            $voucher->xml = $xmlPath;
+            $voucher->save();
+        } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
+            dd($voucher->extra_detail);
+        }
+    }
+
+    private static function cancelVoucher()
+    {
+
+    }
+
+    public function html(Voucher $voucher)
+    {
+        $html = true;
+        return view('vouchers.ride.invoice', compact(['voucher', 'html']));
+    }
+
+    public function xml(Voucher $voucher)
+    {
+        return Storage::download($voucher->xml);
+    }
+
+    public function pdf(Voucher $voucher)
+    {
+        $html = false;
         $voucherAccessKey = DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('dmY') .
             str_pad(strval(VoucherType::find($voucher->voucher_type_id)->code), 2, '0', STR_PAD_LEFT) .
             $voucher->emissionPoint->branch->company->ruc .
@@ -671,18 +753,6 @@ class VoucherController extends Controller
             str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) .
             str_pad(strval($voucher->numeric_code), 8, '0', STR_PAD_LEFT) .
             '1';
-        $accessKey = array(
-            'autorizacionComprobante' => array(
-                'claveAccesoComprobante' =>  $voucherAccessKey . self::getCheckDigit($voucherAccessKey)
-            )
-        );
-        $resultValidation = $soapClientValidation->__soapCall("autorizacionComprobante", $accessKey);
-        //$resultValidation = $soapClientValidation->autorizacionComprobante($voucherAccessKey . self::getCheckDigit($voucherAccessKey));
-        dd($resultValidation);
-    }
-
-    private static function cancelVoucher()
-    {
-
+        return PDF::loadView('vouchers.ride.invoice', compact(['voucher', 'html']))->download($voucherAccessKey . self::getCheckDigit($voucherAccessKey) . '.pdf');
     }
 }

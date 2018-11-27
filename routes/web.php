@@ -35,11 +35,29 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/grantallprivileges', 'SysAdminController@index')->name('grantallprivileges');
 
 Route::group(['prefix' => 'voucher'], function () {
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/', 'VoucherController@index')->name('vouchers.index');
+    });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/create', 'VoucherController@create')->name('vouchers.create');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::post('/create/{state}', 'VoucherController@store')->where('state', '[1-8]{1}')->name('vouchers.store');
+        Route::post('/create/{state}', 'VoucherController@store')->where('state', '^(?:[1-9]|10)$')->name('vouchers.store');
+    });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/{voucher}/edit', 'VoucherController@index')->name('vouchers.edit');
+    });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/{voucher}/view', 'VoucherController@index')->name('vouchers.view');
+    });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/{voucher}/html', 'VoucherController@html')->name('vouchers.html');
+    });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/{voucher}/xml', 'VoucherController@xml')->name('vouchers.xml');
+    });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/{voucher}/pdf', 'VoucherController@pdf')->name('vouchers.pdf');
     });
 });
 
