@@ -10,7 +10,7 @@ class CompanyUser extends Controller
         $companies = array();
         foreach ($emissionPoints as $emissionPoint) {
             if(!in_array($emissionPoint->branch->company, $companies, true)) {
-                array_push($companies, $emissionPoint);
+                array_push($companies, $emissionPoint->branch->company);
             }
         }
         return collect($companies);

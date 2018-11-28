@@ -46,7 +46,9 @@ jQuery(document).ready(function($) {
                                 <th></th>
                                 <th>RUC</th>
                                 <th>Tradename - Social reason</th>
-                                <th></th>
+                                @if(auth()->user()->can('delete_hard_companies'))
+                                    <th></th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -67,44 +69,38 @@ jQuery(document).ready(function($) {
                                             @endif
                                         @endif
                                     </td>
-                                    <td>
-                                        @if($company->deleted_at !== NULL)
-                                            @if(auth()->user()->can('delete_hard_companies'))
-                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#companyModal"
-                                                    data-title="Are you sure you want to activate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
-                                                    data-body="All company data will be restored."
-                                                    data-form="{{ route('companies.restore', $company->id) }}"
-                                                    data-method="POST"
-                                                    data-class="btn btn-sm btn-success"
-                                                    data-action="Activate">Activate</button>
-                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#companyModal"
-                                                    data-title="Are you sure you want to delete the company {{ $company->tradename }} - {{ $company->social_reason }}?"
-                                                    data-body="WARNING: All company data will be deleted. This action can not be undone."
-                                                    data-form="{{ route('companies.destroy', $company->id) }}"
-                                                    data-method="DELETE"
-                                                    data-class="btn btn-sm btn-danger"
-                                                    data-action="Delete">Delete</button>
-                                            @endif
-                                        @else
-                                            @if(auth()->user()->can('delete_hard_companies'))
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#companyModal"
-                                                    data-title="Are you sure you want to deactivate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
-                                                    data-body="The data of the company will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
-                                                    data-form="{{ route('companies.delete', $company) }}"
-                                                    data-method="DELETE"
-                                                    data-class="btn btn-sm btn-warning"
-                                                    data-action="Deactivate">Deactivate</button>
+                                    @if(auth()->user()->can('delete_hard_companies'))
+                                        <td>
+                                            @if($company->deleted_at !== NULL)
+                                                @if(auth()->user()->can('delete_hard_companies'))
+                                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#companyModal"
+                                                        data-title="Are you sure you want to activate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
+                                                        data-body="All company data will be restored."
+                                                        data-form="{{ route('companies.restore', $company->id) }}"
+                                                        data-method="POST"
+                                                        data-class="btn btn-sm btn-success"
+                                                        data-action="Activate">Activate</button>
+                                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#companyModal"
+                                                        data-title="Are you sure you want to delete the company {{ $company->tradename }} - {{ $company->social_reason }}?"
+                                                        data-body="WARNING: All company data will be deleted. This action can not be undone."
+                                                        data-form="{{ route('companies.destroy', $company->id) }}"
+                                                        data-method="DELETE"
+                                                        data-class="btn btn-sm btn-danger"
+                                                        data-action="Delete">Delete</button>
+                                                @endif
                                             @else
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#companyModal"
-                                                    data-title="Are you sure you want to deactivate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
-                                                    data-body="The data of the company will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
-                                                    data-form="{{ route('companies.delete', $company) }}"
-                                                    data-method="DELETE"
-                                                    data-class="btn btn-sm btn-warning"
-                                                    data-action="Delete">Delete</button>
+                                                @if(auth()->user()->can('delete_hard_companies'))
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#companyModal"
+                                                        data-title="Are you sure you want to deactivate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
+                                                        data-body="The data of the company will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
+                                                        data-form="{{ route('companies.delete', $company) }}"
+                                                        data-method="DELETE"
+                                                        data-class="btn btn-sm btn-warning"
+                                                        data-action="Deactivate">Deactivate</button>
+                                                @endif
                                             @endif
-                                        @endif
-                                    </td>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>

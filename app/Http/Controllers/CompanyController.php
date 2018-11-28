@@ -30,10 +30,15 @@ class CompanyController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->hasPermissionTo('delete_hard_companies')) {
-            $companies = Company::withTrashed()->get()->sortBy(['tradename', 'social_reason']);
+        if ($user->hasRole('admin')) {
+            $companies = Company::withTrashed();
         } else {
-            $companies = Company::all()->sortBy(['tradename', 'social_reason']);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if ($user->hasPermissionTo('delete_hard_companies')) {
+            $companies = Company::withTrashed()->whereIn('id', $companies->pluck('id'))->get()->sortBy(['tradename', 'social_reason']);
+        } else {
+            $companies = Company::all()->whereIn('id', $companies->pluck('id'))->sortBy(['tradename', 'social_reason']);
         }
         return view('companies.index', compact('companies'));
     }
@@ -99,7 +104,16 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
-        return view('companies.show', compact('company'));
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if (in_array($company->id, $companies->pluck('id')->toArray())) {
+            return view('companies.show', compact('company'));
+        }
+        return abort('404');
     }
 
     /**
@@ -110,7 +124,16 @@ class CompanyController extends Controller
      */
     public function edit(Company $company)
     {
-        return view('companies.edit', compact('company'));
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if (in_array($company->id, $companies->pluck('id')->toArray())) {
+            return view('companies.edit', compact('company'));
+        }
+        return abort('404');
     }
 
     /**
@@ -122,6 +145,15 @@ class CompanyController extends Controller
      */
     public function update(StoreCompanyRequest $request, Company $company)
     {
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if (!in_array($company->id, $companies->pluck('id')->toArray())) {
+            return abort('404');
+        }
         $request->merge(['keep_accounting' => $request->has('keep_accounting')]);
         if ($request->has('sign')) {
             Validator::make($request->all(), [
@@ -172,6 +204,15 @@ class CompanyController extends Controller
      */
     public function delete(Company $company)
     {
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if (!in_array($company->id, $companies->pluck('id')->toArray())) {
+            return abort('404');
+        }
         $company->delete();
         return redirect()->route('companies.index')->with(['status' => 'Company deactivated successfully.']);
     }

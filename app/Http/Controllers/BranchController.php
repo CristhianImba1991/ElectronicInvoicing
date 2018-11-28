@@ -91,11 +91,7 @@ class BranchController extends Controller
      */
     public function edit(Branch $branch)
     {
-        //return $request;
-        // $products = Product::where('branch_id', $branch->id)->with(['taxes', 'taxes.iva', 'taxes.ice', 'taxes.irbpnr']);
-        $products = Product::where('branch_id', $branch->id)->get()->first()->branch_id;
-        return $products;
-        // return view('branches.edit', compact(['branch','products']));
+        return view('branches.edit', compact('branch'));
     }
 
     /**
