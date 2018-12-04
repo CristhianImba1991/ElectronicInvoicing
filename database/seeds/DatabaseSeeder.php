@@ -371,9 +371,6 @@ class DatabaseSeeder extends Seeder
         $role_supervisor->givePermissionTo($permission_read_users);
         $role_supervisor->givePermissionTo($permission_update_users);
         $role_supervisor->givePermissionTo($permission_delete_soft_users);
-        $role_employee->givePermissionTo($permission_create_users);
-        $role_employee->givePermissionTo($permission_read_users);
-        $role_employee->givePermissionTo($permission_update_users);
 
         $role_admin->givePermissionTo($permission_create_products);
         $role_admin->givePermissionTo($permission_read_products);

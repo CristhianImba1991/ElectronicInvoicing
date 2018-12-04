@@ -29,9 +29,9 @@ class StoreCustomerRequest extends FormRequest
                 'identification_type' => 'required|exists:identification_types,id',
                 'identification' => 'required|exists:customers,identification|max:20',
                 'social_reason' => 'required|max:300',
-                'address' => 'required|max:300',
-                'phone' => 'required|max:30',
-                'email' => 'required|max:300',
+                'address' => 'max:300',
+                'phone' => 'max:30',
+                'email' => 'max:300',
             ];
         } else {
             return [
@@ -39,9 +39,9 @@ class StoreCustomerRequest extends FormRequest
                 'identification_type' => 'required|exists:identification_types,id',
                 'identification' => 'required|max:20',
                 'social_reason' => 'required|max:300',
-                'address' => 'required|max:300',
-                'phone' => 'required|max:30',
-                'email' => 'required|max:300',
+                'address' => 'max:300',
+                'phone' => 'max:30',
+                'email' => 'max:300',
             ];
         }
     }

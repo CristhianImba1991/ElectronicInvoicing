@@ -27,10 +27,18 @@ class CustomerController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->hasPermissionTo('delete_hard_customers')) {
-            $customers = Customer::withTrashed()->where('identification', '!=', '9999999999999')->get()->sortBy(['social_reason']);
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
         } else {
-            $customers = Customer::where('identification', '!=', '9999999999999')->sortBy(['social_reason']);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        $customers = array();
+        foreach ($companies as $company) {
+            foreach ($company->customers()->get() as $customer) {
+                if (!in_array($customer->id, collect($customers)->pluck('id')->toArray(), true)) {
+                    array_push($customers, $customer);
+                }
+            }
         }
         return view('customers.index', compact('customers'));
     }
@@ -70,14 +78,15 @@ class CustomerController extends Controller
         $input['identification_type_id'] = $request->identification_type;
         $customer = Customer::create($input);
         $customer->companies()->save(Company::where('id', $request->company)->first());
-        if (!User::where('email', '=', $request->email)->exists()) {
+        $userEmail = explode(',', $request->email)[0];
+        if (!User::where('email', '=', $userEmail)->exists()) {
             $input['name'] = $request->social_reason;
-            $input['email'] = $request->email;
+            $input['email'] = $userEmail;
             $input['password'] = Hash::make($request->identification);
             $user = User::create($input);
             $user->assignRole('customer');
         } else {
-            $user = User::where('email', '=', $request->email)->first();
+            $user = User::where('email', '=', $userEmail)->first();
         }
         foreach (Customer::where('identification', '=', $request->identification)->get() as $customer) {
             if (!$user->customers()->where('id', $customer->id)->exists()) {

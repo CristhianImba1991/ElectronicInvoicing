@@ -25,15 +25,15 @@ class StoreUserRequest extends FormRequest
     {
         if ($this->method() === 'PUT') {
             return [
-                'role' => 'required|exists:roles,name|string',
+                'role' => 'nullable|exists:roles,name|string',
                 'name' => 'required|max:255',
-                'email' => 'required|email|max:255|unique:users',
-                'password' => 'required|min:6|confirmed',
-                'company' => 'required|min:1',
+                //'email' => 'required|email|max:255|unique:users',
+                //'password' => 'required|min:6|confirmed',
+                'company' => 'nullable|min:1',
                 'company.*' => 'exists:companies,id',
-                'branch' => 'required|min:1',
+                'branch' => 'nullable|min:1',
                 'branch.*' => 'exists:branches,id',
-                'emission_point' => 'required|min:1',
+                'emission_point' => 'nullable|min:1',
                 'emission_point.*' => 'exists:emission_points,id',
             ];
         } else {
@@ -42,13 +42,22 @@ class StoreUserRequest extends FormRequest
                 'name' => 'required|max:255',
                 'email' => 'required|email|max:255|unique:users',
                 'password' => 'required|min:6|confirmed',
-                'company' => 'required|min:1',
+                'company' => 'required_unless:role,admin|min:1',
                 'company.*' => 'exists:companies,id',
-                'branch' => 'required|min:1',
+                'branch' => 'required_unless:role,admin,owner|min:1',
                 'branch.*' => 'exists:branches,id',
-                'emission_point' => 'required|min:1',
+                'emission_point' => 'required_unless:role,admin,owner|min:1',
                 'emission_point.*' => 'exists:emission_points,id',
             ];
         }
+    }
+
+    public function messages()
+    {
+        return [
+            'company.required_unless' => 'The :attribute field is required.',
+            'branch.required_unless' => 'The :attribute field is required.',
+            'emission_point.required_unless' => 'The :attribute field is required.',
+        ];
     }
 }

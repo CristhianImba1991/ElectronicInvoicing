@@ -2,29 +2,77 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
+use ElectronicInvoicing\{Branch, Company, EmissionPoint, User};
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
+
 class CompanyUser extends Controller
 {
-    public static function getCompaniesAllowedToUser($user)
+    public static function getCompaniesAllowedToUser(User $user)
     {
-        $emissionPoints = $user->emissionPoints()->get();
+        $branches = self::getBranchesAllowedToUser($user);
         $companies = array();
-        foreach ($emissionPoints as $emissionPoint) {
-            if(!in_array($emissionPoint->branch->company, $companies, true)) {
-                array_push($companies, $emissionPoint->branch->company);
+        foreach ($branches as $branch) {
+            if(!in_array($branch->company, $companies, true)) {
+                if ($branch->company === null && $user->hasPermissionTo('delete_hard_companies')) {
+                    array_push($companies, Company::withTrashed()->where('id', '=', $branch->company_id)->first());
+                } else {
+                    array_push($companies, $branch->company);
+                }
             }
         }
         return collect($companies);
     }
 
-    public static function getBranchesAllowedToUser($user)
+    public static function getBranchesAllowedToUser(User $user)
     {
-        $emissionPoints = $user->emissionPoints()->get();
+        $emissionPoints = $user->emissionPoints()->withTrashed()->get();
         $branches = array();
         foreach ($emissionPoints as $emissionPoint) {
             if(!in_array($emissionPoint->branch, $branches, true)){
-                array_push($branches, $emissionPoint->branch);
+                if ($emissionPoint->branch === null && $user->hasPermissionTo('delete_hard_branches')) {
+                    $branch = Branch::withTrashed()->where('id', '=', $emissionPoint->branch_id)->first();
+                    if ($branch->company !== null) {
+                        array_push($branches, $branch);
+                    }
+                } else {
+                    if ($emissionPoint->branch->company !== null) {
+                        array_push($branches, $emissionPoint->branch);
+                    }
+                }
             }
         }
         return collect($branches);
+    }
+
+    public static function getUsersBelongingToCompany(Company $company, Role $role = null)
+    {
+        $branches = Branch::withTrashed()->where('company_id', '=', $company->id)->get();
+        $emissionPoints = array();
+        foreach ($branches as $branch) {
+            array_push($emissionPoints, EmissionPoint::withTrashed()->where('branch_id', '=', $branch->id)->first());
+        }
+        if (Auth::user()->hasPermissionTo('delete_hard_users')) {
+            $allUsers = User::withTrashed()->get();
+        } else {
+            $allUsers = User::all();
+        }
+        $users = array();
+        foreach ($allUsers as $user) {
+            if (!$user->hasRole('admin')) {
+                foreach ($user->emissionPoints()->withTrashed()->get() as $emissionPoint) {
+                    if (in_array($emissionPoint->id, collect($emissionPoints)->pluck('id')->toArray(), true) && !in_array($user, $users, true)) {
+                        if ($role === null) {
+                            array_push($users, $user);
+                            break;
+                        } elseif ($user->hasRole($role)) {
+                            array_push($users, $user);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return collect($users);
     }
 }

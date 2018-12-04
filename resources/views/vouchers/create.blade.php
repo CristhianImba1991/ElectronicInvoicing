@@ -3,6 +3,7 @@
 @section('scripts')
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function(){
     $('#company').change(function() {
@@ -107,6 +108,14 @@ $(document).ready(function(){
         }
     });
     $('#currency').selectpicker('val', 1);
+    $('#issue_date').datepicker({
+        autoclose: true,
+        todayBtn: 'linked',
+        todayHighlight: true,
+        endDate: '0d',
+        format: 'yyyy/mm/dd',
+        daysOfWeekHighlighted: "0,6"
+    });
     $('#environment').selectpicker('val', 2);
     $('#voucher_type').change(function() {
         if($(this).val() != '') {
@@ -139,7 +148,8 @@ $(document).ready(function(){
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
-<link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/jquery.dataTables.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/bootstrap-datepicker3.min.css') }}">
 @endsection
 
 @section('content')
@@ -264,10 +274,6 @@ $(document).ready(function(){
                                     <div class="card-body">
                                         <h5 class="card-title">4. Voucher information</h5>
                                         <div class="form-group">
-                                            <label for="emission">Emission</label>
-                                            <input class="form-control" type="text" id="emission" name="emission" value="NORMAL" readonly>
-                                        </div>
-                                        <div class="form-group">
                                             <label for="currency">Currency</label>
                                             <select class="form-control selectpicker" id="currency" name="currency" data-live-search="true" data-dependent="branch" title="Select a currency ...">
                                                 @foreach($currencies as $currency)
@@ -277,7 +283,7 @@ $(document).ready(function(){
                                         </div>
                                         <div class="form-group">
                                             <label for="issue_date">Issue date</label>
-                                            <input class="form-control" type="date" id="issue_date" name="issue_date">
+                                            <input class="form-control" id="issue_date" name="issue_date" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="environment">Environment</label>

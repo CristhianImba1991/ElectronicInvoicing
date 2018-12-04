@@ -27,14 +27,26 @@ class EmissionPointController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $branches = Branch::all();
+            $allBranches = Branch::all();
+            $branches = collect();
+            foreach ($allBranches as $branch) {
+                if ($branch->company !== null) {
+                    $branches->push($branch);
+                }
+            }
         } else {
             $branches = CompanyUser::getBranchesAllowedToUser($user);
         }
         if ($user->hasPermissionTo('delete_hard_emission_points')) {
-            $emissionPoints = EmissionPoint::withTrashed()->whereIn('branch_id', $branches->pluck('id'))->get()->sortBy(['branch_id', 'code']);
+            $allEmissionPoints = EmissionPoint::withTrashed()->whereIn('branch_id', $branches->pluck('id'))->get()->sortBy(['branch_id', 'code']);
         } else {
-            $emissionPoints = EmissionPoint::all()->whereIn('branch_id', $branches->pluck('id'))->sortBy(['branch_id', 'code']);
+            $allEmissionPoints = EmissionPoint::all()->whereIn('branch_id', $branches->pluck('id'))->sortBy(['branch_id', 'code']);
+        }
+        $emissionPoints = collect();
+        foreach ($allEmissionPoints as $emissionPoint) {
+            if ($emissionPoint->branch !== null) {
+                $emissionPoints->push($emissionPoint);
+            }
         }
         return view('emission_points.index', compact('emissionPoints'));
     }
@@ -80,7 +92,33 @@ class EmissionPointController extends Controller
      */
     public function show(EmissionPoint $emissionPoint)
     {
-        return view('emission_points.show', compact('emissionPoint'));
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $allBranches = Branch::all();
+            $branches = collect();
+            foreach ($allBranches as $branch) {
+                if ($branch->company !== null) {
+                    $branches->push($branch);
+                }
+            }
+        } else {
+            $branches = CompanyUser::getBranchesAllowedToUser($user);
+        }
+        if ($user->hasPermissionTo('delete_hard_emission_points')) {
+            $allEmissionPoints = EmissionPoint::withTrashed()->whereIn('branch_id', $branches->pluck('id'))->get()->sortBy(['branch_id', 'code']);
+        } else {
+            $allEmissionPoints = EmissionPoint::all()->whereIn('branch_id', $branches->pluck('id'))->sortBy(['branch_id', 'code']);
+        }
+        $emissionPoints = collect();
+        foreach ($allEmissionPoints as $amissionPointAux) {
+            if ($amissionPointAux->branch !== null) {
+                $emissionPoints->push($amissionPointAux);
+            }
+        }
+        if (in_array($emissionPoint->id, $emissionPoints->pluck('id')->toArray())) {
+            return view('emission_points.show', compact('emissionPoint'));
+        }
+        return abort('404');
     }
 
     /**
@@ -114,6 +152,32 @@ class EmissionPointController extends Controller
      */
     public function delete(EmissionPoint $emissionPoint)
     {
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $allBranches = Branch::all();
+            $branches = collect();
+            foreach ($allBranches as $branch) {
+                if ($branch->company !== null) {
+                    $branches->push($branch);
+                }
+            }
+        } else {
+            $branches = CompanyUser::getBranchesAllowedToUser($user);
+        }
+        if ($user->hasPermissionTo('delete_hard_emission_points')) {
+            $allEmissionPoints = EmissionPoint::withTrashed()->whereIn('branch_id', $branches->pluck('id'))->get()->sortBy(['branch_id', 'code']);
+        } else {
+            $allEmissionPoints = EmissionPoint::all()->whereIn('branch_id', $branches->pluck('id'))->sortBy(['branch_id', 'code']);
+        }
+        $emissionPoints = collect();
+        foreach ($allEmissionPoints as $amissionPointAux) {
+            if ($amissionPointAux->branch !== null) {
+                $emissionPoints->push($amissionPointAux);
+            }
+        }
+        if (!in_array($emissionPoint->id, $emissionPoints->pluck('id')->toArray())) {
+            return abort('404');
+        }
         $emissionPoint->delete();
         return redirect()->route('emission_points.index')->with(['status' => 'Emission point deactivated successfully.']);
     }

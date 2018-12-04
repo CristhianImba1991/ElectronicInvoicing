@@ -106,7 +106,7 @@ class CompanyController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::withTrashed();
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }

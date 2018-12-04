@@ -80,7 +80,18 @@ class BranchController extends Controller
      */
     public function show(Branch $branch)
     {
-        return view('branches.show', compact('branch'));
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if ($branch->company !== null) {
+            if (in_array($branch->company->id, $companies->pluck('id')->toArray())) {
+                return view('branches.show', compact('branch'));
+            }
+        }
+        return abort('404');
     }
 
     /**
@@ -91,7 +102,18 @@ class BranchController extends Controller
      */
     public function edit(Branch $branch)
     {
-        return view('branches.edit', compact('branch'));
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if ($branch->company !== null) {
+            if (in_array($branch->company->id, $companies->pluck('id')->toArray())) {
+                return view('branches.show', compact('branch'));
+            }
+        }
+        return abort('404');
     }
 
     /**
@@ -103,6 +125,19 @@ class BranchController extends Controller
      */
     public function update(StoreBranchRequest $request, Branch $branch)
     {
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if ($branch->company !== null) {
+            if (!in_array($branch->company->id, $companies->pluck('id')->toArray())) {
+                return abort('404');
+            }
+        } else {
+            return abort('404');
+        }
         $branch->fill($request->except('company_branch'))->save();
         return redirect()->route('branches.index')->with(['status' => 'Branch updated successfully.']);
     }
@@ -115,6 +150,19 @@ class BranchController extends Controller
      */
     public function delete(Branch $branch)
     {
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        if ($branch->company !== null) {
+            if (!in_array($branch->company->id, $companies->pluck('id')->toArray())) {
+                return abort('404');
+            }
+        } else {
+            return abort('404');
+        }
         $branch->delete();
         return redirect()->route('branches.index')->with(['status' => 'Branch deactivated successfully.']);
     }

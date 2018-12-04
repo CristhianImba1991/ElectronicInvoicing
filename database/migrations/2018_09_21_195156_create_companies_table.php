@@ -19,7 +19,7 @@ class CreateCompaniesTable extends Migration
             $table->string('social_reason', 300);
             $table->string('tradename', 300);
             $table->string('address', 300);
-            $table->string('special_contributor', 13);
+            $table->string('special_contributor', 13)->nullable();
             $table->boolean('keep_accounting');
             $table->string('phone', 30);
             $table->string('logo', 300);

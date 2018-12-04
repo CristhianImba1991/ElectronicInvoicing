@@ -42,7 +42,11 @@ class VoucherController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $companies = Company::all();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
         $currencies = Currency::all();
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();

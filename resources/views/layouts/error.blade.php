@@ -465,9 +465,9 @@
 
                     @yield('message')
 
-                    <a href="{{ url('/home') }}">
+                    <a href="{{ redirect()->getUrlGenerator()->previous() }}">
                         <button class="bg-transparent text-grey-darkest font-bold uppercase tracking-wide py-3 px-6 border-2 border-grey-light hover:border-grey rounded-lg">
-                            Go Home
+                            Go Back
                         </button>
                     </a>
                 </div>
