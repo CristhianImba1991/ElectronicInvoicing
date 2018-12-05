@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('customers')->insert([
-            ['identification_type_id' => 4, 'identification' => '9999999999999', 'social_reason' => 'CONSUMIDOR FINAL', 'address' => NULL, 'phone' => NULL, 'email' => NULL, 'created_at' => Carbon::now()]
+            ['identification_type_id' => 4, 'identification' => '9999999999999', 'social_reason' => 'CONSUMIDOR FINAL', 'created_at' => Carbon::now()]
         ]);
 
         DB::table('iva_taxes')->insert([

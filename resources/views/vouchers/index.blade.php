@@ -6,7 +6,6 @@
 $.noConflict();
 jQuery(document).ready(function($) {
     $('#vouchers-table').DataTable();
-
 });
 </script>
 @endsection

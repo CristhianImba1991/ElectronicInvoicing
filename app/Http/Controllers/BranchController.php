@@ -110,7 +110,7 @@ class BranchController extends Controller
         }
         if ($branch->company !== null) {
             if (in_array($branch->company->id, $companies->pluck('id')->toArray())) {
-                return view('branches.show', compact('branch'));
+                return view('branches.edit', compact('branch'));
             }
         }
         return abort('404');

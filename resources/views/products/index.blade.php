@@ -2,20 +2,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-<script type="text/javascript">
-$.noConflict();
-jQuery(document).ready(function($) {
-    $('#products-table').DataTable();
-    $('#productModal').on('show.bs.modal', function(event) {
-        $(this).find('#modal-title').text($(event.relatedTarget).data('title'))
-        $(this).find('#modal-body').text($(event.relatedTarget).data('body'))
-        $(this).find("#modal-form").attr("action", $(event.relatedTarget).data('form'))
-        $(this).find("#form-method").val($(event.relatedTarget).data('method'))
-        $(this).find('#submit-action').attr("class", $(event.relatedTarget).data('class'))
-        $(this).find('#submit-action').text($(event.relatedTarget).data('action'))
-    });
-});
-</script>
+<script id="modal" src="{{ asset('js/app/modal.js') }}" data-model="product" data-table="products"></script>
 @endsection
 
 @section('styles')
@@ -55,17 +42,17 @@ jQuery(document).ready(function($) {
                             @forelse($products as $product)
                                 <tr>
                                     <td>
-                                    @if($product->deleted_at !== NULL)
-                                           {{ $product->main_code }} 
-                                       @else
-                                           @if(auth()->user()->can('update_products'))
+                                        @if($product->deleted_at !== NULL)
+                                            {{ $product->main_code }}
+                                        @else
+                                            @if(auth()->user()->can('update_products'))
                                                 <a href="{{ route('products.edit', $product) }}">{{ $product->main_code }}</a>
-                                           @elseif(auth()->user()->can('read_products'))
+                                            @elseif(auth()->user()->can('read_products'))
                                                 <a href="{{ route('products.show', $product) }}">{{ $product->main_code }}</a>
-                                           @else
+                                            @else
                                                 {{ $product->main_code }}
-                                           @endif
-                                    @endif
+                                            @endif
+                                        @endif
                                     </td>
                                     <td>{{ $product->auxiliary_code }}</td>
                                     <td>{{ $product->stock }}</td>
@@ -123,25 +110,5 @@ jQuery(document).ready(function($) {
     </div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="productModal">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <strong><p id="modal-title"></p></strong>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body"><p id="modal-body"></p></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                <form id="modal-form" action="#" method="post">
-                    {{ csrf_field() }}
-                    <input id="form-method" type="hidden" name="_method" value="" />
-                    <button id="submit-action" type="submit" class=""></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection 
+@include('layouts.modal', ['model' => 'product'])
+@endsection

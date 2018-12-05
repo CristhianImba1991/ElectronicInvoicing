@@ -228,7 +228,7 @@ $(document).ready(function(){
                     additionalDetailTable.row.add([
                         '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="">',
                         '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="">',
-                        '<button type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>',
+                        '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
                     ]).draw(false);
                     additionalDetailCount++;
                 }

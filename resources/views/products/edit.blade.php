@@ -3,6 +3,7 @@
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 @endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -13,8 +14,9 @@
                     <a href="{{ route('products.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('products.update', $product) }}" method="post" enctype="multipart/form-data">
+                <form action="{{ route('products.update', $product) }}" method="post">
                     {{ csrf_field() }}
+                    <input type="hidden" name="_method" value="PUT">
 
                     <div class="card-body">
                         @if ($errors->count() > 0)

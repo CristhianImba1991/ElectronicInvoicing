@@ -23,16 +23,16 @@ class StoreProductRequest extends FormRequest
      */
     public function rules()
     {
-        if ($this->method() === 'POST') {
+        if ($this->method() === 'PUT') {
             return [
                 'main_code' => 'required|max:25',
                 'auxiliary_code' => 'required|max:25',
-                'company' => 'required|exists:companies,id',
-                'branch' => 'required|exists:branches,id',
+                //'company' => 'required|exists:companies,id',
+                //'branch' => 'required|exists:branches,id',
                 'unit_price' => 'required|gt:0',
                 'stock' => 'required|gt:0',
                 'description'=> 'required|max:300',
-                'iva_tax'=> 'required'
+                //'iva_tax'=> 'required'
             ];
         } else {
             return [

@@ -32,8 +32,6 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::get('/grantallprivileges', 'SysAdminController@index')->name('grantallprivileges');
-
 Route::group(['prefix' => 'voucher'], function () {
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/', 'VoucherController@index')->name('vouchers.index');
@@ -72,10 +70,10 @@ Route::group(['prefix' => 'resource'], function () {
         Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
     });
     Route::group(['middleware' => ['permission:read_branches']], function () {
-        Route::post('/branch/products/', 'BranchController@products')->name('branches.products');
+        Route::post('/branch/products', 'BranchController@products')->name('branches.products');
     });
     Route::group(['middleware' => ['permission:read_products']], function () {
-        Route::post('/product/taxes/', 'ProductController@taxes')->name('products.taxes');
+        Route::post('/product/taxes', 'ProductController@taxes')->name('products.taxes');
     });
     Route::group(['middleware' => ['permission:read_customers']], function () {
         Route::post('/customers/customer', 'CustomerController@customers')->name('customers.customer');
@@ -117,8 +115,8 @@ Route::group(['prefix' => 'manage'], function () {
     });
 
     /**
-     * Routes for branches
-     */
+      * Routes for branches
+      */
     Route::group(['middleware' => ['permission:read_branches']], function () {
         Route::get('/branches', 'BranchController@index')->name('branches.index');
     });
@@ -240,9 +238,6 @@ Route::group(['prefix' => 'manage'], function () {
         Route::post('/users/{user}/restore', 'UserController@restore')->name('users.restore');
     });
 
-
-
-
     /**
      * Routes for products
      */
@@ -273,10 +268,6 @@ Route::group(['prefix' => 'manage'], function () {
     Route::group(['middleware' => ['permission:delete_soft_products']], function () {
         Route::post('/products/{product}/restore', 'ProductController@restore')->name('products.restore');
     });
-
-
-
-
 
     /**
      * Routes for vouchers

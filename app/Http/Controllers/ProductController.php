@@ -38,15 +38,21 @@ class ProductController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->hasPermissionTo('delete_hard_products')) {
-            $products = Product::withTrashed()->get()->sortBy(['main_code']);
+        if ($user->hasRole('admin')) {
+            $branches = Branch::all();
         } else {
-            $products = Product::all()->sortBy(['main_code']);
+            $branches = CompanyUser::getBranchesAllowedToUser($user);
+        }
+        $products = array();
+        foreach ($branches as $branch) {
+            foreach ($branch->products()->get() as $product) {
+                if (!in_array($product->id, collect($products)->pluck('id')->toArray(), true)) {
+                    array_push($products, $product);
+                }
+            }
         }
         return view('products.index', compact('products'));
-
     }
-
 
     public function create()
     {

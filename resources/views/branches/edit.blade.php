@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
-
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -10,7 +9,7 @@
                     Edit branch
                     <a href="{{ route('branches.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
-                <form action="{{ route('branches.update', $branch) }}" method="post" enctype="multipart/form-data">
+                <form action="{{ route('branches.update', $branch) }}" method="post">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
 

@@ -12,40 +12,32 @@
 
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="ruc">RUC</label>
-                        <input type="text" class="form-control" id="ruc" name="ruc" value="{{ $company->ruc }}" readonly>
+                        <label for="company">Company</label>
+                        <input class="form-control" type="text" id="company" name="company" value="{{ $product->branch->company->tradename }} - {{ $product->branch->company->social_reason }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="social_reason">Social reason</label>
-                        <input type="text" class="form-control" id="social_reason" name="social_reason"  value="{{ $company->social_reason }}" readonly>
+                        <label for="branch">Branch</label>
+                        <input class="form-control" type="text" id="branch" name="branch" value="{{ $product->branch->name }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="tradename">Tradename</label>
-                        <input type="text" class="form-control" id="tradename" name="tradename"  value="{{ $company->tradename }}" readonly>
+                        <label for="main_code">Main Code</label>
+                        <input type="text" class="form-control" id="main_code" name="main_code" value="{{ $product->main_code }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="address">Address</label>
-                        <input type="text" class="form-control" id="address" name="address"  value="{{ $company->address }}" readonly>
+                        <label for="social_reason">Auxiliary Code</label>
+                        <input type="text" class="form-control" id="auxiliary_code" name="auxiliary_code"  value="{{ $product->auxiliary_code }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="special_contributor">Special contributor</label>
-                        <input type="text" class="form-control" id="special_contributor" name="special_contributor"  value="{{ $company->special_contributor }}" readonly>
-                    </div>
-                    <div class="form-check">
-                        @if ($company->keep_accounting)
-                            <input class="form-check-input" checked="checked" type="checkbox" id="keep_accounting" name="keep_accounting" onclick="return false;" readonly>
-                        @else
-                            <input class="form-check-input" type="checkbox" id="keep_accounting" name="keep_accounting" onclick="return false;" readonly>
-                        @endif
-                        <label class="form-check-label" for="keep_accounting">Keep accounting</label>
+                        <label for="tradename">Unit Price</label>
+                        <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price"  value="{{ $product->unit_price }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="text" class="form-control" id="phone" name="phone" value="{{ $company->phone }}" readonly>
+                        <label for="address">Description</label>
+                        <input type="text" class="form-control" id="description" name="description"  value="{{ $product->description }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="current_logo">Logo</label><br>
-                        <img class="img-fluid img-thumbnail" src="{{ url('storage/logo/images/'.$company->logo) }}" alt="">
+                        <label for="special_contributor">Stock</label>
+                        <input type="number" class="form-control" id="stock" name="stock"  value="{{ $product->stock }}" readonly>
                     </div>
                 </div>
             </div>

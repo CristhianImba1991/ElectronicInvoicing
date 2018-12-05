@@ -30,15 +30,10 @@ class CompanyController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->hasRole('admin')) {
-            $companies = Company::withTrashed();
+        if ($user->hasPermissionTo('delete_hard_companies')) {
+            $companies = Company::withTrashed()->get();
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
-        }
-        if ($user->hasPermissionTo('delete_hard_companies')) {
-            $companies = Company::withTrashed()->whereIn('id', $companies->pluck('id'))->get()->sortBy(['tradename', 'social_reason']);
-        } else {
-            $companies = Company::all()->whereIn('id', $companies->pluck('id'))->sortBy(['tradename', 'social_reason']);
         }
         return view('companies.index', compact('companies'));
     }
@@ -106,7 +101,7 @@ class CompanyController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::withTrashed();
+            $companies = Company::all();
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }
