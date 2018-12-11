@@ -2,7 +2,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-<script id="modal" src="{{ asset('js/app/modal.js') }}" data-model="company" data-table="companies"></script>
+<script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
 @endsection
 
 @section('styles')
@@ -27,7 +27,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="companies-table" class="display">
+                    <table id="table" class="display">
                         <thead>
                             <tr>
                                 <th></th>
@@ -39,7 +39,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($companies as $company)
+                            @foreach($companies as $company)
                                 <tr>
                                     <td align="center"><img class="img-thumbnail" src="{{ url('storage/logo/thumbnail/'.$company->logo) }}" alt="{{ $company->tradename }}"></td>
                                     <td>{{ $company->ruc }}</td>
@@ -60,14 +60,14 @@
                                         <td>
                                             @if($company->deleted_at !== NULL)
                                                 @if(auth()->user()->can('delete_hard_companies'))
-                                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#companyModal"
+                                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#confirmation"
                                                         data-title="Are you sure you want to activate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
                                                         data-body="All company data will be restored."
                                                         data-form="{{ route('companies.restore', $company->id) }}"
                                                         data-method="POST"
                                                         data-class="btn btn-sm btn-success"
                                                         data-action="Activate">Activate</button>
-                                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#companyModal"
+                                                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
                                                         data-title="Are you sure you want to delete the company {{ $company->tradename }} - {{ $company->social_reason }}?"
                                                         data-body="WARNING: All company data will be deleted. This action can not be undone."
                                                         data-form="{{ route('companies.destroy', $company->id) }}"
@@ -77,7 +77,7 @@
                                                 @endif
                                             @else
                                                 @if(auth()->user()->can('delete_hard_companies'))
-                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#companyModal"
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                         data-title="Are you sure you want to deactivate the company {{ $company->tradename }} - {{ $company->social_reason }}?"
                                                         data-body="The data of the company will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                         data-form="{{ route('companies.delete', $company) }}"
@@ -89,11 +89,7 @@
                                         </td>
                                     @endif
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4"><center>No records found.</center></td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -102,5 +98,5 @@
     </div>
 </div>
 
-@include('layouts.modal', ['model' => 'company'])
+@include('layouts.confirmation')
 @endsection

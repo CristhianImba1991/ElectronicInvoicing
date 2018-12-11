@@ -1,4 +1,4 @@
-<div class="modal fade" tabindex="-1" role="dialog" id="{{ $model }}Modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="confirmation">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">

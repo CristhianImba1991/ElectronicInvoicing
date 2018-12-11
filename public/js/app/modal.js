@@ -1,9 +1,7 @@
-var model = document.getElementById("modal").getAttribute("data-model");
-var table = document.getElementById("modal").getAttribute("data-table");
 $.noConflict();
 jQuery(document).ready(function($) {
-    $('#' + table + '-table').DataTable();
-    $('#' + model + 'Modal').on('show.bs.modal', function(event) {
+    $('#table').DataTable();
+    $('#confirmation').on('show.bs.modal', function(event) {
         $(this).find('#modal-title').text($(event.relatedTarget).data('title'))
         $(this).find('#modal-body').text($(event.relatedTarget).data('body'))
         $(this).find("#modal-form").attr("action", $(event.relatedTarget).data('form'))

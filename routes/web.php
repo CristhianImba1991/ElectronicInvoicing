@@ -86,23 +86,19 @@ Route::group(['prefix' => 'manage'], function () {
     /**
      * Routes for companies
      */
+    Route::post('/companies/store', 'CompanyController@validateRequest')->name('companies.store');
+    Route::put('/companies/update/{company}', 'CompanyController@validateRequest')->name('companies.update');
     Route::group(['middleware' => ['permission:read_companies']], function () {
         Route::get('/companies', 'CompanyController@index')->name('companies.index');
     });
     Route::group(['middleware' => ['permission:create_companies']], function () {
         Route::get('/companies/create', 'CompanyController@create')->name('companies.create');
     });
-    Route::group(['middleware' => ['permission:create_companies']], function () {
-        Route::post('/companies', 'CompanyController@store')->name('companies.store');
-    });
     Route::group(['middleware' => ['permission:read_companies']], function () {
         Route::get('/companies/{company}', 'CompanyController@show')->name('companies.show');
     });
     Route::group(['middleware' => ['permission:update_companies']], function () {
         Route::get('/companies/{company}/edit', 'CompanyController@edit')->name('companies.edit');
-    });
-    Route::group(['middleware' => ['permission:update_companies']], function () {
-        Route::put('/companies/{company}', 'CompanyController@update')->name('companies.update');
     });
     Route::group(['middleware' => ['permission:delete_soft_companies']], function () {
         Route::delete('/companies/{company}/delete', 'CompanyController@delete')->name('companies.delete');
@@ -117,23 +113,19 @@ Route::group(['prefix' => 'manage'], function () {
     /**
       * Routes for branches
       */
+    Route::post('/branches/store', 'BranchController@validateRequest')->name('branches.store');
+    Route::put('/branches/update/{branch}', 'BranchController@validateRequest')->name('branches.update');
     Route::group(['middleware' => ['permission:read_branches']], function () {
         Route::get('/branches', 'BranchController@index')->name('branches.index');
     });
     Route::group(['middleware' => ['permission:create_branches']], function () {
         Route::get('/branches/create', 'BranchController@create')->name('branches.create');
     });
-    Route::group(['middleware' => ['permission:create_branches']], function () {
-        Route::post('/branches', 'BranchController@store')->name('branches.store');
-    });
     Route::group(['middleware' => ['permission:read_branches']], function () {
         Route::get('/branches/{branch}', 'BranchController@show')->name('branches.show');
     });
     Route::group(['middleware' => ['permission:update_branches']], function () {
         Route::get('/branches/{branch}/edit', 'BranchController@edit')->name('branches.edit');
-    });
-    Route::group(['middleware' => ['permission:update_branches']], function () {
-        Route::put('/branches/{branch}', 'BranchController@update')->name('branches.update');
     });
     Route::group(['middleware' => ['permission:delete_soft_branches']], function () {
         Route::delete('/branches/{branch}/delete', 'BranchController@delete')->name('branches.delete');
@@ -148,23 +140,19 @@ Route::group(['prefix' => 'manage'], function () {
     /**
      * Routes for emission points
      */
+    Route::post('/emission_points/store', 'EmissionPointController@validateRequest')->name('emission_points.store');
+    //Route::put('/emission_points/update/{emission_point}', 'EmissionPointController@validateRequest')->name('emission_points.update');
     Route::group(['middleware' => ['permission:read_emission_points']], function () {
         Route::get('/emission_points', 'EmissionPointController@index')->name('emission_points.index');
     });
     Route::group(['middleware' => ['permission:create_emission_points']], function () {
         Route::get('/emission_points/create', 'EmissionPointController@create')->name('emission_points.create');
     });
-    Route::group(['middleware' => ['permission:create_emission_points']], function () {
-        Route::post('/emission_points', 'EmissionPointController@store')->name('emission_points.store');
-    });
     Route::group(['middleware' => ['permission:read_emission_points']], function () {
         Route::get('/emission_points/{emission_point}', 'EmissionPointController@show')->name('emission_points.show');
     });
     Route::group(['middleware' => ['permission:update_emission_points']], function () {
         Route::get('/emission_points/{emission_point}/edit', 'EmissionPointController@edit')->name('emission_points.edit');
-    });
-    Route::group(['middleware' => ['permission:update_emission_points']], function () {
-        Route::put('/emission_points/{emission_point}', 'EmissionPointController@update')->name('emission_points.update');
     });
     Route::group(['middleware' => ['permission:delete_soft_emission_points']], function () {
         Route::delete('/emission_points/{emission_point}/delete', 'EmissionPointController@delete')->name('emission_points.delete');
@@ -179,23 +167,19 @@ Route::group(['prefix' => 'manage'], function () {
     /**
      * Routes for customers
      */
+    Route::post('/customers/store', 'CustomerController@validateRequest')->name('customers.store');
+    Route::put('/customers/update/{customer}', 'CustomerController@validateRequest')->name('customers.update');
     Route::group(['middleware' => ['permission:read_customers']], function () {
         Route::get('/customers', 'CustomerController@index')->name('customers.index');
     });
     Route::group(['middleware' => ['permission:create_customers']], function () {
         Route::get('/customers/create', 'CustomerController@create')->name('customers.create');
     });
-    Route::group(['middleware' => ['permission:create_customers']], function () {
-        Route::post('/customers', 'CustomerController@store')->name('customers.store');
-    });
     Route::group(['middleware' => ['permission:read_customers']], function () {
         Route::get('/customers/{customer}', 'CustomerController@show')->name('customers.show');
     });
     Route::group(['middleware' => ['permission:update_customers']], function () {
         Route::get('/customers/{customer}/edit', 'CustomerController@edit')->name('customers.edit');
-    });
-    Route::group(['middleware' => ['permission:update_customers']], function () {
-        Route::put('/customers/{customer}', 'CustomerController@update')->name('customers.update');
     });
     Route::group(['middleware' => ['permission:delete_soft_customers']], function () {
         Route::delete('/customers/{customer}/delete', 'CustomerController@delete')->name('customers.delete');
@@ -210,23 +194,19 @@ Route::group(['prefix' => 'manage'], function () {
     /**
      * Routes for users
      */
+    Route::post('/users/store', 'UserController@validateRequest')->name('users.store');
+    Route::put('/users/update/{user}', 'UserController@validateRequest')->name('users.update');
     Route::group(['middleware' => ['permission:read_users']], function () {
         Route::get('/users', 'UserController@index')->name('users.index');
     });
     Route::group(['middleware' => ['permission:create_users']], function () {
         Route::get('/users/create', 'UserController@create')->name('users.create');
     });
-    Route::group(['middleware' => ['permission:create_users']], function () {
-        Route::post('/users', 'UserController@store')->name('users.store');
-    });
     Route::group(['middleware' => ['permission:read_users']], function () {
         Route::get('/users/{user}', 'UserController@show')->name('users.show');
     });
     Route::group(['middleware' => ['permission:update_users']], function () {
         Route::get('/users/{user}/edit', 'UserController@edit')->name('users.edit');
-    });
-    Route::group(['middleware' => ['permission:update_users']], function () {
-        Route::put('/users/{user}', 'UserController@update')->name('users.update');
     });
     Route::group(['middleware' => ['permission:delete_soft_users']], function () {
         Route::delete('/users/{user}/delete', 'UserController@delete')->name('users.delete');
@@ -241,23 +221,19 @@ Route::group(['prefix' => 'manage'], function () {
     /**
      * Routes for products
      */
+    Route::post('/products/store', 'ProductController@validateRequest')->name('products.store');
+    Route::put('/products/update/{product}', 'ProductController@validateRequest')->name('products.update');
     Route::group(['middleware' => ['permission:read_products']], function () {
         Route::get('/products', 'ProductController@index')->name('products.index');
     });
     Route::group(['middleware' => ['permission:create_products']], function () {
         Route::get('/products/create', 'ProductController@create')->name('products.create');
     });
-    Route::group(['middleware' => ['permission:create_products']], function () {
-        Route::post('/products', 'ProductController@store')->name('products.store');
-    });
     Route::group(['middleware' => ['permission:read_products']], function () {
         Route::get('/products/{product}', 'ProductController@show')->name('products.show');
     });
     Route::group(['middleware' => ['permission:update_products']], function () {
         Route::get('/products/{product}/edit', 'ProductController@edit')->name('products.edit');
-    });
-    Route::group(['middleware' => ['permission:update_products']], function () {
-        Route::put('/products/{product}', 'ProductController@update')->name('products.update');
     });
     Route::group(['middleware' => ['permission:delete_soft_products']], function () {
         Route::delete('/products/{product}/delete', 'ProductController@delete')->name('products.delete');

@@ -23,6 +23,65 @@ class CompanyController extends Controller
     }
 
     /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, Company $company = NULL)
+    {
+        if ($request->method() === 'PUT') {
+            $rules = [
+                'ruc' => 'required|digits:13|validruc',
+                'social_reason' => 'required|max:300',
+                'tradename' => 'required|max:300',
+                'address' => 'required|max:300',
+                'special_contributor' => 'max:13',
+                //'keep_accounting',
+                'phone' => 'required|max:30',
+                'logo' => 'mimes:jpeg,jpg,png|max:2048',
+                'sign' => 'mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32',
+                'password' => 'required_with:sign',
+            ];
+            if ($request->has('sign')) {
+                $rules['sign'] .= '|validsign:' . $request->password;
+            }
+            $validator = Validator::make($request->all(), $rules, array(
+                'ruc.validruc' => 'The :attribute is not valid.',
+                'validsign' => 'Unable to read the cert store or the password is wrong.'
+            ));
+        } else {
+            $validator = Validator::make($request->all(), [
+                'ruc' => 'required|digits:13|unique:companies|validruc',
+                'social_reason' => 'required|max:300',
+                'tradename' => 'required|max:300',
+                'address' => 'required|max:300',
+                'special_contributor' => 'max:13',
+                //'keep_accounting',
+                'phone' => 'required|max:30',
+                'logo' => 'mimes:jpeg,jpg,png|max:2048',
+                'sign' => 'required|mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32|validsign:' . $request->password,
+                'password' => 'required',
+            ], array(
+                'ruc.validruc' => 'The :attribute is not valid.',
+                'validsign' => 'Unable to read the cert store or the password is wrong.'
+            ));
+        }
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $company);
+                $request->session()->flash('status', 'Company updated successfully.');
+            } else {
+                $this->store($request);
+                $request->session()->flash('status', 'Company added successfully.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -54,11 +113,8 @@ class CompanyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreCompanyRequest $request)
+    private function store(Request $request)
     {
-        Validator::make($request->all(), [
-            'sign' => 'validsign:' . $request->password
-        ], array('validsign' => 'Unable to read the cert store or the password is wrong.'))->validate();
         $request->merge(['keep_accounting' => $request->has('keep_accounting')]);
         $input = $request->except(['password', 'logo', 'sign']);
         if ($request->logo === NULL) {
@@ -88,7 +144,7 @@ class CompanyController extends Controller
         Storage::put('signs/' . $request->ruc . '_cert.pem', $certout);
         Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
         Company::create($input);
-        return redirect()->route('companies.index')->with(['status' => 'Company added successfully.']);
+        return true;
     }
 
     /**
@@ -138,7 +194,7 @@ class CompanyController extends Controller
      * @param  \ElectronicInvoicing\Company  $company
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreCompanyRequest $request, Company $company)
+    private function update(Request $request, Company $company)
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
@@ -147,14 +203,9 @@ class CompanyController extends Controller
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }
         if (!in_array($company->id, $companies->pluck('id')->toArray())) {
-            return abort('404');
+            return false;
         }
         $request->merge(['keep_accounting' => $request->has('keep_accounting')]);
-        if ($request->has('sign')) {
-            Validator::make($request->all(), [
-                'sign' => 'validsign:' . $request->password
-            ], array('validsign' => 'Unable to read the cert store or the password is wrong.'))->validate();
-        }
         $input = $request->except(['password', 'logo', 'sign']);
         if ($request->logo !== NULL) {
             $companyOld = Company::where('ruc', $company->ruc)->first();
@@ -188,7 +239,7 @@ class CompanyController extends Controller
             Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
         }
         $company->fill($input)->save();
-        return redirect()->route('companies.index')->with(['status' => 'Company updated successfully.']);
+        return true;
     }
 
     /**

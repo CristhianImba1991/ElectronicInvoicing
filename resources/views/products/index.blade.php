@@ -2,7 +2,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-<script id="modal" src="{{ asset('js/app/modal.js') }}" data-model="product" data-table="products"></script>
+<script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
 @endsection
 
 @section('styles')
@@ -27,7 +27,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="products-table" class="display">
+                    <table id="table" class="display">
                         <thead>
                             <tr>
                                 <th>Main Code</th>
@@ -39,7 +39,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($products as $product)
+                            @foreach($products as $product)
                                 <tr>
                                     <td>
                                         @if($product->deleted_at !== NULL)
@@ -61,14 +61,14 @@
                                     <td>
                                         @if($product->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_products'))
-                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#productModal"
+                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to activate the product {{ $product->main_code }}?"
                                                     data-body="All product data will be restored."
                                                     data-form="{{ route('products.restore', $product->id) }}"
                                                     data-method="POST"
                                                     data-class="btn btn-sm btn-success"
                                                     data-action="Activate">Activate</button>
-                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#productModal"
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to delete the product {{ $product->main_code }}?"
                                                     data-body="WARNING: All product data will be deleted. This action can not be undone."
                                                     data-form="{{ route('products.destroy', $product->id) }}"
@@ -78,7 +78,7 @@
                                             @endif
                                         @else
                                             @if(auth()->user()->can('delete_hard_products'))
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#productModal"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to deactivate the product {{ $product->main_code }}?"
                                                     data-body="The data of the product will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('products.delete', $product) }}"
@@ -86,7 +86,7 @@
                                                     data-class="btn btn-sm btn-warning"
                                                     data-action="Deactivate">Deactivate</button>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#productModal"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to deactivate the product {{ $product->main_code }}?"
                                                     data-body="The data of the product will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('products.delete', $product) }}"
@@ -97,11 +97,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4"><center>No records found.</center></td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -110,5 +106,5 @@
     </div>
 </div>
 
-@include('layouts.modal', ['model' => 'product'])
+@include('layouts.confirmation')
 @endsection

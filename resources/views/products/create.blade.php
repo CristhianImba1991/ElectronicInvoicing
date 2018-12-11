@@ -3,30 +3,53 @@
 @section('scripts')
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script type="text/javascript">
-$(document).ready(function(){
-    $('#company').change(function() {
-        if($(this).val() != '') {
-            var _token = $('input[name = "_token"]').val();
-            var id = $(this).val();
-            $.ajax({
-                url: "{{ route('companies.branches') }}",
-                method: "POST",
-                data: {
-                    _token: _token,
-                    id: id,
-                },
-                success: function(result) {
-                    var branches = JSON.parse(result);
-                    var options = '';
-                    for (var i = 0; i < branches.length; i++) {
-                        options += '<option value="' + branches[i]['id'] + '">' + branches[i]['name'] + '</option>';
+    $.noConflict();
+    jQuery(document).ready(function($) {
+        $('#company').change(function() {
+            if($(this).val() != '') {
+                var _token = $('input[name = "_token"]').val();
+                var id = $(this).val();
+                $.ajax({
+                    url: "{{ route('companies.branches') }}",
+                    method: "POST",
+                    data: {
+                        _token: _token,
+                        id: id,
+                    },
+                    success: function(result) {
+                        var branches = JSON.parse(result);
+                        var options = '';
+                        for (var i = 0; i < branches.length; i++) {
+                            options += '<option value="' + branches[i]['id'] + '">' + branches[i]['name'] + '</option>';
+                        }
+                        $("#branch").html(options).selectpicker('refresh');
                     }
-                    $("#branch").html(options).selectpicker('refresh');
+                })
+            }
+        });
+        $("#submit").click(function() {
+            $.ajax({
+                url: "{{ route('products.store') }}",
+                method: "POST",
+                data: $('#create_form').serialize(),
+                success: function(result) {
+                    var validator = JSON.parse(result);
+                    if (validator['status']) {
+                        window.location.href = "{{ route('products.index') }}";
+                    } else {
+                        $('#validation').on('show.bs.modal', function(event) {
+                            var errors = '';
+                            $.each(validator['messages'], function(field, message) {
+                                errors += "<li>" + message + "</li>";
+                            });
+                            $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                        });
+                        $('#validation').modal('show');
+                    }
                 }
-            })
-        }
+            });
+        });
     });
-});
 </script>
 
 @endsection
@@ -43,25 +66,16 @@ $(document).ready(function(){
                     <a href="{{ route('products.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('products.store') }}" method="post" enctype="multipart/form-data">
+                <form id="create_form">
                     {{ csrf_field() }}
 
                     <div class="card-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+
                         <div class="form-group">
                             <label for="company">Company</label>
                             <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
                                 @foreach($companies as $company)
-                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -73,29 +87,29 @@ $(document).ready(function(){
                         </div>
                         <div class="form-group">
                             <label for="main_code">Main Code</label>
-                            <input type="text" class="form-control" id="main_code" name="main_code" value="{{ old('main_code') }}">
+                            <input type="text" class="form-control" id="main_code" name="main_code" value="">
                         </div>
                         <div class="form-group">
                             <label for="social_reason">Auxiliary Code</label>
-                            <input type="text" class="form-control" id="auxiliary_code" name="auxiliary_code"  value="{{ old('auxiliary_code') }}">
+                            <input type="text" class="form-control" id="auxiliary_code" name="auxiliary_code"  value="">
                         </div>
                         <div class="form-group">
                             <label for="tradename">Unit Price</label>
-                            <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price"  value="{{ old('unit_price') }}">
+                            <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price"  value="">
                         </div>
                         <div class="form-group">
                             <label for="address">Description</label>
-                            <input type="text" class="form-control" id="description" name="description"  value="{{ old('description') }}">
+                            <input type="text" class="form-control" id="description" name="description"  value="">
                         </div>
                         <div class="form-group">
                             <label for="special_contributor">Stock</label>
-                            <input type="number" class="form-control" id="stock" name="stock"  value="{{ old('stock') }}">
+                            <input type="number" class="form-control" id="stock" name="stock"  value="">
                         </div>
                         <div class="form-group">
                             <label for="iva_taxes">Iva taxes</label>
                             <select class="form-control selectpicker input-lg dynamic" id="iva_tax" name="iva_tax" data-live-search="true"  title="Select an IVA tax ...">
                                 @foreach($iva_taxes as $iva_tax)
-                                    <option value="{{ $iva_tax->id }}" {{ $iva_tax->id === old('iva_tax') ? "selected" : "" }}>{{ $iva_tax->auxiliary_code }} - {{ $iva_tax->description }}</option>
+                                    <option value="{{ $iva_tax->id }}">{{ $iva_tax->auxiliary_code }} - {{ $iva_tax->description }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -103,7 +117,7 @@ $(document).ready(function(){
                             <label for="ice_taxes">Ice Taxes</label>
                             <select class="form-control selectpicker input-lg dynamic" id="ice_tax" name="ice_tax" data-live-search="true" title="Select an ICE tax ...">
                                 @foreach($ice_taxes as $ice_tax)
-                                    <option value="{{ $ice_tax->id }}" {{ $ice_tax->id === old('ice_tax') ? "selected" : "" }}>{{ $ice_tax->auxiliary_code }} - {{ $ice_tax->description }}</option>
+                                    <option value="{{ $ice_tax->id }}">{{ $ice_tax->auxiliary_code }} - {{ $ice_tax->description }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -111,13 +125,15 @@ $(document).ready(function(){
                             <label for="irbpnr_taxes">Irbpnr taxes</label>
                             <select class="form-control selectpicker input-lg dynamic" id="irbpnr_tax" name="irbpnr_tax" data-live-search="true" title="Select an IRBPNR tax ...">
                                 @foreach($irbpnr_taxes as $irbpnr_tax)
-                                    <option value="{{ $irbpnr_tax->id }}" {{ $irbpnr_tax->id === old('irbpnr_tax') ? "selected" : "" }}>{{ $irbpnr_tax->auxiliary_code }} - {{ $irbpnr_tax->description }}</option>
+                                    <option value="{{ $irbpnr_tax->id }}">{{ $irbpnr_tax->auxiliary_code }} - {{ $irbpnr_tax->description }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
 
-                    <div class="card-footer"><button type="submit" class="btn btn-sm btn-success">Add</button></div>
+                    <div class="card-footer">
+                        <button id="submit" type="button" class="btn btn-sm btn-success">Add</button>
+                    </div>
 
                 </form>
 
@@ -125,4 +141,6 @@ $(document).ready(function(){
         </div>
     </div>
 </div>
+
+@include('layouts.validation')
 @endsection

@@ -30,6 +30,52 @@ class ProductController extends Controller
     }
 
     /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Product  $product
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, Product $product = NULL)
+    {
+        if ($request->method() === 'PUT') {
+            $validator = Validator::make($request->all(), [
+                'main_code' => 'required|max:25',
+                'auxiliary_code' => 'required|max:25',
+                //'company' => 'required|exists:companies,id',
+                //'branch' => 'required|exists:branches,id',
+                'unit_price' => 'required|gt:0',
+                'stock' => 'required|gt:0',
+                'description'=> 'required|max:300',
+                //'iva_tax'=> 'required'
+            ]);
+        } else {
+            $validator = Validator::make($request->all(), [
+                'main_code' => 'required|max:25|uniquemultiple:products,branch_id,' . $request->branch . ',main_code,' . $request->main_code,
+                'auxiliary_code' => 'required|max:25',
+                'company' => 'required|exists:companies,id',
+                'branch' => 'required|exists:branches,id',
+                'unit_price' => 'required|gt:0',
+                'stock' => 'required|gt:0',
+                'description'=> 'required|max:300',
+            ], array(
+                'uniquemultiple' => 'The :attribute has already been taken.'
+            ));
+        }
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $product);
+                $request->session()->flash('status', 'Product updated successfully.');
+            } else {
+                $this->store($request);
+                $request->session()->flash('status', 'Product added successfully.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -74,11 +120,8 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreProductRequest $request)
+    private function store(Request $request)
     {
-        Validator::make($request->all(), [
-            'code' => 'uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code
-        ], array('uniquemultiple' => 'The :attribute has already been taken.'))->validate();
         $input = $request->except(['company', 'branch']);
         $input['branch_id'] = $request->branch;
         $product = Product::create($input);
@@ -87,7 +130,7 @@ class ProductController extends Controller
         $input_product_taxes['ice_tax_id']=$request->ice_tax;
         $input_product_taxes['irbpnr_tax_id']=$request->irbpnr_tax;
         $product = ProductTax::create($input_product_taxes);
-        return redirect()->route('products.index')->with(['status' => 'Products added successfully.']);
+        return true;
     }
 
     /**
@@ -119,10 +162,10 @@ class ProductController extends Controller
      * @param  \ElectronicInvoicing\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreProductRequest $request, Product $product)
+    private function update(Request $request, Product $product)
     {
         $product->fill($request->except(['company', 'branch']))->save();
-        return redirect()->route('products.index')->with(['status' => 'Product updated successfully.']);
+        return true;
     }
 
     /**

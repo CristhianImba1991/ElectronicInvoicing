@@ -19,6 +19,43 @@ class EmissionPointController extends Controller
     }
 
     /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\EmissionPoint  $emissionPoint
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, EmissionPoint $emissionPoint = NULL)
+    {
+        if ($request->method() === 'PUT') {
+            $validator = Validator::make($request->all(), [
+                'company' => 'required|exists:companies,id',
+                'branch' => 'required|exists:branches,id',
+                'code' => 'required|min:1|max:999|integer',
+            ]);
+        } else {
+            $validator = Validator::make($request->all(), [
+                'company' => 'required|exists:companies,id',
+                'branch' => 'required|exists:branches,id',
+                'code' => 'required|min:1|max:999|integer|uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code,
+            ], array(
+                'uniquemultiple' => 'The :attribute has already been taken.'
+            ));
+        }
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $emissionPoint);
+                $request->session()->flash('status', 'Emission point updated successfully.');
+            } else {
+                $this->store($request);
+                $request->session()->flash('status', 'Emission point added successfully.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -73,15 +110,12 @@ class EmissionPointController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreEmissionPointRequest $request)
+    private function store(Request $request)
     {
-        Validator::make($request->all(), [
-            'code' => 'uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code
-        ], array('uniquemultiple' => 'The :attribute has already been taken.'))->validate();
         $input = $request->except(['company', 'branch']);
         $input['branch_id'] = $request->branch;
         EmissionPoint::create($input);
-        return redirect()->route('emission_points.index')->with(['status' => 'Emission point added successfully.']);
+        return true;
     }
 
     /**
@@ -139,7 +173,7 @@ class EmissionPointController extends Controller
      * @param  \ElectronicInvoicing\EmissionPoint  $emissionPoint
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, EmissionPoint $emissionPoint)
+    private function update(Request $request, EmissionPoint $emissionPoint)
     {
         //
     }

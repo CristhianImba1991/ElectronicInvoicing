@@ -3,53 +3,76 @@
 @section('scripts')
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script type="text/javascript">
-$(document).ready(function(){
-    $('#company').change(function() {
-        if($(this).val() != '') {
-            var _token = $('input[name = "_token"]').val();
-            var id = $(this).val();
-            $.ajax({
-                url: "{{ route('companies.branches') }}",
-                method: "POST",
-                data: {
-                    _token: _token,
-                    id: id,
-                },
-                success: function(result) {
-                    var branches = JSON.parse(result);
-                    var options = '';
-                    for (var i = 0; i < branches.length; i++) {
-                        options += '<option value="' + branches[i]['id'] + '">' + branches[i]['company']['tradename'] + ': ' + branches[i]['name'] + '</option>';
+    $.noConflict();
+    jQuery(document).ready(function($){
+        $('#company').change(function() {
+            if($(this).val() != '') {
+                var _token = $('input[name = "_token"]').val();
+                var id = $(this).val();
+                $.ajax({
+                    url: "{{ route('companies.branches') }}",
+                    method: "POST",
+                    data: {
+                        _token: _token,
+                        id: id,
+                    },
+                    success: function(result) {
+                        var branches = JSON.parse(result);
+                        var options = '';
+                        for (var i = 0; i < branches.length; i++) {
+                            options += '<option value="' + branches[i]['id'] + '">' + branches[i]['company']['tradename'] + ': ' + branches[i]['name'] + '</option>';
+                        }
+                        $("#branch").html(options).selectpicker('refresh');
+                        $("#emission_point").html('').selectpicker('refresh');
                     }
-                    $("#branch").html(options).selectpicker('refresh');
-                    $("#emission_point").html('').selectpicker('refresh');
-                }
-            })
-        }
-    });
-    $('#branch').change(function() {
-        if($(this).val() != '') {
-            var _token = $('input[name = "_token"]').val();
-            var id = $(this).val();
-            $.ajax({
-                url: "{{ route('branches.emissionPoints') }}",
-                method: "POST",
-                data: {
-                    _token: _token,
-                    id: id,
-                },
-                success: function(result) {
-                    var emissionPoints = JSON.parse(result);
-                    var options = '';
-                    for (var i = 0; i < emissionPoints.length; i++) {
-                        options += '<option value="' + emissionPoints[i]['id'] + '">' + emissionPoints[i]['branch']['company']['tradename'] + ' (' + emissionPoints[i]['branch']['name'] + '): ' + emissionPoints[i]['code'] + '</option>';
+                })
+            }
+        });
+        $('#branch').change(function() {
+            if($(this).val() != '') {
+                var _token = $('input[name = "_token"]').val();
+                var id = $(this).val();
+                $.ajax({
+                    url: "{{ route('branches.emissionPoints') }}",
+                    method: "POST",
+                    data: {
+                        _token: _token,
+                        id: id,
+                    },
+                    success: function(result) {
+                        var emissionPoints = JSON.parse(result);
+                        var options = '';
+                        for (var i = 0; i < emissionPoints.length; i++) {
+                            options += '<option value="' + emissionPoints[i]['id'] + '">' + emissionPoints[i]['branch']['company']['tradename'] + ' (' + emissionPoints[i]['branch']['name'] + '): ' + emissionPoints[i]['code'] + '</option>';
+                        }
+                        $("#emission_point").html(options).selectpicker('refresh');
                     }
-                    $("#emission_point").html(options).selectpicker('refresh');
+                })
+            }
+        });
+        $("#submit").click(function() {
+            $.ajax({
+                url: "{{ route('users.store') }}",
+                method: "POST",
+                data: $('#create_form').serialize(),
+                success: function(result) {
+                    var validator = JSON.parse(result);
+                    if (validator['status']) {
+                        window.location.href = "{{ route('users.index') }}";
+                    } else {
+                        $('#validation').on('show.bs.modal', function(event) {
+                            var errors = '';
+                            $.each(validator['messages'], function(field, message) {
+                                errors += "<li>" + message + "</li>";
+                            });
+                            $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                        });
+                        $('#validation').modal('show');
+                    }
                 }
-            })
-        }
+            });
+        });
     });
-});
 </script>
 @endsection
 
@@ -67,36 +90,26 @@ $(document).ready(function(){
                     <a href="{{ route('users.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('users.store') }}" method="post">
+                <form id="create_form">
                     {{ csrf_field() }}
 
                     <div class="card-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
 
                         <div class="form-group">
                             <label for="role">Role</label>
                             <select class="form-control selectpicker" id="role" name="role" data-live-search="true" data-dependent="branch" title="Select one role ...">
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ $role->name === old('role') ? "selected" : "" }}>{{ strtoupper($role->name) }}</option>
+                                    <option value="{{ $role->name }}">{{ strtoupper($role->name) }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="name">Name</label>
-                            <input class="form-control" type="text" id="name" name="name" value="{{ old('name') }}">
+                            <input class="form-control" type="text" id="name" name="name" value="">
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input class="form-control" type="email" id="email" name="email" value="{{ old('email') }}">
+                            <input class="form-control" type="email" id="email" name="email" value="">
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
@@ -110,7 +123,7 @@ $(document).ready(function(){
                             <label for="company">Company</label>
                             <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more companies ...">
                                 @foreach($companies as $company)
-                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -130,7 +143,7 @@ $(document).ready(function(){
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-sm btn-success">Add</button>
+                        <button id="submit" type="button" class="btn btn-sm btn-success">Add</button>
                     </div>
 
                 </form>
@@ -139,4 +152,6 @@ $(document).ready(function(){
         </div>
     </div>
 </div>
+
+@include('layouts.validation')
 @endsection

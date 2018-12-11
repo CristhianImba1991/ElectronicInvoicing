@@ -1,5 +1,43 @@
 @extends('layouts.app')
 
+@section('scripts')
+<script type="text/javascript">
+    $.noConflict();
+    jQuery(document).ready(function($) {
+        $("#submit").click(function() {
+            $.ajax({
+                url: "{{ url('/manage/companies/update') }}/{{ $company->id }}",
+                method: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                enctype: 'multipart/form-data',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: new FormData($('#update_form')[0]),
+                success: function(result) {
+                    var validator = JSON.parse(result);
+                    if (validator['status']) {
+                        window.location.href = "{{ route('companies.index') }}";
+                    } else {
+                        $('#validation').on('show.bs.modal', function(event) {
+                            var errors = '';
+                            $.each(validator['messages'], function(field, message) {
+                                errors += "<li>" + message + "</li>";
+                            });
+                            $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                        });
+                        $('#validation').modal('show');
+                        $('#password').val('');
+                    }
+                }
+            });
+        });
+    });
+</script>
+@endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -10,21 +48,11 @@
                     <a href="{{ route('companies.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('companies.update', $company) }}" method="post" enctype="multipart/form-data">
+                <form id="update_form">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
 
                     <div class="card-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
 
                         <div class="form-group">
                             <label for="ruc">RUC</label>
@@ -78,7 +106,7 @@
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">Update</button>
+                        <button id="submit" type="button" class="btn btn-success btn-sm">Update</button>
                     </div>
 
                 </form>
@@ -86,4 +114,6 @@
         </div>
     </div>
 </div>
+
+@include('layouts.validation')
 @endsection

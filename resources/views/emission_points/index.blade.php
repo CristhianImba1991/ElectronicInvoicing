@@ -2,7 +2,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-<script id="modal" src="{{ asset('js/app/modal.js') }}" data-model="emissionPoint" data-table="emissionpoints"></script>
+<script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
 @endsection
 
 @section('styles')
@@ -27,7 +27,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="emissionpoints-table" class="display">
+                    <table id="table" class="display">
                         <thead>
                             <tr>
                                 <th>Company</th>
@@ -37,7 +37,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($emissionPoints as $emissionPoint)
+                            @foreach($emissionPoints as $emissionPoint)
                                 <tr>
                                     <td>{{ $emissionPoint->branch->company->tradename }}</td>
                                     <td>{{ $emissionPoint->branch->establishment }}</td>
@@ -55,14 +55,14 @@
                                     <td>
                                         @if($emissionPoint->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_emission_points'))
-                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#emissionPointModal"
+                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to activate the emission point {{ $emissionPoint->code }}?"
                                                     data-body="All emission point data will be restored."
                                                     data-form="{{ route('emission_points.restore', $emissionPoint->id) }}"
                                                     data-method="POST"
                                                     data-class="btn btn-sm btn-success"
                                                     data-action="Activate">Activate</button>
-                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#emissionPointModal"
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to delete the emission point {{ $emissionPoint->code }}?"
                                                     data-body="WARNING: All emission point data will be deleted. This action can not be undone."
                                                     data-form="{{ route('emission_points.destroy', $emissionPoint->id) }}"
@@ -72,7 +72,7 @@
                                             @endif
                                         @else
                                             @if(auth()->user()->can('delete_hard_emission_points'))
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#emissionPointModal"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to deactivate the emission point {{ $emissionPoint->code }}?"
                                                     data-body="The data of the emission point will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('emission_points.delete', $emissionPoint) }}"
@@ -80,7 +80,7 @@
                                                     data-class="btn btn-sm btn-warning"
                                                     data-action="Deactivate">Deactivate</button>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#emissionPointModal"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to deactivate the emission point {{ $emissionPoint->code }}?"
                                                     data-body="The data of the emission point will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('emission_points.delete', $emissionPoint) }}"
@@ -91,11 +91,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4"><center>No records found.</center></td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -104,5 +100,5 @@
     </div>
 </div>
 
-@include('layouts.modal', ['model' => 'emissionPoint'])
+@include('layouts.confirmation')
 @endsection

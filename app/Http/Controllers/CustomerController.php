@@ -20,6 +20,56 @@ class CustomerController extends Controller
     }
 
     /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Customer  $customer
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, Customer $customer = NULL)
+    {
+        if ($request->method() === 'PUT') {
+            $validator = Validator::make($request->all(), [
+                'company' => 'required|exists:companies,id',
+                'identification_type' => 'required|exists:identification_types,id',
+                'identification' => 'required|exists:customers,identification|max:20',
+                'social_reason' => 'required|max:300',
+                'address' => 'required|max:300',
+                'phone' => 'max:30',
+                'email' => 'required|max:300',
+            ]);
+        } else {
+            $rules = [
+                'company' => 'required|exists:companies,id',
+                'identification_type' => 'required|exists:identification_types,id',
+                'identification' => 'required|max:20',
+                'social_reason' => 'required|max:300',
+                'address' => 'required|max:300',
+                'phone' => 'max:30',
+                'email' => 'required|max:300',
+            ];
+            if (Customer::where('identification', '=', $request->identification)->exists()) {
+                $customer = Customer::where('identification', '=', $request->identification)->first();
+                $rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
+            }
+            $validator = Validator::make($request->all(), $rules, array(
+                'uniquecustomer' => 'The :attribute has already been taken.'
+            ));
+        }
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $customer);
+                $request->session()->flash('status', 'Customer updated successfully.');
+            } else {
+                $this->store($request);
+                $request->session()->flash('status', 'Customer added successfully. Remember that for the login, the customer must enter the first email provided and the identification as password.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -66,14 +116,8 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreCustomerRequest $request)
+    private function store(Request $request)
     {
-        if (Customer::where('identification', '=', $request->identification)->exists()) {
-            $customer = Customer::where('identification', '=', $request->identification)->first();
-            Validator::make($request->all(), [
-                'identification' => 'uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id
-            ], array('uniquecustomer' => 'The :attribute has already been taken.'))->validate();
-        }
         $input = $request->except(['company', 'identification_type']);
         $input['identification_type_id'] = $request->identification_type;
         $customer = Customer::create($input);
@@ -93,7 +137,7 @@ class CustomerController extends Controller
                 $user->customers()->save($customer);
             }
         }
-        return redirect()->route('customers.index')->with(['status' => 'Customer added successfully. Remember that for the login, the customer must enter the first email provided and the identification as password.']);
+        return true;
     }
 
     /**
@@ -125,7 +169,7 @@ class CustomerController extends Controller
      * @param  \ElectronicInvoicing\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreCustomerRequest $request, Customer $customer)
+    private function update(Request $request, Customer $customer)
     {
         $customer->fill($request->except(['ruc', 'company', 'identification_type_name', 'identification_type', 'identification']))->save();
         return redirect()->route('customers.index')->with(['status' => 'Customer updated successfully.']);

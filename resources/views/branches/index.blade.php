@@ -2,7 +2,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
-<script id="modal" src="{{ asset('js/app/modal.js') }}" data-model="branch" data-table="branches"></script>
+<script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
 @endsection
 
 @section('styles')
@@ -27,7 +27,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="branches-table" class="display">
+                    <table id="table" class="display">
                         <thead>
                             <tr>
                                 <th>Company</th>
@@ -37,7 +37,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($branches as $branch)
+                            @foreach($branches as $branch)
                                 <tr>
                                     <td>{{ $branch->company->tradename }}</td>
                                     <td>{{ $branch->establishment }}</td>
@@ -57,14 +57,14 @@
                                     <td>
                                         @if($branch->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_branches'))
-                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#branchModal"
+                                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to activate the branch {{ $branch->name }}?"
                                                     data-body="All branch data will be restored."
                                                     data-form="{{ route('branches.restore', $branch->id) }}"
                                                     data-method="POST"
                                                     data-class="btn btn-sm btn-success"
                                                     data-action="Activate">Activate</button>
-                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#branchModal"
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to delete the branch {{ $branch->name }}?"
                                                     data-body="WARNING: All branch data will be deleted. This action can not be undone."
                                                     data-form="{{ route('branches.destroy', $branch->id) }}"
@@ -74,7 +74,7 @@
                                             @endif
                                         @else
                                             @if(auth()->user()->can('delete_hard_branches'))
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#branchModal"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to deactivate the branch {{ $branch->name }}?"
                                                     data-body="The data of the branch will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('branches.delete', $branch) }}"
@@ -82,7 +82,7 @@
                                                     data-class="btn btn-sm btn-warning"
                                                     data-action="Deactivate">Deactivate</button>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#branchModal"
+                                                <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
                                                     data-title="Are you sure you want to deactivate the branch {{ $branch->name }}?"
                                                     data-body="The data of the branch will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
                                                     data-form="{{ route('branches.delete', $branch) }}"
@@ -93,11 +93,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4"><center>No records found.</center></td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -106,5 +102,5 @@
     </div>
 </div>
 
-@include('layouts.modal', ['model' => 'branch'])
+@include('layouts.confirmation')
 @endsection

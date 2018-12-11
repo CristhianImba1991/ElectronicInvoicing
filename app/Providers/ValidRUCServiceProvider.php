@@ -21,6 +21,9 @@ class ValidRUCServiceProvider extends ServiceProvider
             if (!((intval(substr($value, 2, 1)) >= 0 && intval(substr($value, 2, 1)) <= 6) || intval(substr($value, 2, 1)) == 9)) {
                 return false;
             }
+            if (strlen($value) !== 13) {
+                return false;
+            }
             $ruc = array_map('intval', str_split($value));
             if ($ruc[2] >= 0 && $ruc[2] <= 5) {
                 $coefficients = array(

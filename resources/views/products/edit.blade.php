@@ -1,5 +1,35 @@
 @extends('layouts.app')
 
+@section('scripts')
+<script type="text/javascript">
+    $.noConflict();
+    jQuery(document).ready(function($) {
+        $("#submit").click(function() {
+            $.ajax({
+                url: "{{ url('/manage/products/update') }}/{{ $product->id }}",
+                method: "POST",
+                data: $('#update_form').serialize(),
+                success: function(result) {
+                    var validator = JSON.parse(result);
+                    if (validator['status']) {
+                        window.location.href = "{{ route('products.index') }}";
+                    } else {
+                        $('#validation').on('show.bs.modal', function(event) {
+                            var errors = '';
+                            $.each(validator['messages'], function(field, message) {
+                                errors += "<li>" + message + "</li>";
+                            });
+                            $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                        });
+                        $('#validation').modal('show');
+                    }
+                }
+            });
+        });
+    });
+</script>
+@endsection
+
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 @endsection
@@ -14,21 +44,12 @@
                     <a href="{{ route('products.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
-                <form action="{{ route('products.update', $product) }}" method="post">
+                <form id="update_form">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
 
                     <div class="card-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+
                         <div class="form-group">
                             <label for="company">Company</label>
                             <input class="form-control" type="text" id="company" name="company" value="{{ $product->branch->company->tradename }} - {{ $product->branch->company->social_reason }}" readonly>
@@ -59,7 +80,9 @@
                         </div>
                     </div>
 
-                    <div class="card-footer"><button type="submit" class="btn btn-sm btn-success">Update</button></div>
+                    <div class="card-footer">
+                        <button id="submit" type="button" class="btn btn-sm btn-success">Update</button>
+                    </div>
 
                 </form>
 
@@ -67,4 +90,6 @@
         </div>
     </div>
 </div>
+
+@include('layouts.validation')
 @endsection

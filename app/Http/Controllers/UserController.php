@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Validator;
 
 class UserController extends Controller
 {
@@ -17,6 +18,63 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\User  $user
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, User $user = NULL)
+    {
+        if ($request->method() === 'PUT') {
+            $validator = Validator::make($request->all(), [
+                'role' => 'nullable|exists:roles,name|string',
+                'name' => 'required|max:255',
+                'email' => 'required|email|max:255',
+                //'password' => 'required|min:6|confirmed',
+                'company' => 'nullable|min:1',
+                'company.*' => 'exists:companies,id',
+                'branch' => 'nullable|min:1',
+                'branch.*' => 'exists:branches,id',
+                'emission_point' => 'nullable|min:1',
+                'emission_point.*' => 'exists:emission_points,id',
+            ], [
+                'company.required_unless' => 'The :attribute field is required.',
+                'branch.required_unless' => 'The :attribute field is required.',
+                'emission_point.required_unless' => 'The :attribute field is required.',
+            ]);
+        } else {
+            $validator = Validator::make($request->all(), [
+                'role' => 'required|exists:roles,name|string',
+                'name' => 'required|max:255',
+                'email' => 'required|email|max:255|unique:users',
+                'password' => 'required|min:6|confirmed',
+                'company' => 'required_unless:role,admin|min:1',
+                'company.*' => 'exists:companies,id',
+                'branch' => 'required_unless:role,admin,owner|min:1',
+                'branch.*' => 'exists:branches,id',
+                'emission_point' => 'required_unless:role,admin,owner|min:1',
+                'emission_point.*' => 'exists:emission_points,id',
+            ], [
+                'company.required_unless' => 'The :attribute field is required.',
+                'branch.required_unless' => 'The :attribute field is required.',
+                'emission_point.required_unless' => 'The :attribute field is required.',
+            ]);
+        }
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $user);
+                $request->session()->flash('status', 'User updated successfully.');
+            } else {
+                $this->store($request);
+                $request->session()->flash('status', 'User added successfully.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
     }
 
     /**
@@ -67,7 +125,7 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUserRequest $request)
+    private function store(Request $request)
     {
         $input = $request->only(['name', 'email', 'password']);
         $input['password'] = Hash::make($input['password']);
@@ -89,7 +147,7 @@ class UserController extends Controller
                 }
             }
         }
-        return redirect()->route('users.index')->with(['status' => 'User added successfully.']);
+        return true;
     }
 
     /**
@@ -163,7 +221,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreUserRequest $request, User $user)
+    private function update(Request $request, User $user)
     {
         if ($request->role !== null) {
             $user->syncRoles($request->role);
@@ -191,7 +249,7 @@ class UserController extends Controller
                 }
             }
         }
-        return redirect()->route('users.index')->with(['status' => 'User updated successfully.']);
+        return true;
     }
 
     /**

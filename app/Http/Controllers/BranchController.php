@@ -19,6 +19,47 @@ class BranchController extends Controller
     }
 
     /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Branch  $branch
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, Branch $branch = NULL)
+    {
+        if ($request->method() === 'PUT') {
+            $validator = Validator::make($request->all(), [
+                'company' => 'required|exists:companies,id',
+                'establishment' => 'required|min:1|max:999|integer',
+                'name' => 'required|max:300',
+                'address' => 'required|max:300',
+                'phone' => 'required|max:30',
+            ]);
+        } else {
+            $validator = Validator::make($request->all(), [
+                'company' => 'required|exists:companies,id',
+                'establishment' => 'required|min:1|max:999|integer|uniquemultiple:branches,company_id,' . $request->company . ',establishment,' . $request->establishment,
+                'name' => 'required|max:300',
+                'address' => 'required|max:300',
+                'phone' => 'required|max:30',
+            ], array(
+                'uniquemultiple' => 'The :attribute has already been taken.'
+            ));
+        }
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $branch);
+                $request->session()->flash('status', 'Branch updated successfully.');
+            } else {
+                $this->store($request);
+                $request->session()->flash('status', 'Branch added successfully.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -61,15 +102,12 @@ class BranchController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreBranchRequest $request)
+    private function store(Request $request)
     {
-        Validator::make($request->all(), [
-            'establishment' => 'uniquemultiple:branches,company_id,' . $request->company . ',establishment,' . $request->establishment
-        ], array('uniquemultiple' => 'The :attribute has already been taken.'))->validate();
         $input = $request->except(['company']);
         $input['company_id'] = $request['company'];
         Branch::create($input);
-        return redirect()->route('branches.index')->with(['status' => 'Branch added successfully.']);
+        return true;
     }
 
     /**
@@ -123,7 +161,7 @@ class BranchController extends Controller
      * @param  \ElectronicInvoicing\Branch  $branch
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreBranchRequest $request, Branch $branch)
+    private function update(Request $request, Branch $branch)
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
@@ -133,13 +171,13 @@ class BranchController extends Controller
         }
         if ($branch->company !== null) {
             if (!in_array($branch->company->id, $companies->pluck('id')->toArray())) {
-                return abort('404');
+                return false;
             }
         } else {
-            return abort('404');
+            return false;
         }
         $branch->fill($request->except('company_branch'))->save();
-        return redirect()->route('branches.index')->with(['status' => 'Branch updated successfully.']);
+        return true;
     }
 
     /**
