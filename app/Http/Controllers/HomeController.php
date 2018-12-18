@@ -2,7 +2,11 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
+use ElectronicInvoicing\{Company, Environment, VoucherType};
+use ElectronicInvoicing\Http\Controllers\VoucherController;
+use ElectronicInvoicing\Http\Logic\DraftJson;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -23,6 +27,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $user = Auth::user();
+        $draftVouchers = VoucherController::getDraftVouchers($user);
+        return view('home', compact('draftVouchers'));
     }
 }

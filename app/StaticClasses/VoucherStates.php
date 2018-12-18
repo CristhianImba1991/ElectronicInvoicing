@@ -4,14 +4,15 @@ namespace ElectronicInvoicing\StaticClasses;
 
 class VoucherStates
 {
-    const SAVED         = 1;
-    const ACCEPTED      = 2;
-    const REJECTED      = 3;
-    const SENDED        = 4;
-    const RECEIVED      = 5;
-    const RETURNED      = 6;
-    const AUTHORIZED    = 7;
-    const IN_PROCESS    = 8;
-    const UNAUTHORIZED  = 9;
-    const CANCELED      = 10;
+    const DRAFT         = 1;
+    const SAVED         = 2;
+    const ACCEPTED      = 3;
+    const REJECTED      = 4;
+    const SENDED        = 5;
+    const RECEIVED      = 6;
+    const RETURNED      = 7;
+    const AUTHORIZED    = 8;
+    const IN_PROCESS    = 9;
+    const UNAUTHORIZED  = 10;
+    const CANCELED      = 11;
 }

@@ -3,7 +3,6 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Company, Customer, Branch};
-use ElectronicInvoicing\Http\Requests\StoreCompanyRequest;
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

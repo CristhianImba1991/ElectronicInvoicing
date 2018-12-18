@@ -22,8 +22,8 @@ Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('login', 'Auth\LoginController@login');
 Route::post('logout', 'Auth\LoginController@logout')->name('logout');
 // Registration Routes...
-Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
-Route::post('register', 'Auth\RegisterController@register');
+//Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+//Route::post('register', 'Auth\RegisterController@register');
 // Password Reset Routes...
 Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
 Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
@@ -249,8 +249,12 @@ Route::group(['prefix' => 'manage'], function () {
      * Routes for vouchers
      */
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::get('/vouchers/{id}', function ($id) {
-            return view('vouchers.' . $id);
-        })->where('id', '[1-5]{1}');
+        Route::get('/vouchers/{id}', 'VoucherController@getVoucherView')->where('id', '[1-5]{1}');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::delete('/vouchers/{id}/destroy_draft', 'VoucherController@destroyDraft')->name('vouchers.destroy_draft');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/vouchers/{id}/edit_draft', 'VoucherController@editDraft')->name('vouchers.edit_draft');
     });
 });

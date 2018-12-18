@@ -39,7 +39,50 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-
+                        @auth
+                            @if(auth()->user()->can('read_companies') || auth()->user()->can('read_branches') || auth()->user()->can('read_emission_points') || auth()->user()->can('read_customers') || auth()->user()->can('read_users') || auth()->user()->can('read_products'))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                        Manage <span class="caret"></span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+                                        @can('read_companies')
+                                            <a href="{{ route('companies.index') }}" class="dropdown-item">Companies</a>
+                                        @endcan
+                                        @can('read_branches')
+                                            <a href="{{ route('branches.index') }}" class="dropdown-item">Branches</a>
+                                        @endcan
+                                        @can('read_emission_points')
+                                            <a href="{{ route('emission_points.index') }}" class="dropdown-item">Emission points</a>
+                                        @endcan
+                                        @can('read_users')
+                                            <a href="{{ route('users.index') }}" class="dropdown-item">Users</a>
+                                        @endcan
+                                        @can('read_customers')
+                                            <a href="{{ route('customers.index') }}" class="dropdown-item">Customers</a>
+                                        @endcan
+                                        @can('read_products')
+                                            <a href="{{ route('products.index') }}" class="dropdown-item">Products</a>
+                                        @endcan
+                                    </div>
+                                </li>
+                            @endif
+                            @if(auth()->user()->can('create_vouchers') || auth()->user()->can('read_vouchers'))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                        Vouchers <span class="caret"></span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+                                        @can('create_vouchers')
+                                            <a href="{{ route('vouchers.create') }}" class="dropdown-item">New voucher</a>
+                                        @endcan
+                                        @can('read_vouchers')
+                                            <a href="{{ route('vouchers.index') }}" class="dropdown-item">Reports</a>
+                                        @endcan
+                                    </div>
+                                </li>
+                            @endif
+                        @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar -->

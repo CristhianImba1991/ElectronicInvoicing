@@ -8,14 +8,18 @@ use Spatie\Permission\Models\Role;
 
 class CompanyUser extends Controller
 {
-    public static function getCompaniesAllowedToUser(User $user)
+    public static function getCompaniesAllowedToUser(User $user, $withDeactivatedCompanies = true)
     {
         $branches = self::getBranchesAllowedToUser($user);
         $companies = array();
         foreach ($branches as $branch) {
-            if(!in_array($branch->company, $companies, true)) {
+            if(!in_array($branch->company, $companies)) {
                 if ($branch->company === null && $user->hasPermissionTo('delete_hard_companies')) {
-                    array_push($companies, Company::withTrashed()->where('id', '=', $branch->company_id)->first());
+                    if ($withDeactivatedCompanies) {
+                        array_push($companies, Company::withTrashed()->where('id', '=', $branch->company_id)->first());
+                    } else {
+                        array_push($companies, Company::where('id', '=', $branch->company_id)->first());
+                    }
                 } else {
                     array_push($companies, $branch->company);
                 }
@@ -24,16 +28,22 @@ class CompanyUser extends Controller
         return collect($companies);
     }
 
-    public static function getBranchesAllowedToUser(User $user)
+    public static function getBranchesAllowedToUser(User $user, $withDeactivatedBranches = true)
     {
         $emissionPoints = $user->emissionPoints()->withTrashed()->get();
         $branches = array();
         foreach ($emissionPoints as $emissionPoint) {
-            if(!in_array($emissionPoint->branch, $branches, true)){
+            if(!in_array($emissionPoint->branch, $branches)){
                 if ($emissionPoint->branch === null && $user->hasPermissionTo('delete_hard_branches')) {
-                    $branch = Branch::withTrashed()->where('id', '=', $emissionPoint->branch_id)->first();
-                    if ($branch->company !== null) {
-                        array_push($branches, $branch);
+                    if ($withDeactivatedBranches) {
+                        $branch = Branch::withTrashed()->where('id', '=', $emissionPoint->branch_id)->first();
+                    } else {
+                        $branch = Branch::where('id', '=', $emissionPoint->branch_id)->first();
+                    }
+                    if ($branch !== null) {
+                        if ($branch->company !== null) {
+                            array_push($branches, $branch);
+                        }
                     }
                 } else {
                     if ($emissionPoint->branch->company !== null) {

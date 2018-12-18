@@ -88,6 +88,53 @@ $(document).ready(function(){
             $('#paymentmethod-table').DataTable().clear().draw();
         }
     });
+    @if(auth()->user()->can('create_customers'))
+        $("#submit_customer").click(function() {
+            $.ajax({
+                url: "{{ route('customers.store') }}",
+                method: "POST",
+                data: $('#customer_create').serialize(),
+                success: function(result) {
+                    var validator = JSON.parse(result);
+                    if (validator['status']) {
+                        if ($('#company').val() != '') {
+                            $.ajax({
+                                url: "{{ route('companies.customers') }}",
+                                method: "POST",
+                                data: {
+                                    _token: $('input[name = "_token"]').val(),
+                                    id: $('#company').val(),
+                                },
+                                success: function(result) {
+                                    var customers = JSON.parse(result);
+                                    var options = '';
+                                    for (var i = 0; i < customers.length; i++) {
+                                        options += '<option value="' + customers[i]['id'] + '">' + customers[i]['social_reason'] + '</option>';
+                                    }
+                                    $("#customer").html(options).selectpicker('refresh');
+                                    $("#customer_identification").val('');
+                                    $("#customer_address").val('');
+                                }
+                            });
+                        }
+                        $('#customerModal').modal('toggle');
+                        $('#customer_create').trigger('reset');
+                        $('#customer_company').selectpicker('refresh');
+                        $('#customer_identification_type').selectpicker('refresh');
+                    } else {
+                        $('#validation').on('show.bs.modal', function(event) {
+                            var errors = '';
+                            $.each(validator['messages'], function(field, message) {
+                                errors += "<li>" + message + "</li>";
+                            });
+                            $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                        });
+                        $('#validation').modal('show');
+                    }
+                }
+            });
+        });
+    @endif
     $('#customer').change(function() {
         if($(this).val() != '') {
             var _token = $('input[name = "_token"]').val();
@@ -130,16 +177,19 @@ $(document).ready(function(){
         }
     });
     @can('create_vouchers')
+        $('#draft').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}").submit();
+        });
         $('#save').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', 1) }}").submit();
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}").submit();
         });
     @endcan
     @can('send_vouchers')
         $('#accept').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', 2) }}").submit();
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}").submit();
         });
         $('#send').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', 4) }}").submit();
+            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}").submit();
         });
     @endcan
 });
@@ -166,16 +216,6 @@ $(document).ready(function(){
                     {{ csrf_field() }}
 
                     <div class="card-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
 
                         <div class="row">
                             <div class="col-sm-6 text-center">
@@ -313,6 +353,7 @@ $(document).ready(function(){
 
                     <div class="card-footer">
                         @can('create_vouchers')
+                            <button type="button" id="draft" class="btn btn-sm btn-secondary">Draft</button>
                             <button type="button" id="save" class="btn btn-sm btn-info">Save</button>
                         @endcan
                         @can('send_vouchers')
@@ -338,63 +379,55 @@ $(document).ready(function(){
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="customer-create">
+                <form id="customer_create">
                     {{ csrf_field() }}
                     <div class="modal-body">
-                        @if ($errors->count() > 0)
-                            <div class="alert alert-danger" role="alert">
-                                <h5>The following errors were found:</h5>
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
                         <div class="form-group">
-                            <label for="company">Company</label>
-                            <select class="form-control selectpicker" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
+                            <label for="customer_company">Company</label>
+                            <select class="form-control selectpicker" id="customer_company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
                                 @foreach($companies as $company)
-                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="identification_type">Identification type</label>
-                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="Select a identification type ...">
+                            <label for="customer_identification_type">Identification type</label>
+                            <select class="form-control selectpicker" id="customer_identification_type" name="identification_type" data-live-search="true" title="Select a identification type ...">
                                 @foreach($identificationTypes as $identificationType)
-                                    <option value="{{ $identificationType->id }}" {{ $identificationType->id === old('identification_type') ? "selected" : "" }}>{{ $identificationType->name }}</option>
+                                    <option value="{{ $identificationType->id }}" >{{ $identificationType->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="identification">Identification</label>
-                            <input class="form-control" type="text" id="identification" name="identification" value="{{ old('identification') }}">
+                            <label for="customer_identification">Identification</label>
+                            <input class="form-control" type="text" id="customer_identification" name="identification" value="">
                         </div>
                         <div class="form-group">
-                            <label for="social_reason">Social reason</label>
-                            <input class="form-control" type="text" id="social_reason" name="social_reason" value="{{ old('social_reason') }}">
+                            <label for="customer_social_reason">Social reason</label>
+                            <input class="form-control" type="text" id="customer_social_reason" name="social_reason" value="">
                         </div>
                         <div class="form-group">
-                            <label for="name">Address</label>
-                            <input class="form-control" type="text" id="address" name="address" value="{{ old('address') }}">
+                            <label for="customer_name">Address</label>
+                            <input class="form-control" type="text" id="customer_address" name="address" value="">
                         </div>
                         <div class="form-group">
-                            <label for="phone">Phone</label>
-                            <input class="form-control" type="text" id="phone" name="phone" value="{{ old('phone') }}">
+                            <label for="customer_phone">Phone</label>
+                            <input class="form-control" type="text" id="customer_phone" name="phone" value="">
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
-                            <input class="form-control" type="email" id="email" name="email" value="{{ old('email') }}" multiple>
+                            <label for="customer_email">Email</label>
+                            <input class="form-control" type="email" id="customer_email" name="email" value="" multiple>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-sm btn-success">Add</button>
+                        <button id="submit_customer" type="button" class="btn btn-sm btn-success">Add</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 @endif
+
+@include('layouts.validation')
 @endsection

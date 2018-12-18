@@ -1,4 +1,3 @@
-$.noConflict();
 jQuery(document).ready(function($) {
     $('#table').DataTable();
     $('#confirmation').on('show.bs.modal', function(event) {

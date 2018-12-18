@@ -3,7 +3,7 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Branch, Company, EmissionPoint, User};
-use ElectronicInvoicing\Http\Requests\StoreUserRequest;
+use ElectronicInvoicing\Http\Logic\DraftJson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -134,12 +134,14 @@ class UserController extends Controller
         if (!$user->hasRole('admin')) {
             if ($user->hasRole('owner')) {
                 $branches = Branch::withTrashed()->whereIn('company_id', $request->company)->get();
-                $emissionPoints = collect();
+                $emissionPointsGroup = collect();
                 foreach ($branches as $branch) {
-                    $emissionPoints->push(EmissionPoint::withTrashed()->whereIn('branch_id', $branch->id)->get());
+                    $emissionPointsGroup->push(EmissionPoint::withTrashed()->where('branch_id', $branch->id)->get());
                 }
-                foreach ($emissionPoints as $emissionPoint) {
-                    $user->emissionPoints()->save(EmissionPoint::where('id', $emissionPoint->id)->first());
+                foreach ($emissionPointsGroup as $emissionPoints) {
+                    foreach ($emissionPoints as $emissionPoint) {
+                        $user->emissionPoints()->save(EmissionPoint::where('id', $emissionPoint->id)->first());
+                    }
                 }
             } else {
                 foreach ($request->emission_point as $emissionPoint) {
@@ -147,6 +149,7 @@ class UserController extends Controller
                 }
             }
         }
+        DraftJson::getInstance()->appendUser($user);
         return true;
     }
 
@@ -303,6 +306,7 @@ class UserController extends Controller
     public function destroy($user)
     {
         $userOld = User::withTrashed()->where('id', $user)->first();
+        DraftJson::getInstance()->removeUser($userOld);
         $userOld->forceDelete();
         return redirect()->route('users.index')->with(['status' => 'User deleted successfully.']);
     }

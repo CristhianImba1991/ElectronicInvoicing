@@ -3,7 +3,6 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Branch, Company, EmissionPoint, Product, ProductTax};
-use ElectronicInvoicing\Http\Requests\StoreBranchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;

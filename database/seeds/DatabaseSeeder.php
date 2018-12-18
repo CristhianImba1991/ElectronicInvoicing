@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('voucher_states')->insert([
-            ['name' => 'SAVED', 'created_at' => Carbon::now()],         // Voucher is stored in the database, it might has empty or null values in some fields
+            ['name' => 'DRAFT', 'created_at' => Carbon::now()],         // Voucher is stored in the JSON file, it might has empty or null values in some fields
+            ['name' => 'SAVED', 'created_at' => Carbon::now()],         // Voucher is stored in the database with all values
             ['name' => 'ACCEPTED', 'created_at' => Carbon::now()],      // Same as the previous, but the voucher has been accepted by supervisor
             ['name' => 'REJECTED', 'created_at' => Carbon::now()],      // Same as the SAVED state, but the voucher has been rejected by supervisor
             ['name' => 'SENDED', 'created_at' => Carbon::now()],        // Same as the ACCEPTED state, but the XML file is created and signed and the voucher is sended to SRI and it does not have response

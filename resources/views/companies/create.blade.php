@@ -79,12 +79,16 @@
                             <input type="text" class="form-control" id="phone" name="phone" value="">
                         </div>
                         <div class="form-group">
-                            <label for="logo">Logo</label>
-                            <input type="file" class="form-control-file" id="logo" name="logo">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="logo" name="logo">
+                                <label for="logo" class="custom-file-label">Logo</label>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="sign">Sign</label>
-                            <input type="file" class="form-control-file" id="sign" name="sign">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="sign" name="sign">
+                                <label for="sign" class="custom-file-label">Sign</label>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 
 use ElectronicInvoicing\{Company, Branch, IvaTax, IceTax, IrbpnrTax, ProductTax};
-use ElectronicInvoicing\Http\Requests\StoreProductRequest;
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -111,7 +110,7 @@ class ProductController extends Controller
         $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
         $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
         $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
-        return view('products.create',compact(['companies','iva_taxes','ice_taxes','irbpnr_taxes']));
+        return view('products.create', compact(['companies','iva_taxes','ice_taxes','irbpnr_taxes']));
     }
 
     /**

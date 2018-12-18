@@ -3,7 +3,6 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Branch, Company, EmissionPoint};
-use ElectronicInvoicing\Http\Requests\StoreEmissionPointRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -112,9 +111,13 @@ class EmissionPointController extends Controller
      */
     private function store(Request $request)
     {
+        $user = Auth::user();
         $input = $request->except(['company', 'branch']);
         $input['branch_id'] = $request->branch;
-        EmissionPoint::create($input);
+        $emissionPoint = EmissionPoint::create($input);
+        if ($user->hasRole('owner')) {
+            $user->emissionPoints()->save($emissionPoint);
+        }
         return true;
     }
 

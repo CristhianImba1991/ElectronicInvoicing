@@ -4,7 +4,9 @@ namespace ElectronicInvoicing\Http\Controllers;
 
 use DateTime;
 use DateTimeZone;
-use ElectronicInvoicing\{AdditionalField, Branch, Company, Currency, Customer, Detail, EmissionPoint, Environment, IceTax, IdentificationType, IrbpnrTax, IvaTax, Payment, PaymentMethod, Product, TaxDetail, TimeUnit, Voucher, VoucherState, VoucherType};
+use ElectronicInvoicing\{AdditionalField, Branch, Company, Currency, Customer, Detail, EmissionPoint, Environment, IceTax, IdentificationType, IrbpnrTax, IvaTax, Payment, PaymentMethod, Product, TaxDetail, TimeUnit, User, Voucher, VoucherState, VoucherType};
+use ElectronicInvoicing\Http\Controllers\CompanyUser;
+use ElectronicInvoicing\Http\Logic\DraftJson;
 use ElectronicInvoicing\StaticClasses\VoucherStates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +32,40 @@ class VoucherController extends Controller
      */
     public function index()
     {
-        $vouchers = Voucher::all();
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $vouchers = Voucher::all();
+        } elseif ($user->hasRole('owner')) {
+            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
+            $emissionPoints = collect();
+            foreach ($branches as $branch) {
+                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
+                    $emissionPoints->push($emissionPoint);
+                }
+            }
+            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
+        } elseif ($user->hasRole('supervisor')) {
+            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
+            $allEmissionPoints = collect();
+            foreach ($branches as $branch) {
+                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
+                    $allEmissionPoints->push($emissionPoint);
+                }
+            }
+            $emissionPoints = collect();
+            foreach ($allEmissionPoints as $emissionPoint) {
+                if (in_array($emissionPoint->id, $user->emissionPoints()->pluck('id')->toArray(), true)) {
+                    $emissionPoints->push($emissionPoint);
+                }
+            }
+            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
+        } elseif ($user->hasRole('employee')) {
+            $vouchers = Voucher::where('user_id', $user->id)->get();
+        } elseif ($user->hasRole('customer')) {
+            $vouchers = Voucher::whereIn('customer_id', $user->customers->pluck('id'))->where('voucher_state_id', VoucherStates::AUTHORIZED)->where('environment_id', 2)->get();
+        } else {
+            $vouchers = collect();
+        }
         return view('vouchers.index', compact('vouchers'));
     }
 
@@ -62,16 +97,30 @@ class VoucherController extends Controller
      */
     public function store(Request $request, $state)
     {
-        if (intval($state) >= 1) {
+        $user = Auth::user();
+        switch ($state) {
+            case VoucherStates::DRAFT:
+                DraftJson::getInstance()->storeDraftVoucher($user, $request);
+                break;
+            case VoucherStates::SAVED:
+                break;
+            case VoucherStates::ACCEPTED:
+                break;
+            case VoucherStates::REJECTED:
+                break;
+            case VoucherStates::SENDED:
+                break;
+        }
+        /*if (intval($state) >= VoucherStates::SAVED) {
             $voucher = self::saveVoucher($request, $state);
-            if (intval($state) >= 2) {
+            if (intval($state) >= VoucherStates::ACCEPTED) {
                 self::acceptVoucher($voucher);
-                if (intval($state) >= 4) {
+                if (intval($state) >= VoucherStates::SENDED) {
                     self::sendVoucher($voucher);
                 }
             }
-        }
-        return redirect()->route('home');
+        }*/
+        return redirect()->route('home')->with(['status' => 'Voucher added successfully.']);
     }
 
     /**
@@ -97,6 +146,19 @@ class VoucherController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function editDraft($id)
+    {
+        $user = Auth::user();
+        $draftVoucher = DraftJson::getInstance()->getDraftVoucher($user, intval($id));
+        return $draftVoucher;
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -117,6 +179,62 @@ class VoucherController extends Controller
     public function destroy(Voucher $voucher)
     {
         //
+    }
+
+    /**
+     * Remove the specified resource from JSON file.
+     *
+     * @param  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroyDraft($id)
+    {
+        $user = Auth::user();
+        DraftJson::getInstance()->deleteDraftVoucher($user, intval($id));
+        $draftVouchers = self::getDraftVouchers($user);
+        return redirect()->route('home')->with(['status' => 'Draft voucher deleted successfully.', 'draftVouchers' => $draftVouchers]);
+    }
+
+    public static function getDraftVouchers(User $user)
+    {
+        $draftVouchers = DraftJson::getInstance()->getDraftVouchers($user);
+        $draftVouchers = array_splice($draftVouchers, -5);
+        for ($i = 0; $i < count($draftVouchers); $i++) {
+            if ($draftVouchers[$i]['company']) {
+                $draftVouchers[$i]['company'] = Company::find($draftVouchers[$i]['company']);
+            }
+            if ($draftVouchers[$i]['environment']) {
+                $draftVouchers[$i]['environment'] = Environment::find($draftVouchers[$i]['environment']);
+            }
+            if ($draftVouchers[$i]['voucher_type']) {
+                $draftVouchers[$i]['voucher_type'] = VoucherType::find($draftVouchers[$i]['voucher_type']);
+            }
+        }
+        return $draftVouchers;
+    }
+
+    /**
+     * Return the requested voucher
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getVoucherView($id)
+    {
+        switch ($id) {
+            case '1':
+                $user = Auth::user();
+                if ($user->hasRole('admin')) {
+                    $companiesproduct = Company::all();
+                } else {
+                    $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
+                }
+                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                return view('vouchers.' . $id, compact(['companiesproduct','iva_taxes','ice_taxes','irbpnr_taxes']));
+                break;
+        }
+        return view('vouchers.' . $id);
     }
 
     private static function generateRandomNumericCode()
@@ -174,7 +292,7 @@ class VoucherController extends Controller
         $currency = Currency::find($request->currency);
         $environment = Environment::find($request->environment);
         $voucherType = VoucherType::find($request->voucher_type);
-        $issueDate = DateTime::createFromFormat('Y-m-d', $request->issue_date);
+        $issueDate = DateTime::createFromFormat('Y/m/d', $request->issue_date);
         $voucherState = VoucherState::find(VoucherStates::SAVED);
         $sequential = Voucher::where([
             ['emission_point_id', '=', $emissionPoint->id],
