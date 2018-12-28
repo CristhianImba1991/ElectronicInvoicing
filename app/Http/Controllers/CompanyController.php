@@ -295,11 +295,22 @@ class CompanyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      */
     public function branches(Request $request) {
+        $user = Auth::user();
         if (is_array($request->id)) {
-            $branches = Branch::whereIn('company_id', $request->id)->with('company')->get();
+            if ($user->hasAnyRole(['admin', 'owner'])) {
+                $branches = Branch::whereIn('company_id', $request->id)->with('company')->get();
+            } else {
+                $allowedBranches = CompanyUser::getBranchesAllowedToUser($user);
+                $branches = Branch::whereIn('company_id', $request->id)->whereIn('id', $allowedBranches->pluck('id')->toArray())->with('company')->get();
+            }
             return $branches->toJson();
         } else if (is_string($request->id)) {
-            $branches = Branch::where('company_id', $request->id)->with('company')->get();
+            if ($user->hasAnyRole(['admin', 'owner'])) {
+                $branches = Branch::where('company_id', $request->id)->with('company')->get();
+            } else {
+                $allowedBranches = CompanyUser::getBranchesAllowedToUser($user);
+                $branches = Branch::where('company_id', $request->id)->whereIn('id', $allowedBranches->pluck('id')->toArray())->with('company')->get();
+            }
             return $branches->toJson();
         }
     }

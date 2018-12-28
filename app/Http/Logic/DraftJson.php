@@ -110,13 +110,41 @@ class DraftJson
         $voucher = array('id' => $id) + $request->except([
             '_token',
             'company_ruc',
+            'company_name',
             'company_address',
             'branch_address',
             'company_special_contributor',
             'company_keep_accounting',
             'customer_identification',
             'customer_address',
+            'product-description',
+            'product-iva',
+            'product-subtotal'
         ]);
+        function isNotNull($var)
+        {
+            return !is_null($var);
+        }
+        if (array_key_exists('product', $voucher)) {
+            $voucher['product'] = array_values(array_filter($voucher['product'], function ($var) {
+                return !is_null($var);
+            }));
+        }
+        if (array_key_exists('product_quantity', $voucher)) {
+            $voucher['product_quantity'] = array_values(array_filter($voucher['product_quantity'], function ($var) {
+                return !is_null($var);
+            }));
+        }
+        if (array_key_exists('product_unitprice', $voucher)) {
+            $voucher['product_unitprice'] = array_values(array_filter($voucher['product_unitprice'], function ($var) {
+                return !is_null($var);
+            }));
+        }
+        if (array_key_exists('product_discount', $voucher)) {
+            $voucher['product_discount'] = array_values(array_filter($voucher['product_discount'], function ($var) {
+                return !is_null($var);
+            }));
+        }
         $voucher['created_at'] = $createdAt;
         $voucher['updated_at'] = $updatedAt;
         return $voucher;

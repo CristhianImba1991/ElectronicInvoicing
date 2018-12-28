@@ -233,11 +233,20 @@ class BranchController extends Controller
      * @param  \Illuminate\Http\Request  $request
      */
     public function emissionPoints(Request $request) {
+        $user = Auth::user();
         if (is_array($request->id)) {
-            $emissionPoints = EmissionPoint::whereIn('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
+            if ($user->hasAnyRole(['admin', 'owner'])) {
+                $emissionPoints = EmissionPoint::whereIn('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
+            } else {
+                $emissionPoints = EmissionPoint::whereIn('branch_id', $request->id)->whereIn('id', $user->emissionPoints()->pluck('id')->toArray())->with(['branch', 'branch.company'])->get();
+            }
             return $emissionPoints->toJson();
         } else if (is_string($request->id)) {
-            $emissionPoints = EmissionPoint::where('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
+            if ($user->hasAnyRole(['admin', 'owner'])) {
+                $emissionPoints = EmissionPoint::where('branch_id', $request->id)->with(['branch', 'branch.company'])->get();
+            } else {
+                $emissionPoints = EmissionPoint::where('branch_id', $request->id)->whereIn('id', $user->emissionPoints()->pluck('id')->toArray())->with(['branch', 'branch.company'])->get();
+            }
             return $emissionPoints->toJson();
         }
     }

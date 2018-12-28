@@ -1,18 +1,131 @@
 @extends('layouts.app')
 
 @section('scripts')
+<script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
+<script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
 <script type="text/javascript">
-    $.noConflict();
-    jQuery(document).ready(function($) {
-        $("#submit").click(function() {
+$(document).ready(function(){
+    var draftVoucher = @json($draftVoucher);
+    $('#company').change(function() {
+        if($(this).val() != '') {
+            var _token = $('input[name = "_token"]').val();
+            var id = $(this).val();
             $.ajax({
-                url: "{{ url('/manage/branches/update') }}/{{ $branch->id }}",
+                url: "{{ route('companies.branches') }}",
                 method: "POST",
-                data: $('#update_form').serialize(),
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var branches = JSON.parse(result);
+                    var options = '';
+                    var company = '';
+                    for (var i = 0; i < branches.length; i++) {
+                        options += '<option value="' + branches[i]['id'] + '">' + branches[i]['name'] + '</option>';
+                        if (i == 0) {
+                            company = branches[i]['company'];
+                        }
+                    }
+                    $("#company_logo").attr("src", "{{ url('storage/logo/images') }}/" + company['logo']);
+                    $("#company_ruc").val(company['ruc']);
+                    $("#company_name").val(company['tradename'] + " - " + company['social_reason']);
+                    $("#company_address").val(company['address']);
+                    $("#company_special_contributor").val(company['special_contributor']);
+                    $("#company_keep_accounting").val(company['keep_accounting'] === 1 ? 'YES' : 'NO');
+                    $("#branch").html(options).selectpicker('refresh');
+                    $('#branch').selectpicker('val', draftVoucher['branch']);
+                    $("#emission_point").html('').selectpicker('refresh');
+                    $.ajax({
+                        url: "{{ route('companies.customers') }}",
+                        method: "POST",
+                        data: {
+                            _token: _token,
+                            id: id,
+                        },
+                        success: function(result) {
+                            var customers = JSON.parse(result);
+                            var options = '';
+                            for (var i = 0; i < customers.length; i++) {
+                                options += '<option value="' + customers[i]['id'] + '">' + customers[i]['social_reason'] + '</option>';
+                            }
+                            $("#customer").html(options).selectpicker('refresh');
+                            $("#customer_identification").val('');
+                            $("#customer_address").val('');
+                            $('#customer').selectpicker('val', draftVoucher['customer']);
+                        }
+                    });
+                    $('#invoice-table').DataTable().clear().draw();
+                    $('#paymentmethod-table').DataTable().clear().draw();
+                }
+            })
+        }
+    });
+    $('#company').selectpicker('val', draftVoucher['company']);
+    $('#branch').change(function() {
+        if($(this).val() != '') {
+            var _token = $('input[name = "_token"]').val();
+            var id = $(this).val();
+            $.ajax({
+                url: "{{ route('branches.emissionPoints') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var emissionPoints = JSON.parse(result);
+                    var options = '';
+                    var branch = '';
+                    for (var i = 0; i < emissionPoints.length; i++) {
+                        options += '<option value="' + emissionPoints[i]['id'] + '">' + emissionPoints[i]['code'] + '</option>';
+                        if (i == 0) {
+                            branch = emissionPoints[i]['branch'];
+                        }
+                    }
+                    $("#branch_address").val(branch['address']);
+                    $("#emission_point").html(options).selectpicker('refresh');
+                    $('#emission_point').selectpicker('val', draftVoucher['emission_point']);
+                }
+            });
+            $('#invoice-table').DataTable().clear().draw();
+            $('#paymentmethod-table').DataTable().clear().draw();
+        }
+    });
+    @if(auth()->user()->can('create_customers'))
+        $("#submit_customer").click(function() {
+            $.ajax({
+                url: "{{ route('customers.store') }}",
+                method: "POST",
+                data: $('#customer_create').serialize(),
                 success: function(result) {
                     var validator = JSON.parse(result);
                     if (validator['status']) {
-                        window.location.href = "{{ route('branches.index') }}";
+                        if ($('#company').val() != '') {
+                            $.ajax({
+                                url: "{{ route('companies.customers') }}",
+                                method: "POST",
+                                data: {
+                                    _token: $('input[name = "_token"]').val(),
+                                    id: $('#company').val(),
+                                },
+                                success: function(result) {
+                                    var customers = JSON.parse(result);
+                                    var options = '';
+                                    for (var i = 0; i < customers.length; i++) {
+                                        options += '<option value="' + customers[i]['id'] + '">' + customers[i]['social_reason'] + '</option>';
+                                    }
+                                    $("#customer").html(options).selectpicker('refresh');
+                                    $("#customer_identification").val('');
+                                    $("#customer_address").val('');
+                                }
+                            });
+                        }
+                        $('#customerModal').modal('toggle');
+                        $('#customer_create').trigger('reset');
+                        $('#customer_company').selectpicker('refresh');
+                        $('#customer_identification_type').selectpicker('refresh');
                     } else {
                         $('#validation').on('show.bs.modal', function(event) {
                             var errors = '';
@@ -26,8 +139,76 @@
                 }
             });
         });
+    @endif
+    $('#customer').change(function() {
+        if($(this).val() != '') {
+            var _token = $('input[name = "_token"]').val();
+            var id = $(this).val();
+            $.ajax({
+                url: "{{ route('customers.customer') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var customer = JSON.parse(result);
+                    $("#customer_identification").val(customer[0]['identification_type']['name'] + ": " + customer[0]['identification']);
+                    $("#customer_address").val(customer[0]['address']);
+                }
+            })
+        }
     });
+    $('#currency').selectpicker('val', 1);
+    $('#issue_date').datepicker({
+        autoclose: true,
+        todayBtn: 'linked',
+        todayHighlight: true,
+        endDate: '0d',
+        format: 'yyyy/mm/dd',
+        daysOfWeekHighlighted: "0,6"
+    });
+    $('#issue_date').datepicker('update', draftVoucher['issue_date']);
+    $('#environment').selectpicker('val', draftVoucher['environment']);
+    $('#voucher_type').change(function() {
+        if($(this).val() != '') {
+            $("#voucher-information").html('');
+            $.ajax({
+                url: "{{ url('/manage/vouchers') }}/" + $(this).val() + "/draft/" + draftVoucher['id'],
+                method: "GET",
+                success: function(result) {
+                    $("#voucher-information").html(result);
+                }
+            })
+        }
+    });
+    if (draftVoucher['voucher_type'] != null) {
+        $('#voucher_type').selectpicker('val', draftVoucher['voucher_type']);
+    }
+    @can('update_vouchers')
+        $('#draft').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.update_draft', [\ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT, $draftVoucher['id']]) }}").submit();
+        });
+        $('#save').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.update_draft', [\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED, $draftVoucher['id']]) }}").submit();
+        });
+    @endcan
+    @can('send_vouchers')
+        $('#accept').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.update_draft', [\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED, $draftVoucher['id']]) }}").submit();
+        });
+        $('#send').on('click', function() {
+            $('#voucher-form').attr('action', "{{ route('vouchers.update_draft', [\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED, $draftVoucher['id']]) }}").submit();
+        });
+    @endcan
+});
 </script>
+@endsection
+
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/jquery.dataTables.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/bootstrap-datepicker3.min.css') }}">
 @endsection
 
 @section('content')
@@ -36,47 +217,227 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Edit branch
-                    <a href="{{ route('branches.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    Update voucher
+                    <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
-                <form id="update_form">
+
+                <form id="voucher-form" method="post">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
 
                     <div class="card-body">
 
-                        <div class="form-group">
-                            <label for="company_branch">Company</label>
-                            <input class="form-control" type="text" id="company_branch" name="company_branch" value="{{ $branch->company->tradename }} - {{ $branch->company->social_reason }}" readonly>
-                            <input type="hidden" name="company" value="{{ $branch->company->id }}">
+                        <div class="row">
+                            <div class="col-sm-6 text-center">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <img id="company_logo" name="company_logo" class="img-fluid img-thumbnail" src="" alt="Company logo">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">1. Company</h5>
+                                        <div class="form-group">
+                                            <label for="company">Company</label>
+                                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
+                                                @foreach($companies as $company)
+                                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="branch">Branch</label>
+                                            <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch" data-live-search="true" data-dependent="branch" title="Select a branch ...">
+
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="emission_point">Emission point</label>
+                                            <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point" data-live-search="true" data-dependent="branch" title="Select a emission point ...">
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">2. Company information</h5>
+                                        <div class="form-group">
+                                            <label for="company_ruc">RUC</label>
+                                            <input class="form-control" type="text" id="company_ruc" name="company_ruc" value="" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="company_name">Tradename - Social reason</label>
+                                            <input class="form-control" type="text" id="company_name" name="company_name" value="" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="company_address">Company address</label>
+                                            <input class="form-control" type="text" id="company_address" name="company_address" value="" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="branch_address">Branch address</label>
+                                            <input class="form-control" type="text" id="branch_address" name="branch_address" value="" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="company_special_contributor">Special contributor</label>
+                                            <input class="form-control" type="text" id="company_special_contributor" name="company_special_contributor" value="" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="company_keep_accounting">Keep accounting</label>
+                                            <input class="form-control" type="text" id="company_keep_accounting" name="company_keep_accounting" value="" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            3. Customer information
+                                            @if(auth()->user()->can('create_customers'))
+                                                <button type="button" class="btn btn-sm btn-success float-right" data-toggle="modal" data-target="#customerModal">New customer</button>
+                                            @endif
+                                        </h5>
+                                        <div class="form-group">
+                                            <label for="customer">Customer</label>
+                                            <select class="form-control selectpicker input-lg dynamic" id="customer" name="customer" data-live-search="true" data-dependent="branch" title="Select a customer ...">
+
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customer_identification">Identification</label>
+                                            <input class="form-control" type="text" id="customer_identification" name="customer_identification" value="" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customer_address">Address</label>
+                                            <input class="form-control" type="text" id="customer_address" name="customer_address" value="" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">4. Voucher information</h5>
+                                        <div class="form-group">
+                                            <label for="currency">Currency</label>
+                                            <select class="form-control selectpicker" id="currency" name="currency" data-live-search="true" data-dependent="branch" title="Select a currency ...">
+                                                @foreach($currencies as $currency)
+                                                    <option value="{{ $currency->id }}" {{ $currency->id === old('currency') ? "selected" : "" }}>{{ $currency->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="issue_date">Issue date</label>
+                                            <input class="form-control" id="issue_date" name="issue_date" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="environment">Environment</label>
+                                            <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="Select a environment ...">
+                                                @foreach($environments as $environment)
+                                                    <option value="{{ $environment->id }}" {{ $environment->id === old('environment') ? "selected" : "" }}>{{ $environment->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="voucher_type">Voucher type</label>
+                                            <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="Select a voucher type ...">
+                                                @foreach($voucherTypes as $voucherType)
+                                                    <option value="{{ $voucherType->id }}" {{ $voucherType->id === old('voucher_type') ? "selected" : "" }}>{{ $voucherType->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="establishment">Establishment</label>
-                            <input class="form-control" type="text" id="establishment" name="establishment" value="{{ $branch->establishment }}" readonly>
+                        <div id="voucher-information" class="row">
+
                         </div>
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input class="form-control" type="text" id="name" name="name" value="{{ $branch->name }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="address">Address</label>
-                            <input class="form-control" type="text" id="address" name="address" value="{{ $branch->address }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone</label>
-                            <input class="form-control" type="text" id="phone" name="phone" value="{{ $branch->phone }}">
-                        </div>
+
                     </div>
 
                     <div class="card-footer">
-                        <button id="submit" type="button" class="btn btn-success btn-sm">Update</button>
+                        @can('update_vouchers')
+                            <button type="button" id="draft" class="btn btn-sm btn-secondary">Update draft</button>
+                            <button type="button" id="save" class="btn btn-sm btn-info">Save</button>
+                        @endcan
+                        @can('send_vouchers')
+                            <button type="button" id="accept" class="btn btn-sm btn-primary">Save and accept</button>
+                            <button type="button" id="send" class="btn btn-sm btn-success">Save, accept and send</button>
+                        @endcan
                     </div>
 
                 </form>
+
             </div>
         </div>
     </div>
 </div>
+
+@if(auth()->user()->can('create_customers'))
+    <div class="modal fade" tabindex="-1" role="dialog" id="customerModal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <strong>New customer</strong>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="customer_create">
+                    {{ csrf_field() }}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="customer_company">Company</label>
+                            <select class="form-control selectpicker" id="customer_company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
+                                @foreach($companies as $company)
+                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_identification_type">Identification type</label>
+                            <select class="form-control selectpicker" id="customer_identification_type" name="identification_type" data-live-search="true" title="Select a identification type ...">
+                                @foreach($identificationTypes as $identificationType)
+                                    <option value="{{ $identificationType->id }}" >{{ $identificationType->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_identification">Identification</label>
+                            <input class="form-control" type="text" id="customer_identification" name="identification" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_social_reason">Social reason</label>
+                            <input class="form-control" type="text" id="customer_social_reason" name="social_reason" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_name">Address</label>
+                            <input class="form-control" type="text" id="customer_address" name="address" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_phone">Phone</label>
+                            <input class="form-control" type="text" id="customer_phone" name="phone" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_email">Email</label>
+                            <input class="form-control" type="email" id="customer_email" name="email" value="" multiple>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="submit_customer" type="button" class="btn btn-sm btn-success">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 
 @include('layouts.validation')
 @endsection

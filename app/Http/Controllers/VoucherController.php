@@ -66,7 +66,31 @@ class VoucherController extends Controller
         } else {
             $vouchers = collect();
         }
-        return view('vouchers.index', compact('vouchers'));
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            if ($user->hasRole('customer')) {
+                $companies = Company::all();
+            } else {
+                $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            }
+        }
+        return view('vouchers.index', compact(['companies', 'vouchers']));
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexDraft()
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('customer')) {
+            $draftVouchers = VoucherController::getDraftVouchers($user);
+            return view('vouchers.draft.index', compact('draftVouchers'));
+        }
+        return abort('404');
     }
 
     /**
@@ -103,12 +127,16 @@ class VoucherController extends Controller
                 DraftJson::getInstance()->storeDraftVoucher($user, $request);
                 break;
             case VoucherStates::SAVED:
+                self::saveVoucher($request, $state);
                 break;
             case VoucherStates::ACCEPTED:
-                break;
-            case VoucherStates::REJECTED:
+                $voucher = self::saveVoucher($request, $state);
+                self::acceptVoucher($voucher);
                 break;
             case VoucherStates::SENDED:
+                $voucher = self::saveVoucher($request, $state);
+                self::acceptVoucher($voucher);
+                self::sendVoucher($voucher);
                 break;
         }
         /*if (intval($state) >= VoucherStates::SAVED) {
@@ -154,8 +182,17 @@ class VoucherController extends Controller
     public function editDraft($id)
     {
         $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        $currencies = Currency::all();
         $draftVoucher = DraftJson::getInstance()->getDraftVoucher($user, intval($id));
-        return $draftVoucher;
+        $environments = Environment::all();
+        $identificationTypes = IdentificationType::all();
+        $voucherTypes = VoucherType::all();
+        return view('vouchers.draft.edit', compact(['companies', 'currencies', 'draftVoucher', 'environments', 'identificationTypes', 'voucherTypes']));;
     }
 
     /**
@@ -167,7 +204,40 @@ class VoucherController extends Controller
      */
     public function update(Request $request, Voucher $voucher)
     {
-        //
+
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Voucher  $voucher
+     * @return \Illuminate\Http\Response
+     */
+    public function updateDraft(Request $request, $id, $voucherId)
+    {
+        $user = Auth::user();
+        switch ($id) {
+            case VoucherStates::DRAFT:
+                DraftJson::getInstance()->updateDraftVoucher($user, $voucherId, $request);
+                break;
+            case VoucherStates::SAVED:
+                DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
+                self::saveVoucher($request, VoucherStates::SAVED);
+                break;
+            case VoucherStates::ACCEPTED:
+                DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
+                $voucher = self::saveVoucher($request, VoucherStates::ACCEPTED);
+                self::acceptVoucher($voucher);
+                break;
+            case VoucherStates::SENDED:
+                DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
+                $voucher = self::saveVoucher($request, VoucherStates::SENDED);
+                self::acceptVoucher($voucher);
+                self::sendVoucher($voucher);
+                break;
+        }
+        return redirect()->route('home')->with(['status' => 'Voucher updated successfully.']);
     }
 
     /**
@@ -213,6 +283,44 @@ class VoucherController extends Controller
         return $draftVouchers;
     }
 
+    public static function getVouchers(User $user)
+    {
+        if ($user->hasRole('admin')) {
+            $vouchers = Voucher::all();
+        } elseif ($user->hasRole('owner')) {
+            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
+            $emissionPoints = collect();
+            foreach ($branches as $branch) {
+                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
+                    $emissionPoints->push($emissionPoint);
+                }
+            }
+            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
+        } elseif ($user->hasRole('supervisor')) {
+            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
+            $allEmissionPoints = collect();
+            foreach ($branches as $branch) {
+                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
+                    $allEmissionPoints->push($emissionPoint);
+                }
+            }
+            $emissionPoints = collect();
+            foreach ($allEmissionPoints as $emissionPoint) {
+                if (in_array($emissionPoint->id, $user->emissionPoints()->pluck('id')->toArray(), true)) {
+                    $emissionPoints->push($emissionPoint);
+                }
+            }
+            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
+        } elseif ($user->hasRole('employee')) {
+            $vouchers = Voucher::where('user_id', $user->id)->get();
+        } elseif ($user->hasRole('customer')) {
+            $vouchers = Voucher::whereIn('customer_id', $user->customers->pluck('id'))->where('voucher_state_id', VoucherStates::AUTHORIZED)->where('environment_id', 2)->get();
+        } else {
+            $vouchers = collect();
+        }
+        return $vouchers->splice(-5);
+    }
+
     /**
      * Return the requested voucher
      *
@@ -235,6 +343,31 @@ class VoucherController extends Controller
                 break;
         }
         return view('vouchers.' . $id);
+    }
+
+    /**
+     * Return the requested voucher
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getDraftVoucherView($id, $voucherId)
+    {
+        switch ($id) {
+            case '1':
+                $user = Auth::user();
+                if ($user->hasRole('admin')) {
+                    $companiesproduct = Company::all();
+                } else {
+                    $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
+                }
+                $draftVoucher = DraftJson::getInstance()->getDraftVoucher($user, intval($voucherId));
+                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                return view('vouchers.draft.' . $id, compact(['companiesproduct', 'draftVoucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
+                break;
+        }
+        return view('vouchers.draft.' . $id);
     }
 
     private static function generateRandomNumericCode()

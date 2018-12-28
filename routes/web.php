@@ -60,18 +60,22 @@ Route::group(['prefix' => 'voucher'], function () {
 });
 
 Route::group(['prefix' => 'resource'], function () {
-    Route::group(['middleware' => ['permission:read_companies']], function () {
+    Route::post('/company/branches', 'CompanyController@branches')->name('companies.branches');
+    /*Route::group(['middleware' => ['permission:read_companies']], function () {
         Route::post('/company/branches', 'CompanyController@branches')->name('companies.branches');
-    });
-    Route::group(['middleware' => ['permission:read_companies']], function () {
+    });*/
+    Route::post('/company/customers', 'CompanyController@customers')->name('companies.customers');
+    /*Route::group(['middleware' => ['permission:read_companies']], function () {
         Route::post('/company/customers', 'CompanyController@customers')->name('companies.customers');
-    });
-    Route::group(['middleware' => ['permission:read_branches']], function () {
+    });*/
+    Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
+    /*Route::group(['middleware' => ['permission:read_branches']], function () {
         Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
-    });
-    Route::group(['middleware' => ['permission:read_branches']], function () {
+    });*/
+    Route::post('/branch/products', 'BranchController@products')->name('branches.products');
+    /*Route::group(['middleware' => ['permission:read_branches']], function () {
         Route::post('/branch/products', 'BranchController@products')->name('branches.products');
-    });
+    });*/
     Route::group(['middleware' => ['permission:read_products']], function () {
         Route::post('/product/taxes', 'ProductController@taxes')->name('products.taxes');
     });
@@ -252,9 +256,18 @@ Route::group(['prefix' => 'manage'], function () {
         Route::get('/vouchers/{id}', 'VoucherController@getVoucherView')->where('id', '[1-5]{1}');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/vouchers/{id}/draft/{voucherId}', 'VoucherController@getDraftVoucherView')->where('id', '[1-5]{1}');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::delete('/vouchers/{id}/destroy_draft', 'VoucherController@destroyDraft')->name('vouchers.destroy_draft');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/vouchers/{id}/edit_draft', 'VoucherController@editDraft')->name('vouchers.edit_draft');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::put('/vouchers/{id}/update_draft/{voucherId}', 'VoucherController@updateDraft')->name('vouchers.update_draft');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/vouchers/draft', 'VoucherController@indexDraft')->name('vouchers.index_draft');
     });
 });

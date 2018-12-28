@@ -1,6 +1,7 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function(){
+    var draftVoucher = @json($draftVoucher);
     @if(auth()->user()->can('create_products'))
         $("#product_company").selectpicker('render');
         $("#product_branch").selectpicker('render');
@@ -58,42 +59,53 @@ $(document).ready(function(){
             });
         });
     @endif
+    function addRowProduct() {
+        var _token = $('input[name = "_token"]').val();
+        var id = $("#branch").val();
+        if (id != '') {
+            $.ajax({
+                url: "{{ route('branches.products') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var options = '';
+                    var products = JSON.parse(result);
+                    for (var i = 0; i < products.length; i++) {
+                        options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
+                    }
+                    invoiceTable.row.add([
+                        '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' + options + '</select>',
+                        '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
+                        '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
+                        '<input class="form-control" type="text" id="product_unitprice[]" name="product_unitprice[]" value="">',
+                        '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
+                        '<input class="form-control" type="text" id="product_discount[]" name="product_discount[]" value="">',
+                        '<input class="form-control" type="text" id="product-subtotal[]" name="product-subtotal[]" value="" readonly>',
+                        '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                    ]).draw(false);
+                    $("select[id ~= 'product[]']").selectpicker();
+                    if ('product' in draftVoucher) {
+                        if ($("select[id ~= 'product[]']").length == draftVoucher['product'].length && draftVoucher['product'].length > 0) {
+                            $("select[id ~= 'product[]']").each(function() {
+                                $(this).selectpicker('val', draftVoucher['product'][0]);
+                                draftVoucher['product'].shift();
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
     var invoiceTable = $('#invoice-table').DataTable({
         paging: false,
         dom: 'Bfrtip',
         buttons: [{
             text: 'Add row',
             action: function(e, dt, node, config){
-                var _token = $('input[name = "_token"]').val();
-                var id = $("#branch").val();
-                if (id != '') {
-                    $.ajax({
-                        url: "{{ route('branches.products') }}",
-                        method: "POST",
-                        data: {
-                            _token: _token,
-                            id: id,
-                        },
-                        success: function(result) {
-                            var options = '';
-                            var products = JSON.parse(result);
-                            for (var i = 0; i < products.length; i++) {
-                                options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
-                            }
-                            invoiceTable.row.add([
-                                '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' + options + '</select>',
-                                '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
-                                '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
-                                '<input class="form-control" type="text" id="product_unitprice[]" name="product_unitprice[]" value="">',
-                                '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
-                                '<input class="form-control" type="text" id="product_discount[]" name="product_discount[]" value="">',
-                                '<input class="form-control" type="text" id="product-subtotal[]" name="product-subtotal[]" value="" readonly>',
-                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
-                            ]).draw(false);
-                            $('select[id *= product]').selectpicker();
-                        }
-                    });
-                }
+                addRowProduct();
             }
         }]
     });
@@ -119,12 +131,39 @@ $(document).ready(function(){
                     //var productIce = taxes[0]['ice'] != null ? Number(taxes[0]['ice']['specific_rate']) + Number(taxes[0]['ice']['ad_valorem_rate']) : 0.0;
                     var productDiscount = elementChanged == '' ? 0.0 : (elementChanged == 'productDiscount' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product_discount]').val()));
                     productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
-                    var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0);
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                    if ('product_quantity' in draftVoucher) {
+                        if (draftVoucher['product_quantity'].length > 0) {
+                            if (draftVoucher['product_quantity'][0] != null) {
+                                productQuantity = Number(draftVoucher['product_quantity'][0]);
+                                reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                            }
+                            draftVoucher['product_quantity'].shift();
+                        }
+                    }
                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                    if ('product_unitprice' in draftVoucher) {
+                        if (draftVoucher['product_unitprice'].length > 0) {
+                            if (draftVoucher['product_unitprice'][0] != null) {
+                                productUnitPrice = Number(draftVoucher['product_unitprice'][0]);
+                                reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                            }
+                            draftVoucher['product_unitprice'].shift();
+                        }
+                    }
                     reference.closest('tr').find('input[id *= product-iva]').val(productIva.toFixed(2));
                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
+                    if ('product_discount' in draftVoucher) {
+                        if (draftVoucher['product_discount'].length > 0) {
+                            if (draftVoucher['product_discount'][0] != null) {
+                                productDiscount = Number(draftVoucher['product_discount'][0]);
+                                reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
+                            }
+                            draftVoucher['product_discount'].shift();
+                        }
+                    }
+                    var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0);
                     reference.closest('tr').find('input[id *= product-subtotal]').val(productSubtotal.toFixed(2));
                     updateTotal();
                 }
@@ -220,12 +259,74 @@ $(document).ready(function(){
     $('#invoice-table tbody').on('change', 'input[id *= product_discount]', function(){
         loadProductData($(this), 'productDiscount');
     });
+    if ('product' in draftVoucher) {
+        for (var i = 0; i < draftVoucher['product'].length; i++) {
+            addRowProduct();
+        }
+    }
     $('#invoice-table tbody').on('click', 'button.btn.btn-danger.btn-sm', function(){
         invoiceTable
             .row($(this).parents('tr'))
             .remove()
             .draw();
     });
+    function addRowPayment() {
+        var _token = $('input[name = "_token"]').val();
+        $.ajax({
+            url: "{{ route('paymentmethods') }}",
+            method: "GET",
+            success: function(result) {
+                var optionsPaymentMethod = '';
+                var paymentMethods = JSON.parse(result);
+                for (var i = 0; i < paymentMethods.length; i++) {
+                    optionsPaymentMethod += '<option value="' + paymentMethods[i]['id'] + '">' + paymentMethods[i]['name'] + '</option>';
+                }
+                $.ajax({
+                    url: "{{ route('timeunits') }}",
+                    method: "GET",
+                    success: function(result) {
+                        var optionsTimeUnit = '';
+                        var timeunits = JSON.parse(result);
+                        for (var i = 0; i < timeunits.length; i++) {
+                            optionsTimeUnit += '<option value="' + timeunits[i]['id'] + '">' + timeunits[i]['name'] + '</option>';
+                        }
+                        paymentMethodTable.row.add([
+                            '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="Select a payment method ...">' + optionsPaymentMethod + '</select>',
+                            '<input class="form-control" type="text" id="paymentMethod_value[]" name="paymentMethod_value[]" value="">',
+                            '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="Select a time unit ...">' + optionsTimeUnit + '</select>',
+                            '<input class="form-control" type="text" id="paymentMethod_term[]" name="paymentMethod_term[]" value="0">',
+                            '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                        ]).draw(false);
+                        $('select[id *= paymentMethod]').selectpicker('val', 1);
+                        if ('paymentMethod' in draftVoucher) {
+                            if ($("select[id ~= 'paymentMethod[]']").length == draftVoucher['paymentMethod'].length && draftVoucher['paymentMethod'].length > 0) {
+                                $("select[id ~= 'paymentMethod[]']").each(function() {
+                                    $(this).selectpicker('val', draftVoucher['paymentMethod'][0]);
+                                    draftVoucher['paymentMethod'].shift();
+                                    $(this).closest('tr').find('input[id *= paymentMethod_value]').val(draftVoucher['paymentMethod_value'][0]);
+                                    draftVoucher['paymentMethod_value'].shift();
+                                });
+                            }
+                        }
+                        $('select[id *= paymentMethod_timeunit]').selectpicker('val', 1);
+                        if ('paymentMethod_timeunit' in draftVoucher) {
+                            if ($("select[id ~= 'paymentMethod_timeunit[]']").length == draftVoucher['paymentMethod_timeunit'].length && draftVoucher['paymentMethod_timeunit'].length > 0) {
+                                $("select[id ~= 'paymentMethod_timeunit[]']").each(function() {
+                                    $(this).selectpicker('val', draftVoucher['paymentMethod_timeunit'][0]);
+                                    draftVoucher['paymentMethod_timeunit'].shift();
+                                    if ($(this).val() == '') {
+                                        $(this).selectpicker('val', 1);
+                                    }
+                                    $(this).closest('tr').find('input[id *= paymentMethod_term]').val(draftVoucher['paymentMethod_term'][0]);
+                                    draftVoucher['paymentMethod_term'].shift();
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
     var paymentMethodTable = $('#paymentmethod-table').DataTable({
         paging: false,
         dom: 'Bfrtip',
@@ -233,44 +334,7 @@ $(document).ready(function(){
         buttons: [{
             text: 'Add row',
             action: function(e, dt, node, config){
-                var _token = $('input[name = "_token"]').val();
-                $.ajax({
-                    url: "{{ route('paymentmethods') }}",
-                    method: "GET",
-                    success: function(result) {
-                        var optionsPaymentMethod = '';
-                        var paymentMethods = JSON.parse(result);
-                        for (var i = 0; i < paymentMethods.length; i++) {
-                            optionsPaymentMethod += '<option value="' + paymentMethods[i]['id'] + '">' + paymentMethods[i]['name'] + '</option>';
-                        }
-                        $.ajax({
-                            url: "{{ route('timeunits') }}",
-                            method: "GET",
-                            success: function(result) {
-                                var optionsTimeUnit = '';
-                                var timeunits = JSON.parse(result);
-                                for (var i = 0; i < timeunits.length; i++) {
-                                    optionsTimeUnit += '<option value="' + timeunits[i]['id'] + '">' + timeunits[i]['name'] + '</option>';
-                                }
-                                paymentMethodTable.row.add([
-                                    '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="Select a payment method ...">' + optionsPaymentMethod + '</select>',
-                                    '<input class="form-control" type="text" id="paymentMethod_value[]" name="paymentMethod_value[]" value="">',
-                                    '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="Select a time unit ...">' + optionsTimeUnit + '</select>',
-                                    '<input class="form-control" type="text" id="paymentMethod_term[]" name="paymentMethod_term[]" value="0">',
-                                    '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
-                                ]).draw(false);
-                                $('select[id *= paymentMethod]').selectpicker();
-                                $("select[id ~= 'paymentMethod[]']").each(function() {
-                                    $(this).selectpicker('val', $(this).val() == '' ? 1 : $(this).val());
-                                });
-                                $('select[id *= paymentMethod_timeunit]').selectpicker();
-                                $("select[id ~= 'paymentMethod_timeunit[]']").each(function() {
-                                    $(this).selectpicker('val', $(this).val() == '' ? 1 : $(this).val());
-                                });
-                            }
-                        });
-                    }
-                });
+                addRowPayment();
             }
         }]
     });
@@ -280,7 +344,38 @@ $(document).ready(function(){
             .remove()
             .draw();
     });
+    if ('paymentMethod' in draftVoucher) {
+        for (var i = 0; i < draftVoucher['paymentMethod'].length; i++) {
+            addRowPayment();
+        }
+    }
     var additionalDetailCount = 0;
+    function addRowAdditionalDetail() {
+        if (additionalDetailCount < 3) {
+            additionalDetailTable.row.add([
+                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="">',
+                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="">',
+                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+            ]).draw(false);
+            additionalDetailCount++;
+            if ('additionaldetail_name' in draftVoucher) {
+                if ($("input[id ~= 'additionaldetail_name[]']").length == draftVoucher['additionaldetail_name'].length && draftVoucher['additionaldetail_name'].length > 0) {
+                    $("input[id ~= 'additionaldetail_name[]']").each(function() {
+                        $(this).val(draftVoucher['additionaldetail_name'][0]);
+                        draftVoucher['additionaldetail_name'].shift();
+                    });
+                }
+            }
+            if ('additionaldetail_value' in draftVoucher) {
+                if ($("input[id ~= 'additionaldetail_value[]']").length == draftVoucher['additionaldetail_value'].length && draftVoucher['additionaldetail_value'].length > 0) {
+                    $("input[id ~= 'additionaldetail_value[]']").each(function() {
+                        $(this).val(draftVoucher['additionaldetail_value'][0]);
+                        draftVoucher['additionaldetail_value'].shift();
+                    });
+                }
+            }
+        }
+    }
     var additionalDetailTable = $('#additionaldetail-table').DataTable({
         paging: false,
         dom: 'Bfrtip',
@@ -288,14 +383,7 @@ $(document).ready(function(){
         buttons: [{
             text: 'Add row',
             action: function(e, dt, node, config){
-                if (additionalDetailCount < 3) {
-                    additionalDetailTable.row.add([
-                        '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="">',
-                        '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="">',
-                        '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
-                    ]).draw(false);
-                    additionalDetailCount++;
-                }
+                addRowAdditionalDetail();
             }
         }]
     });
@@ -306,6 +394,15 @@ $(document).ready(function(){
             .draw();
         additionalDetailCount--;
     });
+    if ('additionaldetail_name' in draftVoucher) {
+        for (var i = 0; i < draftVoucher['additionaldetail_name'].length; i++) {
+            addRowAdditionalDetail();
+        }
+    }
+    $('#waybill_establishment').val(draftVoucher['waybill_establishment']);
+    $('#waybill_emissionpoint').val(draftVoucher['waybill_emissionpoint']);
+    $('#waybill_sequential').val(draftVoucher['waybill_sequential']);
+    $('#extra_detail').val(draftVoucher['extra_detail']);
     $("#ivaRetention").change(function() {
         $('#ivaRetentionValue')
             .prop('readonly', !this.checked)
@@ -316,9 +413,20 @@ $(document).ready(function(){
             .prop('readonly', !this.checked)
             .val('');
     });
+    if ('ivaRetention' in draftVoucher) {
+        $('#ivaRetention').prop('checked', true);
+        $('#ivaRetention').trigger('change');
+        $('#ivaRetentionValue').val(draftVoucher['ivaRetentionValue']);
+    }
+    if ('rentRetention' in draftVoucher) {
+        $('#rentRetention').prop('checked', true);
+        $('#rentRetention').trigger('change');
+        $('#rentRetentionValue').val(draftVoucher['rentRetentionValue']);
+    }
     $('#tip').change(function() {
         updateTotal();
     });
+    $('#tip').val(Number(draftVoucher['tip']).toFixed(2));
 });
 </script>
 <div class="col-sm-12">

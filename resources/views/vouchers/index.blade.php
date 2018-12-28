@@ -1,16 +1,65 @@
 @extends('layouts.app')
 
 @section('scripts')
+<script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script type="text/javascript">
 $.noConflict();
 jQuery(document).ready(function($) {
-    $('#vouchers-table').DataTable();
+    $('#company').change(function() {
+        if($(this).val() != '') {
+            var _token = $('input[name = "_token"]').val();
+            var id = $(this).val();
+            $.ajax({
+                url: "{{ route('companies.branches') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var branches = JSON.parse(result);
+                    var options = '';
+                    for (var i = 0; i < branches.length; i++) {
+                        options += '<option value="' + branches[i]['id'] + '">' + branches[i]['company']['tradename'] + ': ' + branches[i]['name'] + '</option>';
+                    }
+                    $("#branch").html(options).selectpicker('refresh');
+                    $("#emission_point").html('').selectpicker('refresh');
+                }
+            })
+        }
+    });
+    $('#branch').change(function() {
+        if($(this).val() != '') {
+            var _token = $('input[name = "_token"]').val();
+            var id = $(this).val();
+            $.ajax({
+                url: "{{ route('branches.emissionPoints') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var emissionPoints = JSON.parse(result);
+                    var options = '';
+                    for (var i = 0; i < emissionPoints.length; i++) {
+                        options += '<option value="' + emissionPoints[i]['id'] + '">' + emissionPoints[i]['branch']['company']['tradename'] + ' (' + emissionPoints[i]['branch']['name'] + '): ' + emissionPoints[i]['code'] + '</option>';
+                    }
+                    $("#emission_point").html(options).selectpicker('refresh');
+                }
+            })
+        }
+    });
+    $('#vouchers-table').DataTable({
+        "order": [[ 5, 'desc' ], [ 0, 'desc' ]]
+    });
 });
 </script>
 @endsection
 
 @section('styles')
+<link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endsection
 
@@ -24,6 +73,39 @@ jQuery(document).ready(function($) {
                 </div>
 
                 <div class="card-body">
+                    <p><button class="btn btn-sm btn-light" type="button" data-toggle="collapse" data-target="#filterForm" aria-expanded="false" aria-controls="filterForm">Filter</button></p>
+                    <div class="collapse" id="filterForm">
+                        <div class="card">
+                            <form class="" action="index.html" method="post">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="company">Company</label>
+                                        <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more companies ...">
+                                            @foreach($companies as $company)
+                                                <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="branch">Branch</label>
+                                        <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more branches ...">
+
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emission_point">Emission point</label>
+                                        <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more emission points ...">
+
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <button type="button" id="draft" class="btn btn-sm btn-primary">Filter</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <br>
                     <table id="vouchers-table" class="display">
                         <thead>
                             <tr>
@@ -33,7 +115,10 @@ jQuery(document).ready(function($) {
                                 <th>Voucher</th>
                                 <th>Customer</th>
                                 <th>Issue date</th>
-                                <th></th>
+                                <th>View</th>
+                                @unlessrole('customer')
+                                    <th></th>
+                                @endunlessrole
                             </tr>
                         </thead>
                         <tbody>
@@ -41,12 +126,42 @@ jQuery(document).ready(function($) {
                                 <tr>
                                     <td>{{ $voucher->id }}</td>
                                     <td>{{ \ElectronicInvoicing\VoucherType::find($voucher->voucher_type_id)->name }}</td>
-                                    <td>{{ \ElectronicInvoicing\VoucherState::find($voucher->voucher_state_id)->name }}</td>
+                                    <td>
+                                        @switch($voucher->voucher_state_id)
+                                            @case(3)
+                                                <span class="badge badge-info">
+                                                @break
+                                            @case(4)
+                                                <span class="badge badge-dark">
+                                                @break
+                                            @case(5)
+                                                <span class="badge badge-light">
+                                                @break
+                                            @case(6)
+                                                <span class="badge badge-secondary">
+                                                @break
+                                            @case(7)
+                                                <span class="badge badge-warning">
+                                                @break
+                                            @case(8)
+                                                <span class="badge badge-success">
+                                                @break
+                                            @case(9)
+                                                <span class="badge badge-primary">
+                                                @break
+                                            @case(10)
+                                                <span class="badge badge-danger">
+                                                @break
+                                            @default
+                                                <span class="badge">
+                                        @endswitch
+                                        {{ \ElectronicInvoicing\VoucherState::find($voucher->voucher_state_id)->name }}</span>
+                                    </td>
                                     <td>{{ str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) }}-{{ str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) }}-{{ str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $voucher->customer->social_reason }}</td>
                                     <td>{{ $voucher->issue_date }}</td>
                                     <td>
-                                        @if($voucher->voucher_state_id > \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
+                                        @if($voucher->voucher_state_id >= \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
                                             <a href="{{ route('vouchers.html', $voucher) }}" target="_blank">
                                                 <img alt="HTML" height="32" width="32"  src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU2IDU2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1NiA1NjsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6I0U5RTlFMDsiIGQ9Ik0zNi45ODUsMEg3Ljk2M0M3LjE1NSwwLDYuNSwwLjY1NSw2LjUsMS45MjZWNTVjMCwwLjM0NSwwLjY1NSwxLDEuNDYzLDFoNDAuMDc0ICAgYzAuODA4LDAsMS40NjMtMC42NTUsMS40NjMtMVYxMi45NzhjMC0wLjY5Ni0wLjA5My0wLjkyLTAuMjU3LTEuMDg1TDM3LjYwNywwLjI1N0MzNy40NDIsMC4wOTMsMzcuMjE4LDAsMzYuOTg1LDB6Ii8+Cgk8cG9seWdvbiBzdHlsZT0iZmlsbDojRDlEN0NBOyIgcG9pbnRzPSIzNy41LDAuMTUxIDM3LjUsMTIgNDkuMzQ5LDEyICAiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNFQzY2MzA7IiBkPSJNNDguMDM3LDU2SDcuOTYzQzcuMTU1LDU2LDYuNSw1NS4zNDUsNi41LDU0LjUzN1YzOWg0M3YxNS41MzdDNDkuNSw1NS4zNDUsNDguODQ1LDU2LDQ4LjAzNyw1NnoiLz4KCTxnPgoJCTxwYXRoIHN0eWxlPSJmaWxsOiNGRkZGRkY7IiBkPSJNMTcuNDU1LDQyLjkyNFY1M2gtMS42NDF2LTQuNTM5aC00LjM2MVY1M0g5Ljc4NVY0Mi45MjRoMS42Njh2NC40MTZoNC4zNjF2LTQuNDE2SDE3LjQ1NXoiLz4KCQk8cGF0aCBzdHlsZT0iZmlsbDojRkZGRkZGOyIgZD0iTTI3LjEwNyw0Mi45MjR2MS4xMjFIMjQuMVY1M2gtMS42NTR2LTguOTU1aC0zLjAwOHYtMS4xMjFIMjcuMTA3eiIvPgoJCTxwYXRoIHN0eWxlPSJmaWxsOiNGRkZGRkY7IiBkPSJNMzYuNzA1LDQyLjkyNGgxLjY2OFY1M2gtMS42Njh2LTYuOTMybC0yLjI1Niw1LjYwNUgzM2wtMi4yNy01LjYwNVY1M2gtMS42NjhWNDIuOTI0aDEuNjY4ICAgIGwyLjk5NCw2Ljg5MUwzNi43MDUsNDIuOTI0eiIvPgoJCTxwYXRoIHN0eWxlPSJmaWxsOiNGRkZGRkY7IiBkPSJNNDIuNTcsNDIuOTI0djguODMyaDQuNjM1VjUzaC02LjMwM1Y0Mi45MjRINDIuNTd6Ii8+Cgk8L2c+Cgk8Zz4KCQk8cGF0aCBzdHlsZT0iZmlsbDojRUM2NjMwOyIgZD0iTTIzLjIwNywxNi4yOTNjLTAuMzkxLTAuMzkxLTEuMDIzLTAuMzkxLTEuNDE0LDBsLTYsNmMtMC4zOTEsMC4zOTEtMC4zOTEsMS4wMjMsMCwxLjQxNGw2LDYgICAgQzIxLjk4OCwyOS45MDIsMjIuMjQ0LDMwLDIyLjUsMzBzMC41MTItMC4wOTgsMC43MDctMC4yOTNjMC4zOTEtMC4zOTEsMC4zOTEtMS4wMjMsMC0xLjQxNEwxNy45MTQsMjNsNS4yOTMtNS4yOTMgICAgQzIzLjU5OCwxNy4zMTYsMjMuNTk4LDE2LjY4NCwyMy4yMDcsMTYuMjkzeiIvPgoJCTxwYXRoIHN0eWxlPSJmaWxsOiNFQzY2MzA7IiBkPSJNNDEuMjA3LDIyLjI5M2wtNi02Yy0wLjM5MS0wLjM5MS0xLjAyMy0wLjM5MS0xLjQxNCwwcy0wLjM5MSwxLjAyMywwLDEuNDE0TDM5LjA4NiwyMyAgICBsLTUuMjkzLDUuMjkzYy0wLjM5MSwwLjM5MS0wLjM5MSwxLjAyMywwLDEuNDE0QzMzLjk4OCwyOS45MDIsMzQuMjQ0LDMwLDM0LjUsMzBzMC41MTItMC4wOTgsMC43MDctMC4yOTNsNi02ICAgIEM0MS41OTgsMjMuMzE2LDQxLjU5OCwyMi42ODQsNDEuMjA3LDIyLjI5M3oiLz4KCTwvZz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" />
                                             </a>
@@ -60,6 +175,53 @@ jQuery(document).ready(function($) {
                                             </a>
                                         @endif
                                     </td>
+                                    @unlessrole('customer')
+                                        <td>
+                                            @switch($voucher->voucher_state_id)
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
+                                                    <a href="" class="btn btn-sm">Edit</a>
+                                                    @can('send_vouchers')
+                                                        <button type="button" class="btn btn-sm btn-info">Accept</button>
+                                                        <button type="button" class="btn btn-sm btn-dark">Reject</button>
+                                                    @endcan
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
+                                                    @can('send_vouchers')
+                                                        <button type="button" class="btn btn-sm">Edit</button>
+                                                        <button type="button" class="btn btn-sm btn-light">Send</button>
+                                                    @endcan
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
+                                                    <button type="button" class="btn btn-sm">Edit</button>
+                                                    @can('send_vouchers')
+                                                        <button type="button" class="btn btn-sm btn-info">Accept</button>
+                                                        <button type="button" class="btn btn-sm btn-dark">Reject</button>
+                                                    @endcan
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED)
+
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RECEIVED)
+
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RETURNED)
+
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::AUTHORIZED)
+
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::IN_PROCESS)
+
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
+
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
+
+                                                    @break
+                                            @endswitch
+                                        </td>
+                                    @endunlessrole
                                 </tr>
                             @endforeach
                         </tbody>
