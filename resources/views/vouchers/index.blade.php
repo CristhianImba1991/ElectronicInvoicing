@@ -179,7 +179,7 @@ jQuery(document).ready(function($) {
                                         <td>
                                             @switch($voucher->voucher_state_id)
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
-                                                    <a href="" class="btn btn-sm">Edit</a>
+                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
                                                     @can('send_vouchers')
                                                         <button type="button" class="btn btn-sm btn-info">Accept</button>
                                                         <button type="button" class="btn btn-sm btn-dark">Reject</button>
@@ -187,7 +187,6 @@ jQuery(document).ready(function($) {
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                     @can('send_vouchers')
-                                                        <button type="button" class="btn btn-sm">Edit</button>
                                                         <button type="button" class="btn btn-sm btn-light">Send</button>
                                                     @endcan
                                                     @break

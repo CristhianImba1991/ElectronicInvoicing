@@ -75,6 +75,7 @@
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
                                         @can('create_vouchers')
                                             <a href="{{ route('vouchers.create') }}" class="dropdown-item">New voucher</a>
+                                            <a href="{{ route('vouchers.index_draft') }}" class="dropdown-item">Draft vouchers</a>
                                         @endcan
                                         @can('read_vouchers')
                                             <a href="{{ route('vouchers.index') }}" class="dropdown-item">Reports</a>

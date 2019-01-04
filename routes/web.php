@@ -43,7 +43,10 @@ Route::group(['prefix' => 'voucher'], function () {
         Route::post('/create/{state}', 'VoucherController@store')->where('state', '^(?:[1-9]|10)$')->name('vouchers.store');
     });
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
-        Route::get('/{voucher}/edit', 'VoucherController@index')->name('vouchers.edit');
+        Route::get('/{voucher}/edit', 'VoucherController@edit')->name('vouchers.edit');
+    });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::get('/{id}/edit/{voucherId}', 'VoucherController@getVoucherView')->where('id', '[1-5]{1}');
     });
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/{voucher}/view', 'VoucherController@index')->name('vouchers.view');

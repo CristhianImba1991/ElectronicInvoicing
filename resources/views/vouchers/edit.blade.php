@@ -4,7 +4,7 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
-@include('vouchers.js.create_edit', ['action' => 'create'])
+@include('vouchers.js.create_edit', ['action' => 'edit'])
 @endsection
 
 @section('styles')

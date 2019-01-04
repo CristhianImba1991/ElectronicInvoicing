@@ -170,7 +170,17 @@ class VoucherController extends Controller
      */
     public function edit(Voucher $voucher)
     {
-        //
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        $currencies = Currency::all();
+        $environments = Environment::all();
+        $identificationTypes = IdentificationType::all();
+        $voucherTypes = VoucherType::all();
+        return view('vouchers.edit', compact(['companies', 'currencies', 'voucher', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
     /**
@@ -192,7 +202,7 @@ class VoucherController extends Controller
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
         $voucherTypes = VoucherType::all();
-        return view('vouchers.draft.edit', compact(['companies', 'currencies', 'draftVoucher', 'environments', 'identificationTypes', 'voucherTypes']));;
+        return view('vouchers.draft.edit', compact(['companies', 'currencies', 'draftVoucher', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
     /**
@@ -326,21 +336,39 @@ class VoucherController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getVoucherView($id)
+    public function getVoucherView($id, $voucherId = null)
     {
-        switch ($id) {
-            case '1':
-                $user = Auth::user();
-                if ($user->hasRole('admin')) {
-                    $companiesproduct = Company::all();
-                } else {
-                    $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
-                }
-                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
-                $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
-                $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
-                return view('vouchers.' . $id, compact(['companiesproduct','iva_taxes','ice_taxes','irbpnr_taxes']));
-                break;
+        if ($voucherId === null) {
+            switch ($id) {
+                case '1':
+                    $user = Auth::user();
+                    if ($user->hasRole('admin')) {
+                        $companiesproduct = Company::all();
+                    } else {
+                        $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
+                    }
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id, compact(['companiesproduct','iva_taxes','ice_taxes','irbpnr_taxes']));
+                    break;
+            }
+        } else {
+            switch ($id) {
+                case '1':
+                    $user = Auth::user();
+                    if ($user->hasRole('admin')) {
+                        $companiesproduct = Company::all();
+                    } else {
+                        $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
+                    }
+                    $voucher = Voucher::where('id', $voucherId)->get();
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id . '_edit', compact(['companiesproduct','voucher','iva_taxes','ice_taxes','irbpnr_taxes']));
+                    break;
+            }
         }
         return view('vouchers.' . $id);
     }
