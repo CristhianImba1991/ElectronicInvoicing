@@ -1,5 +1,5 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
-@include('vouchers.js.1', ['action' => 'create'])
+@include('vouchers.js.1', ['action' => $action])
 <div class="col-sm-12">
     <div class="card mb-3">
         <div class="card-body">
