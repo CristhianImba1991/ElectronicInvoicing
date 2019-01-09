@@ -4,7 +4,7 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
-@include('vouchers.js.create_edit', ['action' => 'edit'])
+@include('vouchers.js.create_edit', ['action' => $action])
 @endsection
 
 @section('styles')
@@ -19,12 +19,13 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    New voucher
-                    <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    Update voucher
+                    <a href="{{ redirect()->getUrlGenerator()->previous() }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
                 <form id="voucher-form" method="post">
                     {{ csrf_field() }}
+                    <input type="hidden" name="_method" value="PUT">
 
                     <div class="card-body">
 
@@ -44,7 +45,7 @@
                                             <label for="company">Company</label>
                                             <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
                                                 @foreach($companies as $company)
-                                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -128,7 +129,7 @@
                                             <label for="currency">Currency</label>
                                             <select class="form-control selectpicker" id="currency" name="currency" data-live-search="true" data-dependent="branch" title="Select a currency ...">
                                                 @foreach($currencies as $currency)
-                                                    <option value="{{ $currency->id }}" {{ $currency->id === old('currency') ? "selected" : "" }}>{{ $currency->name }}</option>
+                                                    <option value="{{ $currency->id }}">{{ $currency->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -140,7 +141,7 @@
                                             <label for="environment">Environment</label>
                                             <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="Select a environment ...">
                                                 @foreach($environments as $environment)
-                                                    <option value="{{ $environment->id }}" {{ $environment->id === old('environment') ? "selected" : "" }}>{{ $environment->name }}</option>
+                                                    <option value="{{ $environment->id }}">{{ $environment->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -148,7 +149,7 @@
                                             <label for="voucher_type">Voucher type</label>
                                             <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="Select a voucher type ...">
                                                 @foreach($voucherTypes as $voucherType)
-                                                    <option value="{{ $voucherType->id }}" {{ $voucherType->id === old('voucher_type') ? "selected" : "" }}>{{ $voucherType->name }}</option>
+                                                    <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -164,7 +165,9 @@
 
                     <div class="card-footer">
                         @can('create_vouchers')
-                            <button type="button" id="draft" class="btn btn-sm btn-secondary">Draft</button>
+                            @if($action === 'draft')
+                                <button type="button" id="draft" class="btn btn-sm btn-secondary">Update draft</button>
+                            @endif
                             <button type="button" id="save" class="btn btn-sm btn-info">Save</button>
                         @endcan
                         @can('send_vouchers')

@@ -67,7 +67,7 @@ class Voucher extends Model
         return $this->hasMany('ElectronicInvoicing\Detail');
     }
 
-    public function aditionalFields()
+    public function additionalFields()
     {
         return $this->hasMany('ElectronicInvoicing\AdditionalField');
     }

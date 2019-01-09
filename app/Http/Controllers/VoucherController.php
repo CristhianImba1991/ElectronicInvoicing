@@ -139,15 +139,6 @@ class VoucherController extends Controller
                 self::sendVoucher($voucher);
                 break;
         }
-        /*if (intval($state) >= VoucherStates::SAVED) {
-            $voucher = self::saveVoucher($request, $state);
-            if (intval($state) >= VoucherStates::ACCEPTED) {
-                self::acceptVoucher($voucher);
-                if (intval($state) >= VoucherStates::SENDED) {
-                    self::sendVoucher($voucher);
-                }
-            }
-        }*/
         return redirect()->route('home')->with(['status' => 'Voucher added successfully.']);
     }
 
@@ -171,6 +162,7 @@ class VoucherController extends Controller
     public function edit(Voucher $voucher)
     {
         $user = Auth::user();
+        $action = 'edit';
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
@@ -180,7 +172,7 @@ class VoucherController extends Controller
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
         $voucherTypes = VoucherType::all();
-        return view('vouchers.edit', compact(['companies', 'currencies', 'voucher', 'environments', 'identificationTypes', 'voucherTypes']));
+        return view('vouchers.edit', compact(['action', 'companies', 'currencies', 'voucher', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
     /**
@@ -192,6 +184,7 @@ class VoucherController extends Controller
     public function editDraft($id)
     {
         $user = Auth::user();
+        $action = 'draft';
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
@@ -202,7 +195,7 @@ class VoucherController extends Controller
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
         $voucherTypes = VoucherType::all();
-        return view('vouchers.draft.edit', compact(['companies', 'currencies', 'draftVoucher', 'environments', 'identificationTypes', 'voucherTypes']));
+        return view('vouchers.edit', compact(['action', 'companies', 'currencies', 'draftVoucher', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
     /**
@@ -212,9 +205,24 @@ class VoucherController extends Controller
      * @param  \ElectronicInvoicing\Voucher  $voucher
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Voucher $voucher)
+    public function update(Request $request, $state, $id)
     {
-
+        $user = Auth::user();
+        switch ($state) {
+            case VoucherStates::SAVED:
+                self::saveVoucher($request, $state, true, $id);
+                break;
+            case VoucherStates::ACCEPTED:
+                self::saveVoucher($request, $state, true, $id);
+                self::acceptVoucher(Voucher::find($id));
+                break;
+            case VoucherStates::SENDED:
+                self::saveVoucher($request, $state, true, $id);
+                self::acceptVoucher(Voucher::find($id));
+                self::sendVoucher(Voucher::find($id));
+                break;
+        }
+        return redirect()->route('home')->with(['status' => 'Voucher updated successfully.']);
     }
 
     /**
@@ -362,7 +370,7 @@ class VoucherController extends Controller
                     } else {
                         $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
                     }
-                    $voucher = Voucher::where('id', $voucherId)->get();
+                    $voucher = Voucher::find($voucherId);
                     $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
                     $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
                     $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
@@ -444,7 +452,7 @@ class VoucherController extends Controller
         $voucher->save();
     }
 
-    private static function saveVoucher($request, $state)
+    private static function saveVoucher($request, $state, $isUpdate = false, $id = null)
     {
         $company = Company::find($request->company);
         $branch = Branch::find($request->branch);
@@ -454,20 +462,26 @@ class VoucherController extends Controller
         $environment = Environment::find($request->environment);
         $voucherType = VoucherType::find($request->voucher_type);
         $issueDate = DateTime::createFromFormat('Y/m/d', $request->issue_date);
-        $voucherState = VoucherState::find(VoucherStates::SAVED);
-        $sequential = Voucher::where([
-            ['emission_point_id', '=', $emissionPoint->id],
-            ['voucher_type_id', '=', $voucherType->id],
-            ['environment_id', '=', $environment->id],
-            ['voucher_state_id', '<', VoucherStates::SENDED],
-        ])->max('sequential') + 1;
+        if ($isUpdate) {
+            $voucher = Voucher::find($id);
+        } else {
+            $voucherState = VoucherState::find(VoucherStates::SAVED);
+            $sequential = Voucher::where([
+                ['emission_point_id', '=', $emissionPoint->id],
+                ['voucher_type_id', '=', $voucherType->id],
+                ['environment_id', '=', $environment->id],
+                ['voucher_state_id', '<', VoucherStates::SENDED],
+            ])->max('sequential') + 1;
+            $voucher = new Voucher;
+            $voucher->voucher_state_id = $voucherState->id;
+            $voucher->sequential = $sequential;
+        }
 
-        $voucher = new Voucher;
+
+
         $voucher->emission_point_id = $emissionPoint->id;
         $voucher->voucher_type_id = $voucherType->id;
         $voucher->environment_id = $environment->id;
-        $voucher->voucher_state_id = $voucherState->id;
-        $voucher->sequential = $sequential;
         $voucher->numeric_code = self::generateRandomNumericCode();
         $voucher->customer_id = $customer->id;
         $voucher->issue_date = $issueDate->format('Y-m-d');
@@ -487,6 +501,12 @@ class VoucherController extends Controller
         $quantities = $request->product_quantity;
         $unitPrices = $request->product_unitprice;
         $discounts = $request->product_discount;
+        foreach ($voucher->details as $detail) {
+            foreach ($detail->taxDetails as $taxDetail) {
+                $taxDetail->delete();
+            }
+            $detail->delete();
+        }
         for ($i = 0; $i < count($products); $i++) {
             $product = Product::find($products[$i]);
             $ivaTax = IvaTax::find($product->taxes()->first()->iva_tax_id);
@@ -509,6 +529,9 @@ class VoucherController extends Controller
             $taxDetail->save();
         }
 
+        foreach ($voucher->payments as $payment) {
+            $payment->delete();
+        }
         $paymentMethods = $request->paymentMethod;
         $values = $request->paymentMethod_value;
         $timeUnits = $request->paymentMethod_timeunit;
@@ -523,6 +546,9 @@ class VoucherController extends Controller
             $payment->save();
         }
 
+        foreach ($voucher->additionalFields() as $additionalField) {
+            $additionalField->delete();
+        }
         $names = $request->additionaldetail_name;
         $values = $request->additionaldetail_value;
         if ($names !== NULL) {
@@ -682,9 +708,9 @@ class VoucherController extends Controller
         $xml['detalles'] = [
             'detalle' => $voucherDetails,
         ];
-        if (count($voucher->aditionalFields) > 0) {
+        if (count($voucher->additionalFields) > 0) {
             $voucherAdditionalFields = array();
-            foreach ($voucher->aditionalFields as $additionalField) {
+            foreach ($voucher->additionalFields as $additionalField) {
                 array_push($voucherAdditionalFields,
                     array(
                         '_attributes' => ['nombre' => $additionalField->name],

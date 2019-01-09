@@ -241,21 +241,55 @@ $(document).ready(function(){
             $('#voucher_type').selectpicker('val', draftVoucher['voucher_type']);
         }
     @endif
-    @can('create_vouchers')
-        $('#draft').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}").submit();
-        });
-        $('#save').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}").submit();
-        });
-    @endcan
-    @can('send_vouchers')
-        $('#accept').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}").submit();
-        });
-        $('#send').on('click', function() {
-            $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}").submit();
-        });
-    @endcan
+    @if($action === 'create')
+        @can('create_vouchers')
+            $('#draft').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}").submit();
+            });
+            $('#save').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}").submit();
+            });
+        @endcan
+        @can('send_vouchers')
+            $('#accept').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}").submit();
+            });
+            $('#send').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}").submit();
+            });
+        @endcan
+    @elseif($action === 'edit')
+        @can('create_vouchers')
+            $('#save').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED, $voucher->id]) }}").submit();
+            });
+        @endcan
+        @can('send_vouchers')
+            $('#accept').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED, $voucher->id]) }}").submit();
+            });
+            $('#send').on('click', function() {
+                $('#voucher-form').attr('action', "{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED, $voucher->id]) }}").submit();
+            });
+        @endcan
+    @elseif($action === 'draft')
+        @can('create_vouchers')
+            $('#draft').on('click', function() {
+                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT . '/update_draft/' }}" + draftVoucher['id']).submit();
+            });
+            $('#save').on('click', function() {
+                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED . '/update_draft/' }}" + draftVoucher['id']).submit();
+            });
+        @endcan
+        @can('send_vouchers')
+            $('#accept').on('click', function() {
+                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED . '/update_draft/' }}" + draftVoucher['id']).submit();
+            });
+            $('#send').on('click', function() {
+                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED . '/update_draft/' }}" + draftVoucher['id']).submit();
+            });
+        @endcan
+    @endif
+
 });
 </script>
