@@ -353,7 +353,7 @@ $(document).ready(function(){
                                     $("select[id ~= 'paymentMethod[]']").each(function() {
                                         $(this).selectpicker('val', voucher['paymentMethod'][0]);
                                         voucher['paymentMethod'].shift();
-                                        $(this).closest('tr').find('input[id *= paymentMethod_value]').val(voucher['paymentMethod_value'][0]);
+                                        $(this).closest('tr').find('input[id *= paymentMethod_value]').val(Number(voucher['paymentMethod_value'][0]).toFixed(2));
                                         voucher['paymentMethod_value'].shift();
                                     });
                                 }
@@ -474,12 +474,12 @@ $(document).ready(function(){
         if ('ivaRetention' in voucher) {
             $('#ivaRetention').prop('checked', true);
             $('#ivaRetention').trigger('change');
-            $('#ivaRetentionValue').val(voucher['ivaRetentionValue']);
+            $('#ivaRetentionValue').val(Number(voucher['ivaRetentionValue']).toFixed(2));
         }
         if ('rentRetention' in voucher) {
             $('#rentRetention').prop('checked', true);
             $('#rentRetention').trigger('change');
-            $('#rentRetentionValue').val(voucher['rentRetentionValue']);
+            $('#rentRetentionValue').val(Number(voucher['rentRetentionValue']).toFixed(2));
         }
     @endif
     $('#tip').change(function() {

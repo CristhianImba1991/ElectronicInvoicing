@@ -183,11 +183,18 @@ jQuery(document).ready(function($) {
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                     @can('send_vouchers')
-                                                        <button type="button" class="btn btn-sm btn-light">Send</button>
+                                                        <form action="{{ route('vouchers.send', $voucher) }}" method="post">
+                                                            <button type="submit" class="btn btn-sm btn-light">Send</button>
+                                                        </form>
                                                     @endcan
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
-                                                    <button type="button" class="btn btn-sm">Edit</button>
+                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
+                                                    @can('send_vouchers')
+                                                        <form action="{{ route('vouchers.send', $voucher) }}" method="post">
+                                                            <button type="submit" class="btn btn-sm btn-light">Send</button>
+                                                        </form>
+                                                    @endcan
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED)
 

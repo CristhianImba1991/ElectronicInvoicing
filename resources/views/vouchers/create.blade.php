@@ -44,7 +44,7 @@
                                             <label for="company">Company</label>
                                             <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
                                                 @foreach($companies as $company)
-                                                    <option value="{{ $company->id }}" {{ $company->id === old('company') ? "selected" : "" }}>{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -128,7 +128,7 @@
                                             <label for="currency">Currency</label>
                                             <select class="form-control selectpicker" id="currency" name="currency" data-live-search="true" data-dependent="branch" title="Select a currency ...">
                                                 @foreach($currencies as $currency)
-                                                    <option value="{{ $currency->id }}" {{ $currency->id === old('currency') ? "selected" : "" }}>{{ $currency->name }}</option>
+                                                    <option value="{{ $currency->id }}">{{ $currency->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -140,7 +140,7 @@
                                             <label for="environment">Environment</label>
                                             <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="Select a environment ...">
                                                 @foreach($environments as $environment)
-                                                    <option value="{{ $environment->id }}" {{ $environment->id === old('environment') ? "selected" : "" }}>{{ $environment->name }}</option>
+                                                    <option value="{{ $environment->id }}">{{ $environment->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -148,7 +148,7 @@
                                             <label for="voucher_type">Voucher type</label>
                                             <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="Select a voucher type ...">
                                                 @foreach($voucherTypes as $voucherType)
-                                                    <option value="{{ $voucherType->id }}" {{ $voucherType->id === old('voucher_type') ? "selected" : "" }}>{{ $voucherType->name }}</option>
+                                                    <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>

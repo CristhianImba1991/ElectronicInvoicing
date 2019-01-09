@@ -560,6 +560,12 @@ class VoucherController extends Controller
         $voucher->save();
     }
 
+    private static function rejectVoucher()
+    {
+        $voucher->voucher_state_id = VoucherStates::REJECTED;
+        $voucher->save();
+    }
+
     private static function signVoucher($voucher)
     {
         $version = '1.0.0';
@@ -907,11 +913,6 @@ class VoucherController extends Controller
         }
     }
 
-    private static function rejectVoucher()
-    {
-
-    }
-
     private static function sendVoucher($voucher)
     {
         $voucher->voucher_state_id = VoucherStates::SENDED;
@@ -1022,6 +1023,13 @@ class VoucherController extends Controller
         } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
             dd($voucher->extra_detail);
         }
+    }
+
+    public function send(Voucher $voucher)
+    {
+        dd($voucher);
+        self::sendVoucher($voucher);
+        return view('vouchers.index');
     }
 
     private static function cancelVoucher()
