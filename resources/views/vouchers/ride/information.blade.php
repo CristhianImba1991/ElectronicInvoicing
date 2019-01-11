@@ -16,19 +16,7 @@
           <th class="align-middle" colspan="2">NÚMERO DE AUTORIZACIÓN</th>
         </tr>
         <tr>
-            @php
-            $voucherAccessKey = \DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('dmY') .
-                str_pad(strval(\ElectronicInvoicing\VoucherType::find($voucher->voucher_type_id)->code), 2, '0', STR_PAD_LEFT) .
-                $voucher->emissionPoint->branch->company->ruc .
-                $voucher->environment->code .
-                str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) .
-                str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) .
-                str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) .
-                str_pad(strval($voucher->numeric_code), 8, '0', STR_PAD_LEFT) .
-                '1';
-            $voucherAccessKey .= \ElectronicInvoicing\Http\Controllers\VoucherController::getCheckDigit($voucherAccessKey);
-            @endphp
-          <td class="align-middle" colspan="2">{{ $voucherAccessKey }}</td>
+          <td class="align-middle" colspan="2">{{ $voucher->accessKey() }}</td>
         </tr>
         <tr>
           <th class="align-middle">FECHA Y HORA DE AUTORIZACIÓN</th>
@@ -46,7 +34,7 @@
           <th class="align-middle" colspan="2">CLAVE DE ACCESO</th>
         </tr>
         <tr>
-          <td class="align-middle" colspan="2"><img src='data:image/png;base64,{{ \DNS1D::getBarcodePNG($voucherAccessKey, "C128", 1.3, 60, array(0,0,0), true) }}' alt="barcode"   /></td>
+          <td class="align-middle" colspan="2"><img src='data:image/png;base64,{{ \DNS1D::getBarcodePNG($voucher->accessKey(), "C128", 1.3, 60, array(0,0,0), true) }}' alt="barcode"   /></td>
         </tr>
       </tbody>
     </table>

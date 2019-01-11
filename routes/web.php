@@ -247,7 +247,7 @@ Route::group(['prefix' => 'voucher'], function () {
         Route::put('/update/{state}/{id}', 'VoucherController@update')->where('state', '^(?:[1-9]|10)$')->name('vouchers.update');
     });
     Route::group(['middleware' => ['permission:send_vouchers']], function () {
-        Route::post('/send/{id}', 'VoucherController@send')->name('vouchers.send');
+        Route::post('/send/{voucher}', 'VoucherController@send')->name('vouchers.send');
     });
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/{voucher}/edit', 'VoucherController@edit')->name('vouchers.edit');

@@ -404,18 +404,6 @@ class VoucherController extends Controller
     	return implode($numericCode);
     }
 
-    public static function getCheckDigit($accessKey)
-    {
-        $summation = 0;
-        $factor = 7;
-        foreach (str_split($accessKey) as $number) {
-            $summation += intval($number) * $factor--;
-            $factor = $factor == 1 ? 7 : $factor;
-        }
-        $checkDigit = 11 - $summation % 11;
-        return $checkDigit == 10 ? 1 : ($checkDigit == 11 ? 0 : $checkDigit);
-    }
-
     private static function hex2Base64($hex)
     {
         $base64 = '';
@@ -581,9 +569,7 @@ class VoucherController extends Controller
         $establishment = str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT);
         $emissionPoint = str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT);
         $sequential = str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT);
-        $numericCode = str_pad(strval($voucher->numeric_code), 8, '0', STR_PAD_LEFT);
-        $accessKey = $issueDate->format('dmY') . $voucherTypeCode . $voucher->emissionPoint->branch->company->ruc . $voucher->environment->code . $establishment . $emissionPoint . $sequential . $numericCode . '1';
-        $accessKey = $accessKey . self::getCheckDigit($accessKey);
+        $accessKey = $voucher->accessKey();
         $xml['_attributes'] = ['id' => 'comprobante', 'version' => $version];
         $xml['infoTributaria'] = [
             'ambiente'          => $voucher->environment->code,
@@ -765,149 +751,146 @@ class VoucherController extends Controller
             $ObjectNumber = self::generateRandomNumber(6);
 
             $signature = $xml->createElement('ds:Signature');
-            $signature->setAttribute( 'xmlns:ds', 'http://www.w3.org/2000/09/xmldsig#' );
-            $signature->setAttribute( 'xmlns:etsi', 'http://uri.etsi.org/01903/v1.3.2#' );
-            $signature->setAttribute( 'Id', 'Signature' . $SignatureNumber );
+            $signature->setAttribute('xmlns:ds', 'http://www.w3.org/2000/09/xmldsig#');
+            $signature->setAttribute('xmlns:etsi', 'http://uri.etsi.org/01903/v1.3.2#');
+            $signature->setAttribute('Id', 'Signature' . $SignatureNumber);
             $voucherDocument->appendChild($signature);
 
             $SignedInfo = $xml->createElement('ds:SignedInfo');
-            $SignedInfo->setAttribute( 'Id', 'Signature-SignedInfo' . $SignedInfoNumber );
-            $signature->appendChild( $SignedInfo );
+            $SignedInfo->setAttribute('Id', 'Signature-SignedInfo' . $SignedInfoNumber);
+            $signature->appendChild($SignedInfo);
             $CanonicalizationMethod = $xml->createElement('ds:CanonicalizationMethod');
-            $CanonicalizationMethod->setAttribute( 'Algorithm', 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315' );
-            $SignedInfo->appendChild( $CanonicalizationMethod );
+            $CanonicalizationMethod->setAttribute('Algorithm', 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315');
+            $SignedInfo->appendChild($CanonicalizationMethod);
 
             $SignatureMethod = $xml->createElement('ds:SignatureMethod');
-            $SignatureMethod->setAttribute( 'Algorithm', 'http://www.w3.org/2000/09/xmldsig#rsa-sha1' );
-            $SignedInfo->appendChild( $SignatureMethod );
+            $SignatureMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#rsa-sha1');
+            $SignedInfo->appendChild($SignatureMethod);
 
-            $Reference1 = $xml->createElement( 'ds:Reference' );
-            $Reference1->setAttribute( 'Id', 'SignedPropertiesID' . $SignedPropertiesIDNumber );
-            $Reference1->setAttribute( 'Type', 'http://uri.etsi.org/01903#SignedProperties' );
-            $Reference1->setAttribute( 'URI', '#Signature' . $SignatureNumber . '-SignedProperties' . $SignedPropertiesNumber );
-            $SignedInfo->appendChild( $Reference1 );
-            $DigestMethod = $xml->createElement( 'ds:DigestMethod', '' );
-            $Reference1->appendChild( $DigestMethod );
-            $DigestMethod->setAttribute( 'Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1' );
-            $DigestValue1 = $xml->createElement( 'ds:DigestValue' );
-            $Reference1->appendChild( $DigestValue1 );
+            $Reference1 = $xml->createElement('ds:Reference');
+            $Reference1->setAttribute('Id', 'SignedPropertiesID' . $SignedPropertiesIDNumber);
+            $Reference1->setAttribute('Type', 'http://uri.etsi.org/01903#SignedProperties');
+            $Reference1->setAttribute('URI', '#Signature' . $SignatureNumber . '-SignedProperties' . $SignedPropertiesNumber);
+            $SignedInfo->appendChild($Reference1);
+            $DigestMethod = $xml->createElement('ds:DigestMethod', '');
+            $Reference1->appendChild($DigestMethod);
+            $DigestMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1');
+            $DigestValue1 = $xml->createElement('ds:DigestValue');
+            $Reference1->appendChild($DigestValue1);
 
-            $Reference2 = $xml->createElement( 'ds:Reference' );
-            $Reference2->setAttribute( 'URI', '#Certificate' . $CertificateNumber );
-            $SignedInfo->appendChild( $Reference2 );
-            $DigestMethod = $xml->createElement( 'ds:DigestMethod', '' );
-            $DigestMethod->setAttribute( 'Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1' );
-            $Reference2->appendChild( $DigestMethod );
-            $DigestValue2 = $xml->createElement( 'ds:DigestValue' );
-            $Reference2->appendChild( $DigestValue2 );
+            $Reference2 = $xml->createElement('ds:Reference');
+            $Reference2->setAttribute('URI', '#Certificate' . $CertificateNumber);
+            $SignedInfo->appendChild($Reference2);
+            $DigestMethod = $xml->createElement('ds:DigestMethod', '');
+            $DigestMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1');
+            $Reference2->appendChild($DigestMethod);
+            $DigestValue2 = $xml->createElement('ds:DigestValue');
+            $Reference2->appendChild($DigestValue2);
 
-            $Reference3 = $xml->createElement( 'ds:Reference' );
-            $Reference3->setAttribute( 'Id', 'Reference-ID-' . $ReferenceIDNumber );
-            $Reference3->setAttribute( 'URI', '#comprobante' );
-            $SignedInfo->appendChild( $Reference3 );
-            $Transforms = $xml->createElement( 'ds:Transforms' );
-            $Reference3->appendChild( $Transforms );
-            $Transform = $xml->createElement( 'ds:Transform' );
-            $Transform->setAttribute( 'Algorithm', 'http://www.w3.org/2000/09/xmldsig#enveloped-signature' );
-            $Transforms->appendChild( $Transform );
-            $DigestMethod = $xml->createElement( 'ds:DigestMethod' );
-            $DigestMethod->setAttribute( 'Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1' );
-            $Reference3->appendChild( $DigestMethod );
-            $DigestValue3 = $xml->createElement( 'ds:DigestValue', $digestValueVoucher );
-            $Reference3->appendChild( $DigestValue3 );
+            $Reference3 = $xml->createElement('ds:Reference');
+            $Reference3->setAttribute('Id', 'Reference-ID-' . $ReferenceIDNumber);
+            $Reference3->setAttribute('URI', '#comprobante');
+            $SignedInfo->appendChild($Reference3);
+            $Transforms = $xml->createElement('ds:Transforms');
+            $Reference3->appendChild($Transforms);
+            $Transform = $xml->createElement('ds:Transform');
+            $Transform->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#enveloped-signature');
+            $Transforms->appendChild($Transform);
+            $DigestMethod = $xml->createElement('ds:DigestMethod');
+            $DigestMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1');
+            $Reference3->appendChild($DigestMethod);
+            $DigestValue3 = $xml->createElement('ds:DigestValue', $digestValueVoucher);
+            $Reference3->appendChild($DigestValue3);
 
-            $SignatureValue = $xml->createElement( 'ds:SignatureValue' );
-            $SignatureValue->setAttribute( 'Id', 'SignatureValue' . $SignatureValueNumber );
-            $signature->appendChild( $SignatureValue );
+            $SignatureValue = $xml->createElement('ds:SignatureValue');
+            $SignatureValue->setAttribute('Id', 'SignatureValue' . $SignatureValueNumber);
+            $signature->appendChild($SignatureValue);
 
-            $KeyInfo = $xml->createElement( "ds:KeyInfo" );
-            $KeyInfo->setAttribute( 'Id', 'Certificate' . $CertificateNumber );
-            $signature->appendChild( $KeyInfo );
-            $X509Data = $xml->createElement( "ds:X509Data" );
-            $KeyInfo->appendChild( $X509Data );
-            $X509Certificate = $xml->createElement( "ds:X509Certificate", "\n" . $filledCert . "\n" );
-            $X509Data->appendChild( $X509Certificate );
-            $KeyValue = $xml->createElement( "ds:KeyValue" );
-            $KeyInfo->appendChild( $KeyValue );
-            $RSAKeyValue = $xml->createElement( "ds:RSAKeyValue" );
-            $KeyValue->appendChild( $RSAKeyValue );
-            $Modulus = $xml->createElement( "ds:Modulus", "\n" . $modulus . "\n" );
-            $RSAKeyValue->appendChild( $Modulus );
-            $Exponent = $xml->createElement( "ds:Exponent", "AQAB" );
-            $RSAKeyValue->appendChild( $Exponent );
+            $KeyInfo = $xml->createElement('ds:KeyInfo');
+            $KeyInfo->setAttribute('Id', 'Certificate' . $CertificateNumber);
+            $signature->appendChild($KeyInfo);
+            $X509Data = $xml->createElement('ds:X509Data');
+            $KeyInfo->appendChild($X509Data);
+            $X509Certificate = $xml->createElement('ds:X509Certificate', "\n" . $filledCert . "\n");
+            $X509Data->appendChild($X509Certificate);
+            $KeyValue = $xml->createElement('ds:KeyValue');
+            $KeyInfo->appendChild($KeyValue);
+            $RSAKeyValue = $xml->createElement('ds:RSAKeyValue');
+            $KeyValue->appendChild($RSAKeyValue);
+            $Modulus = $xml->createElement('ds:Modulus', "\n" . $modulus . "\n");
+            $RSAKeyValue->appendChild($Modulus);
+            $Exponent = $xml->createElement('ds:Exponent', 'AQAB');
+            $RSAKeyValue->appendChild($Exponent);
 
             $xml->save(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
             $xml->load(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
 
-            $Object = $xml->createElement("ds:Object");
-            $Object->setAttribute( 'Id', 'Signature' . $SignatureNumber . '-Object' . $ObjectNumber );
-            $signature = $xml->getElementsByTagName( 'Signature' )->item( 0 );
-            $signature->appendChild( $Object );
+            $Object = $xml->createElement('ds:Object');
+            $Object->setAttribute('Id', 'Signature' . $SignatureNumber . '-Object' . $ObjectNumber);
+            $signature = $xml->getElementsByTagName('Signature')->item(0);
+            $signature->appendChild($Object);
 
-            $QualifyingProperties = $xml->createElement( "etsi:QualifyingProperties" );
-            $QualifyingProperties->setAttribute( 'Target', '#Signature' . $SignatureNumber );
+            $QualifyingProperties = $xml->createElement('etsi:QualifyingProperties');
+            $QualifyingProperties->setAttribute('Target', '#Signature' . $SignatureNumber);
             $Object->appendChild($QualifyingProperties);
 
-            $SignedProperties = $xml->createElement( "etsi:SignedProperties" );
-            $SignedProperties->setAttribute( 'Id', 'Signature' . $SignatureNumber . "-SignedProperties" . $SignedPropertiesNumber );
-            $QualifyingProperties->appendChild( $SignedProperties );
-            $SignedSignatureProperties = $xml->createElement( "etsi:SignedSignatureProperties" );
-            $SignedProperties->appendChild( $SignedSignatureProperties );
-            $date = new DateTime( "now", new DateTimeZone( 'America/Guayaquil' ) );
-            $SigningTime = $xml->createElement( "etsi:SigningTime", $date->format( 'c' ) );
-            $SignedSignatureProperties->appendChild( $SigningTime );
-            $SigningCertificate = $xml->createElement( "etsi:SigningCertificate" );
-            $SignedSignatureProperties->appendChild( $SigningCertificate );
-            $Cert = $xml->createElement( "etsi:Cert" );
-            $SigningCertificate->appendChild( $Cert );
-            $CertDigest = $xml->createElement( "etsi:CertDigest" );
-            $Cert->appendChild( $CertDigest );
-            $DigestMethod = $xml->createElement( "ds:DigestMethod" );
-            $DigestMethod->setAttribute( 'Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1' );
-            $CertDigest->appendChild( $DigestMethod );
-            $DigestValue = $xml->createElement( "ds:DigestValue", $digestValueCertificate );
-            $CertDigest->appendChild( $DigestValue );
-            $IssuerSerial = $xml->createElement( "etsi:IssuerSerial" );
-            $Cert->appendChild( $IssuerSerial );
-            $X509IssuerName = $xml->createElement( "ds:X509IssuerName", $issuerName );
-            $IssuerSerial->appendChild( $X509IssuerName );
-            $X509SerialNumber = $xml->createElement( "ds:X509SerialNumber", $certInformation['serialNumber'] );
-            $IssuerSerial->appendChild( $X509SerialNumber );
-            $SignedDataObjectProperties = $xml->createElement( "etsi:SignedDataObjectProperties" );
-            $SignedProperties->appendChild( $SignedDataObjectProperties );
-            $DataObjectFormat = $xml->createElement( "etsi:DataObjectFormat" );
-            $DataObjectFormat->setAttribute( "ObjectReference", "#Reference-ID-" . $ReferenceIDNumber );
-            $SignedDataObjectProperties->appendChild( $DataObjectFormat );
-            $SignedDataObjectProperties = $xml->createElement( "etsi:Description", 'contenido comprobante' );
-            $DataObjectFormat->appendChild( $SignedDataObjectProperties );
-            $SignedDataObjectProperties = $xml->createElement( "etsi:MimeType", 'text/xml' );
-            $DataObjectFormat->appendChild( $SignedDataObjectProperties );
+            $SignedProperties = $xml->createElement('etsi:SignedProperties');
+            $SignedProperties->setAttribute('Id', 'Signature' . $SignatureNumber . '-SignedProperties' . $SignedPropertiesNumber);
+            $QualifyingProperties->appendChild($SignedProperties);
+            $SignedSignatureProperties = $xml->createElement('etsi:SignedSignatureProperties');
+            $SignedProperties->appendChild($SignedSignatureProperties);
+            $date = new DateTime('now', new DateTimeZone('America/Guayaquil'));
+            $SigningTime = $xml->createElement('etsi:SigningTime', $date->format('c'));
+            $SignedSignatureProperties->appendChild($SigningTime);
+            $SigningCertificate = $xml->createElement('etsi:SigningCertificate');
+            $SignedSignatureProperties->appendChild($SigningCertificate);
+            $Cert = $xml->createElement('etsi:Cert');
+            $SigningCertificate->appendChild($Cert);
+            $CertDigest = $xml->createElement('etsi:CertDigest');
+            $Cert->appendChild($CertDigest);
+            $DigestMethod = $xml->createElement('ds:DigestMethod');
+            $DigestMethod->setAttribute('Algorithm', 'http://www.w3.org/2000/09/xmldsig#sha1');
+            $CertDigest->appendChild($DigestMethod);
+            $DigestValue = $xml->createElement('ds:DigestValue', $digestValueCertificate);
+            $CertDigest->appendChild($DigestValue);
+            $IssuerSerial = $xml->createElement('etsi:IssuerSerial');
+            $Cert->appendChild($IssuerSerial);
+            $X509IssuerName = $xml->createElement('ds:X509IssuerName', $issuerName);
+            $IssuerSerial->appendChild($X509IssuerName);
+            $X509SerialNumber = $xml->createElement('ds:X509SerialNumber', $certInformation['serialNumber']);
+            $IssuerSerial->appendChild($X509SerialNumber);
+            $SignedDataObjectProperties = $xml->createElement('etsi:SignedDataObjectProperties');
+            $SignedProperties->appendChild($SignedDataObjectProperties);
+            $DataObjectFormat = $xml->createElement('etsi:DataObjectFormat');
+            $DataObjectFormat->setAttribute('ObjectReference', '#Reference-ID-' . $ReferenceIDNumber);
+            $SignedDataObjectProperties->appendChild($DataObjectFormat);
+            $SignedDataObjectProperties = $xml->createElement('etsi:Description', 'contenido comprobante' );
+            $DataObjectFormat->appendChild($SignedDataObjectProperties);
+            $SignedDataObjectProperties = $xml->createElement('etsi:MimeType', 'text/xml');
+            $DataObjectFormat->appendChild($SignedDataObjectProperties);
 
             $xml->save(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
             $xml->load(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
 
-            $primerDigestRef = self::hex2Base64( sha1( $xml->getElementsByTagName( "SignedProperties" )->item( 0 )->C14N() ) );
-        	$segundoDigestRef = self::hex2Base64( sha1( $xml->getElementsByTagName( "KeyInfo" )->item( 0 )->C14N() ) );
+        	$reference1 = $xml->getElementsByTagName('Reference')->item(0);
+        	$DigestValue1 = $reference1->getElementsByTagName('DigestValue')->item(0);
+        	$text = $xml->createTextNode(self::hex2Base64(sha1($xml->getElementsByTagName('SignedProperties')->item(0)->C14N())));
+        	$text = $DigestValue1->appendChild($text);
 
-        	$reference1 = $xml->getElementsByTagName( "Reference" )->item( 0 );
-        	$DigestValue1 = $reference1->getElementsByTagName( "DigestValue" )->item( 0 );
-        	$text = $xml->createTextNode( $primerDigestRef );
-        	$text = $DigestValue1->appendChild( $text );
-
-        	$reference2 = $xml->getElementsByTagName( "Reference" )->item( 1 );
-        	$DigestValue2 = $reference2->getElementsByTagName( "DigestValue" )->item( 0 );
-        	$text = $xml->createTextNode( $segundoDigestRef );
-        	$text = $DigestValue2->appendChild( $text );
+        	$reference2 = $xml->getElementsByTagName('Reference')->item(1);
+        	$DigestValue2 = $reference2->getElementsByTagName('DigestValue')->item(0);
+        	$text = $xml->createTextNode(self::hex2Base64(sha1($xml->getElementsByTagName('KeyInfo')->item(0)->C14N())));
+        	$text = $DigestValue2->appendChild($text);
 
             $xml->save(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
             $xml->load(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
 
-            openssl_sign( $xml->getElementsByTagName( "SignedInfo" )->item( 0 )->C14N(), $signature, $pkey );
-            $valorFirma = wordwrap( base64_encode( $signature ), 76, "\n", true );
+            openssl_sign($xml->getElementsByTagName('SignedInfo')->item(0)->C14N(), $signature, $pkey);
+            $valorFirma = wordwrap(base64_encode($signature), 76, "\n", true);
 
-            $SignatureValue = $xml->getElementsByTagName( "SignatureValue" )->item( 0 );
-        	$text = $xml->createTextNode( "\n" . $valorFirma . "\n" );
-        	$text = $SignatureValue->appendChild( $text );
+            $SignatureValue = $xml->getElementsByTagName('SignatureValue')->item( 0 );
+        	$text = $xml->createTextNode("\n" . $valorFirma . "\n");
+        	$text = $SignatureValue->appendChild($text);
 
             $xml->save(storage_path('app/' . $voucher->xml), LIBXML_NOEMPTYTAG);
         }
@@ -967,18 +950,9 @@ class VoucherController extends Controller
 
         if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
             $soapClientValidation = new SoapClient($wsdlValidation);
-            $voucherAccessKey = DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('dmY') .
-                str_pad(strval(VoucherType::find($voucher->voucher_type_id)->code), 2, '0', STR_PAD_LEFT) .
-                $voucher->emissionPoint->branch->company->ruc .
-                $voucher->environment->code .
-                str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) .
-                str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) .
-                str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) .
-                str_pad(strval($voucher->numeric_code), 8, '0', STR_PAD_LEFT) .
-                '1';
             $accessKey = array(
                 'autorizacionComprobante' => array(
-                    'claveAccesoComprobante' =>  $voucherAccessKey . self::getCheckDigit($voucherAccessKey)
+                    'claveAccesoComprobante' =>  $voucher->accessKey()
                 )
             );
             $resultValidation = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
@@ -1015,7 +989,7 @@ class VoucherController extends Controller
                 $voucher->emissionPoint->branch->company->ruc . '/' .
                 VoucherState::find($voucher->voucher_state_id)->name . '/' .
                 DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y/m') . '/' .
-                $voucherAccessKey . self::getCheckDigit($voucherAccessKey) . '.xml';
+                $voucher->accessKey() . '.xml';
             Storage::put($xmlPath, ArrayToXml::convert($xmlReponse, 'autorizacion', false, 'UTF-8'));
             Storage::delete($voucher->xml);
             $voucher->xml = $xmlPath;
@@ -1027,9 +1001,8 @@ class VoucherController extends Controller
 
     public function send(Voucher $voucher)
     {
-        dd($voucher);
         self::sendVoucher($voucher);
-        return view('vouchers.index');
+        return redirect()->route('vouchers.index')->with(['status' => 'Voucher sended successfully.']);
     }
 
     private static function cancelVoucher()
@@ -1051,15 +1024,6 @@ class VoucherController extends Controller
     public function pdf(Voucher $voucher)
     {
         $html = false;
-        $voucherAccessKey = DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('dmY') .
-            str_pad(strval(VoucherType::find($voucher->voucher_type_id)->code), 2, '0', STR_PAD_LEFT) .
-            $voucher->emissionPoint->branch->company->ruc .
-            $voucher->environment->code .
-            str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) .
-            str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) .
-            str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) .
-            str_pad(strval($voucher->numeric_code), 8, '0', STR_PAD_LEFT) .
-            '1';
-        return PDF::loadView('vouchers.ride.invoice', compact(['voucher', 'html']))->download($voucherAccessKey . self::getCheckDigit($voucherAccessKey) . '.pdf');
+        return PDF::loadView('vouchers.ride.invoice', compact(['voucher', 'html']))->download($voucher->accessKey() . '.pdf');
     }
 }

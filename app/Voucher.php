@@ -2,6 +2,8 @@
 
 namespace ElectronicInvoicing;
 
+use DateTime;
+use ElectronicInvoicing\VoucherType;
 use Illuminate\Database\Eloquent\Model;
 
 class Voucher extends Model
@@ -151,5 +153,31 @@ class Voucher extends Model
             }
         }
         return $iva;
+    }
+
+    public function accessKey()
+    {
+        $accessKey = DateTime::createFromFormat('Y-m-d', $this->issue_date)->format('dmY') .
+            str_pad(strval(VoucherType::find($this->voucher_type_id)->code), 2, '0', STR_PAD_LEFT) .
+            $this->emissionPoint->branch->company->ruc .
+            $this->environment->code .
+            str_pad(strval($this->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) .
+            str_pad(strval($this->emissionPoint->code), 3, '0', STR_PAD_LEFT) .
+            str_pad(strval($this->sequential), 9, '0', STR_PAD_LEFT) .
+            str_pad(strval($this->numeric_code), 8, '0', STR_PAD_LEFT) .
+            '1';
+        return $accessKey . self::getCheckDigit($accessKey);
+    }
+
+    private static function getCheckDigit($accessKey)
+    {
+        $summation = 0;
+        $factor = 7;
+        foreach (str_split($accessKey) as $number) {
+            $summation += intval($number) * $factor--;
+            $factor = $factor == 1 ? 7 : $factor;
+        }
+        $checkDigit = 11 - $summation % 11;
+        return $checkDigit == 10 ? 1 : ($checkDigit == 11 ? 0 : $checkDigit);
     }
 }

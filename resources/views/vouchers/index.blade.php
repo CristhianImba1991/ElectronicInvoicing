@@ -184,6 +184,7 @@ jQuery(document).ready(function($) {
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                     @can('send_vouchers')
                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
+                                                            {{ csrf_field() }}
                                                             <button type="submit" class="btn btn-sm btn-light">Send</button>
                                                         </form>
                                                     @endcan
@@ -192,6 +193,7 @@ jQuery(document).ready(function($) {
                                                     <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
                                                     @can('send_vouchers')
                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
+                                                            {{ csrf_field() }}
                                                             <button type="submit" class="btn btn-sm btn-light">Send</button>
                                                         </form>
                                                     @endcan

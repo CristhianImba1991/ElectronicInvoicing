@@ -424,5 +424,11 @@ class DatabaseSeeder extends Seeder
         $input['password'] = Hash::make('edgar1234');
         $user = User::create($input);
         $user->assignRole('admin');
+
+        $input2['name'] = 'Inti Guzman';
+        $input2['email'] = 'inti.guzman@taotechideas.com';
+        $input2['password'] = Hash::make('inti1234');
+        $user2 = User::create($input2);
+        $user2->assignRole('admin');
     }
 }
