@@ -1,6 +1,7 @@
 <?php
 
 use Carbon\Carbon;
+use ElectronicInvoicing\Http\Logic\DraftJson;
 use ElectronicInvoicing\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
         DB::table('voucher_types')->insert([
             ['code' => 1, 'name' => 'FACTURA', 'created_at' => Carbon::now()],
             ['code' => 4, 'name' => 'NOTA DE CRÉDITO', 'created_at' => Carbon::now()],
@@ -430,5 +430,8 @@ class DatabaseSeeder extends Seeder
         $input2['password'] = Hash::make('inti1234');
         $user2 = User::create($input2);
         $user2->assignRole('admin');
+
+        DraftJson::getInstance()->appendUser($user);
+        DraftJson::getInstance()->appendUser($user2);
     }
 }

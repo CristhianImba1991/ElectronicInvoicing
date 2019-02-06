@@ -240,8 +240,9 @@ Route::group(['prefix' => 'voucher'], function () {
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/create', 'VoucherController@create')->name('vouchers.create');
     });
+    //Route::post('/create/{state}', 'VoucherController@validateRequest')->where('state', '^(?:[1-9]|10)$')->name('vouchers.store');
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::post('/create/{state}', 'VoucherController@store')->where('state', '^(?:[1-9]|10)$')->name('vouchers.store');
+        Route::post('/create/{state}', 'VoucherController@validateRequest')->where('state', '^(?:[1-9]|10)$')->name('vouchers.store');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::put('/update/{state}/{id}', 'VoucherController@update')->where('state', '^(?:[1-9]|10)$')->name('vouchers.update');

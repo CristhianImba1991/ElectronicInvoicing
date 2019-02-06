@@ -14,6 +14,7 @@ use PDF;
 use SoapClient;
 use Spatie\ArrayToXml\ArrayToXml;
 use Storage;
+use Validator;
 
 class VoucherController extends Controller
 {
@@ -23,6 +24,89 @@ class VoucherController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, $state, $voucher = NULL)
+    {
+        MailController::sendMailNewVoucher(Voucher::find(13));
+        //MailController::sendMailNewUser(User::find(25), str_random(8));
+        dd(str_random(8));
+        $date = new DateTime('now', new DateTimeZone('America/Guayaquil'));
+        $rules = [
+            'company' => 'required|numeric|exists:companies,id',
+            'branch' => 'required|numeric|exists:branches,id',
+            'emission_point' => 'required|numeric|exists:emission_points,id',
+            'customer' => 'required|numeric|exists:customers,id',
+            'currency' => 'required|numeric|exists:currencies,id',
+            'issue_date' => 'required|date|before_or_equal:' . $date->format('Y/m/d'),
+            'environment' => 'required|numeric|exists:environments,id',
+            'voucher_type' => 'required|numeric|exists:voucher_types,id'
+        ];
+        if ($request->voucher_type !== NULL) {
+            switch ($request->voucher_type) {
+                case 1:
+                    $rules['product'] = 'required|array|min:1';
+                    $rules['product.*'] = 'distinct|exists:products,id';
+                    $rules['product_quantity'] = 'required|array|min:1';
+                    $rules['product_quantity.*'] = 'required|numeric';
+                    $rules['product_unitprice'] = 'required|array|min:1';
+                    $rules['product_unitprice.*'] = 'required|numeric';
+                    $rules['product_discount'] = 'required|array|min:1';
+                    $rules['product_discount.*'] = 'required|numeric';
+                    $rules['paymentMethod'] = 'required|array|min:1';
+                    $rules['paymentMethod.*'] = 'exists:payment_methods,id';
+                    $rules['paymentMethod_value'] = 'required|array|min:1';
+                    $rules['paymentMethod_value.*'] = 'required|numeric|gt:0';
+                    $rules['paymentMethod_timeunit'] = 'required|array|min:1';
+                    $rules['paymentMethod_timeunit.*'] = 'exists:time_units,id';
+                    $rules['paymentMethod_term'] = 'required|array|min:1';
+                    $rules['paymentMethod_term.*'] = 'required|numeric|gte:0';
+                    $rules['additionaldetail_name'] = 'array|max:3';
+                    $rules['additionaldetail_name.*'] = 'required|alpha_dash|max:30';
+                    $rules['additionaldetail_value'] = 'array|max:3';
+                    $rules['additionaldetail_value.*'] = 'required|alpha_dash|max:300';
+                    $rules['waybill_establishment'] = 'required_with:waybill_emissionpoint,waybill_sequential|nullable|integer|min:1|max:999';
+                    $rules['waybill_emissionpoint'] = 'required_with:waybill_establishment,waybill_sequential|nullable|integer|min:1|max:999';
+                    $rules['waybill_sequential'] = 'required_with:waybill_establishment,waybill_emissionpoint|nullable|integer|min:1|max:999999999';
+                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['ivaRetentionValue'] = 'nullable|numeric|min:0';
+                    $rules['rentRetentionValue'] = 'nullable|numeric|min:0';
+                    $rules['tip'] = 'required|numeric|min:0';
+                    break;
+                case 2:
+                    // code...
+                    break;
+                case 3:
+                    // code...
+                    break;
+                case 4:
+                    // code...
+                    break;
+                case 5:
+                    // code...
+                    break;
+            }
+        }
+        $validator = Validator::make($request->all(), $rules, array());
+        $isValid = !$validator->fails();
+        //dd($isValid, $validator->messages()->messages());
+        if ($isValid) {
+            if ($request->method() === 'PUT') {
+                $this->update($request, $state, $voucher);
+                $request->session()->flash('status', 'Voucher updated successfully.');
+            } else {
+                $this->store($request, $state);
+                $request->session()->flash('status', 'Voucher added successfully.');
+            }
+        }
+        return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
     }
 
     /**
@@ -139,7 +223,7 @@ class VoucherController extends Controller
                 self::sendVoucher($voucher);
                 break;
         }
-        return redirect()->route('home')->with(['status' => 'Voucher added successfully.']);
+        return true;//redirect()->route('home')->with(['status' => 'Voucher added successfully.']);
     }
 
     /**
@@ -222,7 +306,7 @@ class VoucherController extends Controller
                 self::sendVoucher(Voucher::find($id));
                 break;
         }
-        return redirect()->route('home')->with(['status' => 'Voucher updated successfully.']);
+        return true;//redirect()->route('home')->with(['status' => 'Voucher updated successfully.']);
     }
 
     /**

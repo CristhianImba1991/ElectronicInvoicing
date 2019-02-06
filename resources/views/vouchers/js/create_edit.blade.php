@@ -26,6 +26,11 @@ $(document).ready(function(){
             }
         }
     @endif
+    $('body').on('hidden.bs.modal', function () {
+        if($('.modal.show').length > 0) {
+            $('body').addClass('modal-open');
+        }
+    });
     $('#company').change(function() {
         if($(this).val() != '' && $(this).val() != null) {
             var _token = $('input[name = "_token"]').val();
@@ -241,21 +246,51 @@ $(document).ready(function(){
             $('#voucher_type').selectpicker('val', draftVoucher['voucher_type']);
         }
     @endif
+    @if(in_array($action, array('create', 'edit', 'draft')))
+        @if(auth()->user()->can('create_vouchers') || auth()->user()->can('send_vouchers'))
+            function submit(url) {
+                $.ajax({
+                    url: url,
+                    method: "POST",
+                    data: $('#voucher-form').serialize(),
+                    success: function(result) {
+                        var validator = JSON.parse(result);
+                        if (validator['status']) {
+                            window.location.href = "{{ route('home') }}";
+                        } else {
+                            $('#validation').on('show.bs.modal', function(event) {
+                                var errors = '';
+                                $.each(validator['messages'], function(field, message) {
+                                    errors += "<li>" + message + "</li>";
+                                });
+                                $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                            });
+                            $('#validation').modal('show');
+                        }
+                    }
+                });
+            }
+        @endif
+    @endif
     @if($action === 'create')
         @can('create_vouchers')
             $('#draft').on('click', function() {
                 $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}").submit();
+                //submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}");
             });
             $('#save').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}").submit();
+                //$('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}").submit();
+                submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}");
             });
         @endcan
         @can('send_vouchers')
             $('#accept').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}").submit();
+                //$('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}").submit();
+                submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}");
             });
             $('#send').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}").submit();
+                //$('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}").submit();
+                submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}");
             });
         @endcan
     @elseif($action === 'edit')
@@ -290,6 +325,5 @@ $(document).ready(function(){
             });
         @endcan
     @endif
-
 });
 </script>
