@@ -37,6 +37,8 @@ Route::group(['prefix' => 'resource'], function () {
     Route::post('/company/customers', 'CompanyController@customers')->name('companies.customers');
     Route::post('/branch/emission_points', 'BranchController@emissionPoints')->name('branches.emissionPoints');
     Route::post('/branch/products', 'BranchController@products')->name('branches.products');
+    Route::post('/retention_taxes/taxes', 'RetentionTaxController@retentionTaxes')->name('retentionTaxes.taxes');
+    Route::post('/retention_taxes/tax_descriptions', 'RetentionTaxController@retentionTaxDescriptions')->name('retentionTaxes.taxDescriptions');
     Route::group(['middleware' => ['permission:read_products']], function () {
         Route::post('/product/taxes', 'ProductController@taxes')->name('products.taxes');
     });
@@ -226,7 +228,10 @@ Route::group(['prefix' => 'manage'], function () {
         Route::get('/vouchers/{id}/edit_draft', 'VoucherController@editDraft')->name('vouchers.edit_draft');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::put('/vouchers/{id}/update_draft/{voucherId}', 'VoucherController@updateDraft')->name('vouchers.update_draft');
+        Route::post('/vouchers/store_draft', 'VoucherController@storeDraft')->name('vouchers.store_draft');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::put('/vouchers/{state}/update_draft/{voucherId}', 'VoucherController@updateDraft')->name('vouchers.update_draft');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/vouchers/draft', 'VoucherController@indexDraft')->name('vouchers.index_draft');
@@ -245,7 +250,7 @@ Route::group(['prefix' => 'voucher'], function () {
         Route::post('/create/{state}', 'VoucherController@validateRequest')->where('state', '^(?:[1-9]|10)$')->name('vouchers.store');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::put('/update/{state}/{id}', 'VoucherController@update')->where('state', '^(?:[1-9]|10)$')->name('vouchers.update');
+        Route::put('/update/{state}/{id}', 'VoucherController@validateRequest')->where('state', '^(?:[1-9]|10)$')->name('vouchers.update');
     });
     Route::group(['middleware' => ['permission:send_vouchers']], function () {
         Route::post('/send/{voucher}', 'VoucherController@send')->name('vouchers.send');

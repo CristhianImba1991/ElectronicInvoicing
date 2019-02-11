@@ -6,7 +6,23 @@
           <td class="align-middle">{{ $voucher->emissionPoint->branch->company->ruc }}</td>
         </tr>
         <tr>
-          <th class="align-middle" colspan="2"><center>F A C T U R A</center></th>
+          @switch($voucher->voucher_type_id)
+            @case(1)
+              <th class="align-middle" colspan="2"><center>F A C T U R A</center></th>
+              @break
+            @case(2)
+              <th class="align-middle" colspan="2"><center>N O T A &nbsp; D E &nbsp; C R É D I T O</center></th>
+              @break
+            @case(3)
+              <th class="align-middle" colspan="2"><center>N O T A &nbsp; D E &nbsp; D É B I T O</center></th>
+              @break
+            @case(4)
+              <th class="align-middle" colspan="2"><center>G U Í A &nbsp; D E &nbsp; R E M I S I Ó N</center></th>
+              @break
+            @case(5)
+              <th class="align-middle" colspan="2"><center>C O M P R O B A N T E &nbsp; D E &nbsp; R E T E N C I Ó N</center></th>
+              @break
+          @endswitch
         </tr>
         <tr>
           <th class="align-middle">No.</th>

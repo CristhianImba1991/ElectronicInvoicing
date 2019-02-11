@@ -16,10 +16,12 @@
           <th class="align-middle">DIRECCIÓN SUCURSAL</th>
           <td class="align-middle">{{ $voucher->emissionPoint->branch->address }}</td>
         </tr>
-        <tr>
-          <th class="align-middle">CONTRIBUYENTE ESPECIAL</th>
-          <td class="align-middle">{{ $voucher->emissionPoint->branch->company->special_contributor }}</td>
-        </tr>
+        @if($voucher->emissionPoint->branch->company->special_contributor !== NULL)
+            <tr>
+              <th class="align-middle">CONTRIBUYENTE ESPECIAL</th>
+              <td class="align-middle">{{ $voucher->emissionPoint->branch->company->special_contributor }}</td>
+            </tr>
+        @endif
         <tr>
           <th class="align-middle">OBLIGADO A LLEVAR CONTABILIDAD</th>
           <td class="align-middle">{{ $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO' }}</td>

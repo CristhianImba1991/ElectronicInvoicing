@@ -275,53 +275,49 @@ $(document).ready(function(){
     @if($action === 'create')
         @can('create_vouchers')
             $('#draft').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}").submit();
-                //submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT) }}");
+                submit("{{ route('vouchers.store_draft') }}");
             });
             $('#save').on('click', function() {
-                //$('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}").submit();
                 submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED) }}");
             });
         @endcan
         @can('send_vouchers')
             $('#accept').on('click', function() {
-                //$('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}").submit();
                 submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED) }}");
             });
             $('#send').on('click', function() {
-                //$('#voucher-form').attr('action', "{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}").submit();
                 submit("{{ route('vouchers.store', \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED) }}");
             });
         @endcan
     @elseif($action === 'edit')
         @can('create_vouchers')
             $('#save').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED, $voucher->id]) }}").submit();
+                submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED, $voucher->id]) }}");
             });
         @endcan
         @can('send_vouchers')
             $('#accept').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED, $voucher->id]) }}").submit();
+                submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED, $voucher->id]) }}");
             });
             $('#send').on('click', function() {
-                $('#voucher-form').attr('action', "{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED, $voucher->id]) }}").submit();
+                submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED, $voucher->id]) }}");
             });
         @endcan
     @elseif($action === 'draft')
         @can('create_vouchers')
             $('#draft').on('click', function() {
-                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT . '/update_draft/' }}" + draftVoucher['id']).submit();
+                submit("{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT . '/update_draft/' }}" + draftVoucher['id']);
             });
             $('#save').on('click', function() {
-                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED . '/update_draft/' }}" + draftVoucher['id']).submit();
+                submit("{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED . '/update_draft/' }}" + draftVoucher['id']);
             });
         @endcan
         @can('send_vouchers')
             $('#accept').on('click', function() {
-                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED . '/update_draft/' }}" + draftVoucher['id']).submit();
+                submit("{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED . '/update_draft/' }}" + draftVoucher['id']);
             });
             $('#send').on('click', function() {
-                $('#voucher-form').attr('action', "{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED . '/update_draft/' }}" + draftVoucher['id']).submit();
+                submit("{{ url('/manage/vouchers')  . '/' .  \ElectronicInvoicing\StaticClasses\VoucherStates::SENDED . '/update_draft/' }}" + draftVoucher['id']);
             });
         @endcan
     @endif

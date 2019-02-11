@@ -2,7 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\RetentionTax;
+use ElectronicInvoicing\{RetentionTax, RetentionTaxDescription};
 use Illuminate\Http\Request;
 
 class RetentionTaxController extends Controller
@@ -81,5 +81,25 @@ class RetentionTaxController extends Controller
     public function destroy(RetentionTax $retentionTax)
     {
         //
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function retentionTaxes(Request $request){
+        return RetentionTax::all()->toJson();
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function retentionTaxDescriptions(Request $request){
+        if (is_array($request->id)) {
+            $retentionTaxDescriptions = RetentionTaxDescription::whereIn('retention_tax_id', $request->id)->get();
+            return $retentionTaxDescriptions->toJson();
+        } else if (is_string($request->id)) {
+            $retentionTaxDescriptions = RetentionTaxDescription::where('retention_tax_id', $request->id)->get();
+            return $retentionTaxDescriptions->toJson();
+        }
     }
 }

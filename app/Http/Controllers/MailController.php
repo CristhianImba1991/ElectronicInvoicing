@@ -29,7 +29,14 @@ class MailController extends Controller
     public static function sendMailNewVoucher(Voucher $voucher)
     {
         $html = false;
-        PDF::loadView('vouchers.ride.invoice', compact(['voucher', 'html']))->save($voucher->accessKey() . '.pdf');
+        switch ($voucher->voucher_type_id) {
+            case 1: $voucherType = 'invoice'; break;
+            case 2: $voucherType = 'credit_note'; break;
+            case 3: $voucherType = 'debit_note'; break;
+            case 4: $voucherType = 'waybill'; break;
+            case 5: $voucherType = 'retention'; break;
+        }
+        PDF::loadView('vouchers.ride.' . $voucherType, compact(['voucher', 'html']))->save($voucher->accessKey() . '.pdf');
         Mail::to($voucher->customer->users->first()->email)
             ->cc(explode(',', $voucher->customer->email))
             ->bcc($voucher->user->email)

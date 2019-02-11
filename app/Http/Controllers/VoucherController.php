@@ -4,7 +4,33 @@ namespace ElectronicInvoicing\Http\Controllers;
 
 use DateTime;
 use DateTimeZone;
-use ElectronicInvoicing\{AdditionalField, Branch, Company, Currency, Customer, Detail, EmissionPoint, Environment, IceTax, IdentificationType, IrbpnrTax, IvaTax, Payment, PaymentMethod, Product, TaxDetail, TimeUnit, User, Voucher, VoucherState, VoucherType};
+use ElectronicInvoicing\{
+    AdditionalField,
+    Branch,
+    Company,
+    Currency,
+    Customer,
+    Detail,
+    EmissionPoint,
+    Environment,
+    IceTax,
+    IdentificationType,
+    IrbpnrTax,
+    IvaTax,
+    Payment,
+    PaymentMethod,
+    Product,
+    Retention,
+    RetentionDetail,
+    RetentionTax,
+    RetentionTaxDescription,
+    TaxDetail,
+    TimeUnit,
+    User,
+    Voucher,
+    VoucherState,
+    VoucherType
+};
 use ElectronicInvoicing\Http\Controllers\CompanyUser;
 use ElectronicInvoicing\Http\Logic\DraftJson;
 use ElectronicInvoicing\StaticClasses\VoucherStates;
@@ -26,18 +52,8 @@ class VoucherController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Validate the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \ElectronicInvoicing\Company  $company
-     * @return \Illuminate\Http\Response
-     */
-    public function validateRequest(Request $request, $state, $voucher = NULL)
+    private static function isValidRequest(Request $request)
     {
-        MailController::sendMailNewVoucher(Voucher::find(13));
-        //MailController::sendMailNewUser(User::find(25), str_random(8));
-        dd(str_random(8));
         $date = new DateTime('now', new DateTimeZone('America/Guayaquil'));
         $rules = [
             'company' => 'required|numeric|exists:companies,id',
@@ -55,15 +71,15 @@ class VoucherController extends Controller
                     $rules['product'] = 'required|array|min:1';
                     $rules['product.*'] = 'distinct|exists:products,id';
                     $rules['product_quantity'] = 'required|array|min:1';
-                    $rules['product_quantity.*'] = 'required|numeric';
+                    $rules['product_quantity.*'] = 'required|numeric|gte:0';
                     $rules['product_unitprice'] = 'required|array|min:1';
-                    $rules['product_unitprice.*'] = 'required|numeric';
+                    $rules['product_unitprice.*'] = 'required|numeric|gte:0';
                     $rules['product_discount'] = 'required|array|min:1';
-                    $rules['product_discount.*'] = 'required|numeric';
+                    $rules['product_discount.*'] = 'required|numeric|gte:0';
                     $rules['paymentMethod'] = 'required|array|min:1';
                     $rules['paymentMethod.*'] = 'exists:payment_methods,id';
                     $rules['paymentMethod_value'] = 'required|array|min:1';
-                    $rules['paymentMethod_value.*'] = 'required|numeric|gt:0';
+                    $rules['paymentMethod_value.*'] = 'required|numeric|gte:0';
                     $rules['paymentMethod_timeunit'] = 'required|array|min:1';
                     $rules['paymentMethod_timeunit.*'] = 'exists:time_units,id';
                     $rules['paymentMethod_term'] = 'required|array|min:1';
@@ -90,13 +106,44 @@ class VoucherController extends Controller
                     // code...
                     break;
                 case 5:
-                    // code...
+                    $rules['tax'] = 'required|array|min:1';
+                    $rules['tax.*'] = 'exists:retention_taxes,id';
+                    $rules['description'] = 'required|array|min:1';
+                    $rules['description.*'] = 'distinct|exists:retention_tax_descriptions,id';
+                    $rules['value'] = 'required|array|min:1';
+                    $rules['value.*'] = 'required|numeric|gte:0';
+                    $rules['tax_base'] = 'required|array|min:1';
+                    $rules['tax_base.*'] = 'required|numeric|gte:0';
+                    $rules['additionaldetail_name'] = 'array|max:3';
+                    $rules['additionaldetail_name.*'] = 'required|alpha_dash|max:30';
+                    $rules['additionaldetail_value'] = 'array|max:3';
+                    $rules['additionaldetail_value.*'] = 'required|alpha_dash|max:300';
+                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['voucher_type_support_document'] = 'required|exists:voucher_types,id';
+                    $rules['supportdocument_establishment'] = 'required|nullable|integer|min:1|max:999';
+                    $rules['supportdocument_emissionpoint'] = 'required|nullable|integer|min:1|max:999';
+                    $rules['supportdocument_sequential'] = 'required|nullable|integer|min:1|max:999999999';
+                    $rules['issue_date_support_document'] = 'required|date|before_or_equal:' . $date->format('Y/m/d');
                     break;
             }
         }
-        $validator = Validator::make($request->all(), $rules, array());
+        return Validator::make($request->all(), $rules, array());
+        return !$validator->fails();
+    }
+
+    /**
+     * Validate the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \ElectronicInvoicing\Company  $company
+     * @return \Illuminate\Http\Response
+     */
+    public function validateRequest(Request $request, $state, $voucher = NULL)
+    {
+        //MailController::sendMailNewVoucher(Voucher::find(13));
+        //MailController::sendMailNewUser(User::find(25), str_random(8));
+        $validator = self::isValidRequest($request);
         $isValid = !$validator->fails();
-        //dd($isValid, $validator->messages()->messages());
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $state, $voucher);
@@ -153,11 +200,7 @@ class VoucherController extends Controller
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
-            if ($user->hasRole('customer')) {
-                $companies = Company::all();
-            } else {
-                $companies = CompanyUser::getCompaniesAllowedToUser($user);
-            }
+            $companies = $user->hasRole('customer') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
         }
         return view('vouchers.index', compact(['companies', 'vouchers']));
     }
@@ -185,11 +228,7 @@ class VoucherController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if ($user->hasRole('admin')) {
-            $companies = Company::all();
-        } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
-        }
+        $companies = $user->hasRole('admin') ? Company::all() : $companies = CompanyUser::getCompaniesAllowedToUser($user);
         $currencies = Currency::all();
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
@@ -227,6 +266,20 @@ class VoucherController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function storeDraft(Request $request)
+    {
+        $user = Auth::user();
+        DraftJson::getInstance()->storeDraftVoucher($user, $request);
+        $request->session()->flash('status', 'Draft voucher added successfully.');
+        return json_encode(array("status" => true, "messages" => array()));
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param  \ElectronicInvoicing\Voucher  $voucher
@@ -247,11 +300,7 @@ class VoucherController extends Controller
     {
         $user = Auth::user();
         $action = 'edit';
-        if ($user->hasRole('admin')) {
-            $companies = Company::all();
-        } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
-        }
+        $companies = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
         $currencies = Currency::all();
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
@@ -269,11 +318,7 @@ class VoucherController extends Controller
     {
         $user = Auth::user();
         $action = 'draft';
-        if ($user->hasRole('admin')) {
-            $companies = Company::all();
-        } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
-        }
+        $companies = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
         $currencies = Currency::all();
         $draftVoucher = DraftJson::getInstance()->getDraftVoucher($user, intval($id));
         $environments = Environment::all();
@@ -316,30 +361,51 @@ class VoucherController extends Controller
      * @param  \ElectronicInvoicing\Voucher  $voucher
      * @return \Illuminate\Http\Response
      */
-    public function updateDraft(Request $request, $id, $voucherId)
+    public function updateDraft(Request $request, $state, $voucherId)
     {
         $user = Auth::user();
-        switch ($id) {
+        switch ($state) {
             case VoucherStates::DRAFT:
                 DraftJson::getInstance()->updateDraftVoucher($user, $voucherId, $request);
+                $isValid = true;
+                $messages = array();
+                $request->session()->flash('status', 'Draft voucher updated successfully.');
                 break;
             case VoucherStates::SAVED:
-                DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
-                self::saveVoucher($request, VoucherStates::SAVED);
+                $validator = self::isValidRequest($request);
+                $isValid = !$validator->fails();
+                if ($isValid) {
+                    DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
+                    self::saveVoucher($request, VoucherStates::SAVED);
+                    $request->session()->flash('status', 'Draft voucher saved successfully.');
+                }
+                $messages = $validator->messages()->messages();
                 break;
             case VoucherStates::ACCEPTED:
-                DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
-                $voucher = self::saveVoucher($request, VoucherStates::ACCEPTED);
-                self::acceptVoucher($voucher);
+                $validator = self::isValidRequest($request);
+                $isValid = !$validator->fails();
+                if ($isValid) {
+                    DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
+                    $voucher = self::saveVoucher($request, VoucherStates::ACCEPTED);
+                    self::acceptVoucher($voucher);
+                    $request->session()->flash('status', 'Draft voucher accepted successfully.');
+                }
+                $messages = $validator->messages()->messages();
                 break;
             case VoucherStates::SENDED:
-                DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
-                $voucher = self::saveVoucher($request, VoucherStates::SENDED);
-                self::acceptVoucher($voucher);
-                self::sendVoucher($voucher);
+                $validator = self::isValidRequest($request);
+                $isValid = !$validator->fails();
+                if ($isValid) {
+                    DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
+                    $voucher = self::saveVoucher($request, VoucherStates::SENDED);
+                    self::acceptVoucher($voucher);
+                    self::sendVoucher($voucher);
+                    $request->session()->flash('status', 'Draft voucher sended successfully.');
+                }
+                $messages = $validator->messages()->messages();
                 break;
         }
-        return redirect()->route('home')->with(['status' => 'Voucher updated successfully.']);
+        return json_encode(array("status" => $isValid, "messages" => $messages));
     }
 
     /**
@@ -430,31 +496,50 @@ class VoucherController extends Controller
      */
     public function getVoucherView($id, $voucherId = null)
     {
-        if ($voucherId === null) {
-            $user = Auth::user();
-            $action = 'create';
-            if ($user->hasRole('admin')) {
-                $companiesproduct = Company::all();
-            } else {
-                $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
+        $action = $voucherId == null ? 'create' : 'edit';
+        $user = Auth::user();
+        if ($action === 'create') {
+            switch ($id) {
+                case 1:
+                    $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    $voucherTypes = VoucherType::all();
+                    return view('vouchers.' . $id, compact(['action', 'voucherTypes']));
+                    break;
             }
-            $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
-            $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
-            $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
-            return view('vouchers.' . $id, compact(['action', 'companiesproduct','iva_taxes','ice_taxes','irbpnr_taxes']));
         } else {
-            $user = Auth::user();
-            $action = 'edit';
-            if ($user->hasRole('admin')) {
-                $companiesproduct = Company::all();
-            } else {
-                $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
+            switch ($id) {
+                case 1:
+                    $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    $voucher = Voucher::find($voucherId);
+                    return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'voucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    $voucher = Voucher::find($voucherId);
+                    $voucherTypes = VoucherType::all();
+                    return view('vouchers.' . $id, compact(['action', 'voucherTypes', 'voucher']));
+                    break;
             }
-            $voucher = Voucher::find($voucherId);
-            $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
-            $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
-            $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
-            return view('vouchers.' . $id, compact(['action', 'companiesproduct','voucher','iva_taxes','ice_taxes','irbpnr_taxes']));
         }
         return view('vouchers.' . $id);
     }
@@ -468,16 +553,26 @@ class VoucherController extends Controller
     {
         $user = Auth::user();
         $action = 'draft';
-        if ($user->hasRole('admin')) {
-            $companiesproduct = Company::all();
-        } else {
-            $companiesproduct = CompanyUser::getCompaniesAllowedToUser($user);
-        }
         $draftVoucher = DraftJson::getInstance()->getDraftVoucher($user, intval($voucherId));
-        $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
-        $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
-        $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
-        return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'draftVoucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
+        switch ($id) {
+            case 1:
+                $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'draftVoucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                $voucherTypes = VoucherType::all();
+                return view('vouchers.' . $id, compact(['action', 'draftVoucher', 'voucherTypes']));
+                break;
+        }
     }
 
     private static function generateRandomNumericCode()
@@ -539,8 +634,6 @@ class VoucherController extends Controller
             $voucher->sequential = $sequential;
         }
 
-
-
         $voucher->emission_point_id = $emissionPoint->id;
         $voucher->voucher_type_id = $voucherType->id;
         $voucher->environment_id = $environment->id;
@@ -548,66 +641,110 @@ class VoucherController extends Controller
         $voucher->customer_id = $customer->id;
         $voucher->issue_date = $issueDate->format('Y-m-d');
         $voucher->currency_id = $currency->id;
-        $voucher->tip = $request->tip;
-        $voucher->iva_retention = $request->ivaRetentionValue;
-        $voucher->rent_retention = $request->rentRetentionValue;
+        $voucher->tip = NULL;
         $voucher->extra_detail = $request->extra_detail;
         $voucher->user_id = Auth::user()->id;
-        if ($request->waybill_establishment !== NULL && $request->waybill_emissionpoint !== NULL && $request->waybill_sequential !== NULL) {
-            $voucher->support_document = str_pad($request->waybill_establishment, 3, '0', STR_PAD_LEFT) . str_pad($request->waybill_emissionpoint, 3, '0', STR_PAD_LEFT) . str_pad($request->waybill_sequential, 9, '0', STR_PAD_LEFT);
-        }
-        $voucher->support_document_date = NULL;
-        $voucher->save();
 
-        $products = $request->product;
-        $quantities = $request->product_quantity;
-        $unitPrices = $request->product_unitprice;
-        $discounts = $request->product_discount;
-        foreach ($voucher->details as $detail) {
-            foreach ($detail->taxDetails as $taxDetail) {
-                $taxDetail->delete();
-            }
-            $detail->delete();
-        }
-        for ($i = 0; $i < count($products); $i++) {
-            $product = Product::find($products[$i]);
-            $ivaTax = IvaTax::find($product->taxes()->first()->iva_tax_id);
-            //$iceTax = IceTax::find($product->taxes()->first()->ice_tax_id);
-            //$irbpnrTax = IrbpnrTax::find($product->taxes()->first()->irbpnr_tax_id);
-            $detail = new Detail;
-            $detail->voucher_id = $voucher->id;
-            $detail->product_id = $product->id;
-            $detail->quantity = $quantities[$i];
-            $detail->unit_price = $unitPrices[$i];
-            $detail->discount = $discounts[$i];
-            $detail->save();
-            $taxDetail = new TaxDetail;
-            $taxDetail->detail_id = $detail->id;
-            $taxDetail->code = $ivaTax->code;
-            $taxDetail->percentage_code = $ivaTax->auxiliary_code;
-            $taxDetail->rate = $ivaTax->rate;
-            $taxDetail->tax_base = $detail->quantity * $detail->unit_price - $detail->discount;
-            $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
-            $taxDetail->save();
-        }
 
-        foreach ($voucher->payments as $payment) {
-            $payment->delete();
-        }
-        $paymentMethods = $request->paymentMethod;
-        $values = $request->paymentMethod_value;
-        $timeUnits = $request->paymentMethod_timeunit;
-        $terms = $request->paymentMethod_term;
-        for ($i = 0; $i < count($paymentMethods); $i++) {
-            $payment = new Payment;
-            $payment->voucher_id = $voucher->id;
-            $payment->payment_method_id = $paymentMethods[$i];
-            $payment->time_unit_id = $timeUnits[$i];
-            $payment->total = $values[$i];
-            $payment->term = $terms[$i];
-            $payment->save();
-        }
 
+        switch ($voucherType->id) {
+            case 1:
+                $voucher->tip = $request->tip;
+                $voucher->iva_retention = $request->ivaRetentionValue;
+                $voucher->rent_retention = $request->rentRetentionValue;
+                if ($request->waybill_establishment !== NULL && $request->waybill_emissionpoint !== NULL && $request->waybill_sequential !== NULL) {
+                    $voucher->support_document = str_pad($request->waybill_establishment, 3, '0', STR_PAD_LEFT) . str_pad($request->waybill_emissionpoint, 3, '0', STR_PAD_LEFT) . str_pad($request->waybill_sequential, 9, '0', STR_PAD_LEFT);
+                }
+                $voucher->support_document_date = NULL;
+                $voucher->save();
+                $products = $request->product;
+                $quantities = $request->product_quantity;
+                $unitPrices = $request->product_unitprice;
+                $discounts = $request->product_discount;
+                foreach ($voucher->details as $detail) {
+                    foreach ($detail->taxDetails as $taxDetail) {
+                        $taxDetail->delete();
+                    }
+                    $detail->delete();
+                }
+                for ($i = 0; $i < count($products); $i++) {
+                    $product = Product::find($products[$i]);
+                    $ivaTax = IvaTax::find($product->taxes()->first()->iva_tax_id);
+                    //$iceTax = IceTax::find($product->taxes()->first()->ice_tax_id);
+                    //$irbpnrTax = IrbpnrTax::find($product->taxes()->first()->irbpnr_tax_id);
+                    $detail = new Detail;
+                    $detail->voucher_id = $voucher->id;
+                    $detail->product_id = $product->id;
+                    $detail->quantity = $quantities[$i];
+                    $detail->unit_price = $unitPrices[$i];
+                    $detail->discount = $discounts[$i];
+                    $detail->save();
+                    $taxDetail = new TaxDetail;
+                    $taxDetail->detail_id = $detail->id;
+                    $taxDetail->code = $ivaTax->code;
+                    $taxDetail->percentage_code = $ivaTax->auxiliary_code;
+                    $taxDetail->rate = $ivaTax->rate;
+                    $taxDetail->tax_base = $detail->quantity * $detail->unit_price - $detail->discount;
+                    $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
+                    $taxDetail->save();
+                }
+                foreach ($voucher->payments as $payment) {
+                    $payment->delete();
+                }
+                $paymentMethods = $request->paymentMethod;
+                $values = $request->paymentMethod_value;
+                $timeUnits = $request->paymentMethod_timeunit;
+                $terms = $request->paymentMethod_term;
+                for ($i = 0; $i < count($paymentMethods); $i++) {
+                    $payment = new Payment;
+                    $payment->voucher_id = $voucher->id;
+                    $payment->payment_method_id = $paymentMethods[$i];
+                    $payment->time_unit_id = $timeUnits[$i];
+                    $payment->total = $values[$i];
+                    $payment->term = $terms[$i];
+                    $payment->save();
+                }
+                break;
+            case 2:
+
+                break;
+            case 3:
+
+                break;
+            case 4:
+
+                break;
+            case 5:
+                $voucher->support_document = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('dmY') .
+                    str_pad(strval(VoucherType::find($request->voucher_type_support_document)->code), 2, '0', STR_PAD_LEFT) .
+                    str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
+                    str_pad(strval($request->supportdocument_emissionpoint), 3, '0', STR_PAD_LEFT) .
+                    str_pad(strval($request->supportdocument_sequential), 9, '0', STR_PAD_LEFT);
+                $voucher->support_document_date = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('Y-m-d');
+                $voucher->save();
+                $retention = new Retention;
+                $retention->voucher_id = $voucher->id;
+                $retention->fiscal_period = DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y-m\-\0\1');
+                $retention->save();
+                $tax = $request->tax;
+                $description = $request->description;
+                $value = $request->value;
+                $taxBase = $request->tax_base;
+                for ($i = 0; $i < count($tax); $i++) {
+                    $retentionDetail = new RetentionDetail;
+                    $retentionDetail->retention_id = $retention->id;
+                    $retentionDetail->retention_tax_description_id = $description[$i];
+                    $retentionDetail->tax_base = $taxBase[$i];
+                    $retentionDetail->value = $value[$i];
+                    $retentionDetail->support_doc_code = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('dmY') .
+                        str_pad(strval(VoucherType::find($request->voucher_type_support_document)->code), 2, '0', STR_PAD_LEFT) .
+                        str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
+                        str_pad(strval($request->supportdocument_emissionpoint), 3, '0', STR_PAD_LEFT) .
+                        str_pad(strval($request->supportdocument_sequential), 9, '0', STR_PAD_LEFT);
+                    $retentionDetail->save();
+                }
+                break;
+        }
         foreach ($voucher->additionalFields() as $additionalField) {
             $additionalField->delete();
         }
@@ -622,7 +759,6 @@ class VoucherController extends Controller
                 $additionalFields->save();
             }
         }
-
         return $voucher;
     }
 
@@ -668,112 +804,167 @@ class VoucherController extends Controller
             'secuencial'        => $sequential,
             'dirMatriz'         => $voucher->emissionPoint->branch->company->address,
         ];
-        $xml['infoFactura'] = [
-            'fechaEmision'                  => $issueDate->format('d/m/Y'),
-            'contribuyenteEspecial'         => $voucher->emissionPoint->branch->company->special_contributor,
-            'obligadoContabilidad'          => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
-            'tipoIdentificacionComprador'   => str_pad(strval($voucher->customer->identificationType->code), 2, '0', STR_PAD_LEFT),
-            'guiaRemision'                  => $voucher->support_document,
-            'razonSocialComprador'          => $voucher->customer->social_reason,
-            'identificacionComprador'       => $voucher->customer->identification,
-            'direccionComprador'            => NULL,
-            'totalSinImpuestos'             => number_format($voucher->subtotalWithoutTaxes(), 2, '.', ''),
-            'totalDescuento'                => number_format($voucher->totalDiscounts(), 2, '.', ''),
-            'totalConImpuestos'             => [
-                'totalImpuesto' => array(),
-            ],
-            'propina'                       => number_format($voucher->tip, 2, '.', ''),
-            'importeTotal'                  => number_format($voucher->total(), 2, '.', ''),
-            'moneda'                        => $voucher->currency->name,
-            'pagos'                         => [
-                'pago' => array(),
-            ],
-            'valRetIva'                     => NULL,
-            'valRetRenta'                   => NULL,
-        ];
-        if ($voucher->customer->address === NULL) {
-            unset($xml['infoFactura']['direccionComprador']);
-        } else {
-            $xml['infoFactura']['direccionComprador'] = $voucher->customer->address;
+        switch ($voucher->voucher_type_id) {
+            case 1:
+                $root = 'factura';
+                $xml['infoFactura'] = [
+                    'fechaEmision'                  => $issueDate->format('d/m/Y'),
+                    'dirEstablecimiento'            => $voucher->emissionPoint->branch->address,
+                    'contribuyenteEspecial'         => NULL,
+                    'obligadoContabilidad'          => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
+                    'tipoIdentificacionComprador'   => str_pad(strval($voucher->customer->identificationType->code), 2, '0', STR_PAD_LEFT),
+                    'guiaRemision'                  => NULL,
+                    'razonSocialComprador'          => $voucher->customer->social_reason,
+                    'identificacionComprador'       => $voucher->customer->identification,
+                    'direccionComprador'            => NULL,
+                    'totalSinImpuestos'             => number_format($voucher->subtotalWithoutTaxes(), 2, '.', ''),
+                    'totalDescuento'                => number_format($voucher->totalDiscounts(), 2, '.', ''),
+                    'totalConImpuestos'             => [
+                        'totalImpuesto' => array(),
+                    ],
+                    'propina'                       => number_format($voucher->tip, 2, '.', ''),
+                    'importeTotal'                  => number_format($voucher->total(), 2, '.', ''),
+                    'moneda'                        => $voucher->currency->name,
+                    'pagos'                         => [
+                        'pago' => array(),
+                    ],
+                    'valRetIva'                     => NULL,
+                    'valRetRenta'                   => NULL,
+                ];
+                if ($voucher->emissionPoint->branch->company->special_contributor === NULL) {
+                    unset($xml['infoFactura']['contribuyenteEspecial']);
+                } else {
+                    $xml['infoFactura']['contribuyenteEspecial'] = $voucher->emissionPoint->branch->company->special_contributor;
+                }
+                if ($voucher->customer->address === NULL) {
+                    unset($xml['infoFactura']['direccionComprador']);
+                } else {
+                    $xml['infoFactura']['direccionComprador'] = $voucher->customer->address;
+                }
+                if ($voucher->support_document === NULL) {
+                    unset($xml['infoFactura']['guiaRemision']);
+                } else {
+                    $xml['infoFactura']['guiaRemision'] = substr($voucher->support_document, 0, 3) . '-' . substr($voucher->support_document, 3, 3) . '-' . substr($voucher->support_document, 6, 9);
+                }
+                $totalTaxes = array();
+                foreach ($voucher->details as $detail) {
+                    foreach ($detail->taxDetails as $tax) {
+                        $totalTaxes[$tax->code . '.' . $tax->percentage_code] = array(
+                            'codigo' => $tax->code,
+                            'codigoPorcentaje' => $tax->percentage_code,
+                            'baseImponible' => (array_key_exists($tax->code . '.' . $tax->percentage_code, $totalTaxes) ? $totalTaxes[$tax->code . '.' . $tax->percentage_code]['baseImponible'] : 0) + $tax->tax_base,
+                            'valor' => (array_key_exists($tax->code . '.' . $tax->percentage_code, $totalTaxes) ? $totalTaxes[$tax->code . '.' . $tax->percentage_code]['valor'] : 0) + $tax->value,
+                        );
+                    }
+                }
+                $voucherTaxes = array();
+                foreach ($totalTaxes as $totalTax) {
+                    $totalTax['baseImponible'] = number_format($totalTax['baseImponible'], 2, '.', '');
+                    $totalTax['valor'] = number_format($totalTax['valor'], 2, '.', '');
+                    array_push($voucherTaxes, $totalTax);
+                }
+                $xml['infoFactura']['totalConImpuestos']['totalImpuesto'] = $voucherTaxes;
+                $voucherPayments = array();
+                foreach ($voucher->payments as $payment) {
+                    array_push($voucherPayments,
+                        array(
+                            'formaPago' => str_pad(strval(PaymentMethod::find($payment->payment_method_id)->code), 2, '0', STR_PAD_LEFT),
+                            'total' => number_format($payment->total, 2, '.', ''),
+                            'plazo' => $payment->term,
+                            'unidadTiempo' => TimeUnit::find($payment->time_unit_id)->name,
+                        )
+                    );
+                }
+                $xml['infoFactura']['pagos']['pago'] = $voucherPayments;
+                if ($voucher->iva_retention === NULL) {
+                    unset($xml['infoFactura']['valRetIva']);
+                } else {
+                    $xml['infoFactura']['valRetIva'] = number_format($voucher->iva_retention, 2, '.', '');
+                }
+                if ($voucher->rent_retention === NULL) {
+                    unset($xml['infoFactura']['valRetRenta']);
+                } else {
+                    $xml['infoFactura']['valRetRenta'] = number_format($voucher->rent_retention, 2, '.', '');
+                }
+                $voucherDetails = array();
+                foreach ($voucher->details as $detail) {
+                    $detailTaxes = array();
+                    foreach ($detail->taxDetails as $tax) {
+                        array_push($detailTaxes,
+                            array(
+                                'codigo'            => $tax->code,
+                                'codigoPorcentaje'  => $tax->percentage_code,
+                                'tarifa'            => $tax->rate,
+                                'baseImponible'     => number_format($tax->tax_base, 2, '.', ''),
+                                'valor'             => number_format($tax->value, 2, '.', ''),
+                            )
+                        );
+                    }
+                    array_push($voucherDetails,
+                        array(
+                            'codigoPrincipal'           => $detail->product->main_code,
+                            'codigoAuxiliar'            => $detail->product->auxiliary_code,
+                            'descripcion'               => $detail->product->description,
+                            'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
+                            'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
+                            'descuento'                 => number_format($detail->discount, 2, '.', ''),
+                            'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
+                            'impuestos'                 => [
+                                'impuesto' => $detailTaxes,
+                            ]
+                        )
+                    );
+                }
+                $xml['detalles'] = [
+                    'detalle' => $voucherDetails,
+                ];
+                break;
+            case 2:
+                $root = 'notaCredito';
+                break;
+            case 3:
+                $root = 'notaDebito';
+                break;
+            case 4:
+                $root = 'guiaRemision';
+                break;
+            case 5:
+                $root = 'comprobanteRetencion';
+                $xml['infoCompRetencion'] = [
+                    'fechaEmision'                      => $issueDate->format('d/m/Y'),
+                    'dirEstablecimiento'                => $voucher->emissionPoint->branch->address,
+                    'contribuyenteEspecial'             => NULL,
+                    'obligadoContabilidad'              => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
+                    'tipoIdentificacionSujetoRetenido'  => str_pad(strval($voucher->customer->identificationType->code), 2, '0', STR_PAD_LEFT),
+                    'razonSocialSujetoRetenido'         => $voucher->customer->social_reason,
+                    'identificacionSujetoRetenido'      => $voucher->customer->identification,
+                    'periodoFiscal'                     => $issueDate->format('m/Y')
+                ];
+                if ($voucher->emissionPoint->branch->company->special_contributor === NULL) {
+                    unset($xml['infoCompRetencion']['contribuyenteEspecial']);
+                } else {
+                    $xml['infoCompRetencion']['contribuyenteEspecial'] = $voucher->emissionPoint->branch->company->special_contributor;
+                }
+                $retentionDetails = array();
+                foreach ($voucher->retentions->first()->details as $detail) {
+                    array_push($retentionDetails,
+                        array(
+                            'codigo'                    => RetentionTax::find(RetentionTaxDescription::find($detail->retention_tax_description_id)->retention_tax_id)->code,
+                            'codigoRetencion'           => RetentionTaxDescription::find($detail->retention_tax_description_id)->code,
+                            'baseImponible'             => number_format($detail->tax_base, 2, '.', ''),
+                            'porcentajeRetener'         => number_format($detail->value, 2, '.', ''),
+                            'valorRetenido'             => number_format($detail->tax_base * $detail->value / 100.0, 2, '.', ''),
+                            'codDocSustento'            => substr($detail->support_doc_code, 8, 2),
+                            'numDocSustento'            => substr($detail->support_doc_code, 10),
+                            'fechaEmisionDocSustento'   => DateTime::createFromFormat('dmY', substr($detail->support_doc_code, 0, 8))->format('d/m/Y')
+                        )
+                    );
+                }
+                $xml['impuestos'] = [
+                    'impuesto' => $retentionDetails,
+                ];
+                break;
         }
-
-        if ($voucher->support_document === NULL) {
-            unset($xml['infoFactura']['guiaRemision']);
-        } else {
-            $xml['infoFactura']['guiaRemision'] = substr($voucher->support_document, 0, 3) . '-' . substr($voucher->support_document, 3, 3) . '-' . substr($voucher->support_document, 6, 9);
-        }
-        $totalTaxes = array();
-        foreach ($voucher->details as $detail) {
-            foreach ($detail->taxDetails as $tax) {
-                $totalTaxes[$tax->code . '.' . $tax->percentage_code] = array(
-                    'codigo' => $tax->code,
-                    'codigoPorcentaje' => $tax->percentage_code,
-                    'baseImponible' => (array_key_exists($tax->code . '.' . $tax->percentage_code, $totalTaxes) ? $totalTaxes[$tax->code . '.' . $tax->percentage_code]['baseImponible'] : 0) + $tax->tax_base,
-                    'valor' => (array_key_exists($tax->code . '.' . $tax->percentage_code, $totalTaxes) ? $totalTaxes[$tax->code . '.' . $tax->percentage_code]['valor'] : 0) + $tax->value,
-                );
-            }
-        }
-        $voucherTaxes = array();
-        foreach ($totalTaxes as $totalTax) {
-            $totalTax['baseImponible'] = number_format($totalTax['baseImponible'], 2, '.', '');
-            $totalTax['valor'] = number_format($totalTax['valor'], 2, '.', '');
-            array_push($voucherTaxes, $totalTax);
-        }
-        $xml['infoFactura']['totalConImpuestos']['totalImpuesto'] = $voucherTaxes;
-        $voucherPayments = array();
-        foreach ($voucher->payments as $payment) {
-            array_push($voucherPayments,
-                array(
-                    'formaPago' => str_pad(strval(PaymentMethod::find($payment->payment_method_id)->code), 2, '0', STR_PAD_LEFT),
-                    'total' => number_format($payment->total, 2, '.', ''),
-                    'plazo' => $payment->term,
-                    'unidadTiempo' => TimeUnit::find($payment->time_unit_id)->name,
-                )
-            );
-        }
-        $xml['infoFactura']['pagos']['pago'] = $voucherPayments;
-        if ($voucher->iva_retention === NULL) {
-            unset($xml['infoFactura']['valRetIva']);
-        } else {
-            $xml['infoFactura']['valRetIva'] = number_format($voucher->iva_retention, 2, '.', '');
-        }
-        if ($voucher->rent_retention === NULL) {
-            unset($xml['infoFactura']['valRetRenta']);
-        } else {
-            $xml['infoFactura']['valRetRenta'] = number_format($voucher->rent_retention, 2, '.', '');
-        }
-        $voucherDetails = array();
-        foreach ($voucher->details as $detail) {
-            $detailTaxes = array();
-            foreach ($detail->taxDetails as $tax) {
-                array_push($detailTaxes,
-                    array(
-                        'codigo'            => $tax->code,
-                        'codigoPorcentaje'  => $tax->percentage_code,
-                        'tarifa'            => $tax->rate,
-                        'baseImponible'     => number_format($tax->tax_base, 2, '.', ''),
-                        'valor'             => number_format($tax->value, 2, '.', ''),
-                    )
-                );
-            }
-            array_push($voucherDetails,
-                array(
-                    'codigoPrincipal'           => $detail->product->main_code,
-                    'codigoAuxiliar'            => $detail->product->auxiliary_code,
-                    'descripcion'               => $detail->product->description,
-                    'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
-                    'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
-                    'descuento'                 => number_format($detail->discount, 2, '.', ''),
-                    'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
-                    'impuestos'                 => [
-                        'impuesto' => $detailTaxes,
-                    ]
-                )
-            );
-        }
-        $xml['detalles'] = [
-            'detalle' => $voucherDetails,
-        ];
         if (count($voucher->additionalFields) > 0) {
             $voucherAdditionalFields = array();
             foreach ($voucher->additionalFields as $additionalField) {
@@ -793,7 +984,7 @@ class VoucherController extends Controller
             $state->name . '/' .
             $issueDate->format('Y/m') . '/' .
             $accessKey . '.xml';
-        Storage::put($xmlPath, ArrayToXml::convert($xml, 'factura', false, 'UTF-8'));
+        Storage::put($xmlPath, ArrayToXml::convert($xml, $root, false, 'UTF-8'));
         $voucher->xml = $xmlPath;
         $voucher->save();
 
@@ -803,7 +994,7 @@ class VoucherController extends Controller
         $xml->preserveWhiteSpace = true;
 		$xml->formatOutput = false;
         if ($xml->load(storage_path('app/' . $voucher->xml))) {
-            $voucherDocument = $xml->getElementsByTagName('factura')->item(0);
+            $voucherDocument = $xml->getElementsByTagName($root)->item(0);
             $digestValueVoucher = self::hex2Base64(sha1($voucherDocument->C14N()));
 
             $cert = file_get_contents(storage_path('app/signs/' . $voucher->emissionPoint->branch->company->ruc . '_cert.pem'));
@@ -1011,7 +1202,6 @@ class VoucherController extends Controller
         $soapClientReceipt = new SoapClient($wsdlReceipt, $options);
         $xml['xml'] = file_get_contents(storage_path('app/' . $voucher->xml));
         $resultReceipt = json_decode(json_encode($soapClientReceipt->validarComprobante($xml)), True);
-
         switch ($resultReceipt['RespuestaRecepcionComprobante']['estado']) {
             case 'RECIBIDA':
                 $voucher->voucher_state_id = VoucherStates::RECEIVED;
@@ -1024,7 +1214,7 @@ class VoucherController extends Controller
                     $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['identificador'] . ': ' .
                     $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['mensaje'];
                 if (array_key_exists('informacionAdicional', $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje'])) {
-                    $message .= '. ' . $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['informacionAdiccional'];
+                    $message .= '. ' . $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['informacionAdicional'];
                 }
                 $voucher->extra_detail = $message;
                 $voucher->save();
@@ -1078,8 +1268,11 @@ class VoucherController extends Controller
             Storage::delete($voucher->xml);
             $voucher->xml = $xmlPath;
             $voucher->save();
+            if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED) {
+                MailController::sendMailNewVoucher($voucher);
+            }
         } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
-            dd($voucher->extra_detail);
+            info(' *** ' . $voucher->extra_detail . ' *** ');
         }
     }
 
@@ -1097,7 +1290,14 @@ class VoucherController extends Controller
     public function html(Voucher $voucher)
     {
         $html = true;
-        return view('vouchers.ride.invoice', compact(['voucher', 'html']));
+        switch ($voucher->voucher_type_id) {
+            case 1: $voucherType = 'invoice'; break;
+            case 2: $voucherType = 'credit_note'; break;
+            case 3: $voucherType = 'debit_note'; break;
+            case 4: $voucherType = 'waybill'; break;
+            case 5: $voucherType = 'retention'; break;
+        }
+        return view('vouchers.ride.' . $voucherType, compact(['voucher', 'html']));
     }
 
     public function xml(Voucher $voucher)
@@ -1108,6 +1308,13 @@ class VoucherController extends Controller
     public function pdf(Voucher $voucher)
     {
         $html = false;
-        return PDF::loadView('vouchers.ride.invoice', compact(['voucher', 'html']))->download($voucher->accessKey() . '.pdf');
+        switch ($voucher->voucher_type_id) {
+            case 1: $voucherType = 'invoice'; break;
+            case 2: $voucherType = 'credit_note'; break;
+            case 3: $voucherType = 'debit_note'; break;
+            case 4: $voucherType = 'waybill'; break;
+            case 5: $voucherType = 'retention'; break;
+        }
+        return PDF::loadView('vouchers.ride.' . $voucherType, compact(['voucher', 'html']))->download($voucher->accessKey() . '.pdf');
     }
 }
