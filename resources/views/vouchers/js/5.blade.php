@@ -32,7 +32,7 @@ $(document).ready(function(){
                 retentionTable.row.add([
                     '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="Select a tax ...">' + options + '</select>',
                     '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="Select a tax description ..."></select>',
-                    '<input class="form-control" type="text" id="value[]" name="value[]" value="0.00">',
+                    '<input class="form-control" type="number" id="value[]" name="value[]" value="0.00" step="0.01">',
                     '<input class="form-control" type="text" id="tax_base[]" name="tax_base[]" value="0.00">',
                     '<input class="form-control" type="text" id="retained-value[]" name="retained-value[]" value="0.00" readonly>',
                     '<button type="button" class="btn btn-danger btn-sm">&times;</button>',

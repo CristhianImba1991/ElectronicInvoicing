@@ -10,7 +10,7 @@ class RetentionDetail extends Model
         'retention_id',
         'retention_tax_description_id',
         'tax_base',
-        'value',
+        'rate',
         'support_doc_code'
     ];
 

@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class DebitNote extends Model
 {
     protected $fillable = [
-        'voucher_id',
+        'debit_note_tax_id',
         'reason',
         'value'
     ];
 
-    public function voucher()
+    public function debitNoteTax()
     {
-        return $this->belongsTo('ElectronicInvoicing\Voucher');
+        return $this->belongsTo('ElectronicInvoicing\DebitNoteTax');
     }
 }

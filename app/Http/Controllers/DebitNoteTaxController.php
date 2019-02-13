@@ -2,10 +2,10 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\CreditNoteTax;
+use ElectronicInvoicing\DebitNoteTax;
 use Illuminate\Http\Request;
 
-class CreditNoteTaxController extends Controller
+class DebitNoteTaxController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class CreditNoteTaxController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \ElectronicInvoicing\CreditNoteTax  $creditNoteTax
+     * @param  \ElectronicInvoicing\DebitNoteTax  $debitNoteTax
      * @return \Illuminate\Http\Response
      */
-    public function show(CreditNoteTax $creditNoteTax)
+    public function show(DebitNoteTax $debitNoteTax)
     {
         //
     }
@@ -52,10 +52,10 @@ class CreditNoteTaxController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \ElectronicInvoicing\CreditNoteTax  $creditNoteTax
+     * @param  \ElectronicInvoicing\DebitNoteTax  $debitNoteTax
      * @return \Illuminate\Http\Response
      */
-    public function edit(CreditNoteTax $creditNoteTax)
+    public function edit(DebitNoteTax $debitNoteTax)
     {
         //
     }
@@ -64,10 +64,10 @@ class CreditNoteTaxController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \ElectronicInvoicing\CreditNoteTax  $creditNoteTax
+     * @param  \ElectronicInvoicing\DebitNoteTax  $debitNoteTax
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, CreditNoteTax $creditNoteTax)
+    public function update(Request $request, DebitNoteTax $debitNoteTax)
     {
         //
     }
@@ -75,10 +75,10 @@ class CreditNoteTaxController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \ElectronicInvoicing\CreditNoteTax  $creditNoteTax
+     * @param  \ElectronicInvoicing\DebitNoteTax  $debitNoteTax
      * @return \Illuminate\Http\Response
      */
-    public function destroy(CreditNoteTax $creditNoteTax)
+    public function destroy(DebitNoteTax $debitNoteTax)
     {
         //
     }

@@ -10,7 +10,7 @@
                     <tr>
                         <th>Tax</th>
                         <th>Description</th>
-                        <th>Value</th>
+                        <th>Rate</th>
                         <th>Tax base</th>
                         <th>Retained value</th>
                         <th></th>

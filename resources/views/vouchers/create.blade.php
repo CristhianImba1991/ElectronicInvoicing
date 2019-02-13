@@ -241,4 +241,19 @@
 @endif
 
 @include('layouts.validation')
+
+@if(auth()->user()->can('create_vouchers') || auth()->user()->can('send_vouchers'))
+    <div class="modal fade" tabindex="-1" role="dialog" id="loadingModal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <strong>Processing voucher...</strong>
+                </div>
+                <div class="modal-body">
+                    <p>Please wait while your voucher is processed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection

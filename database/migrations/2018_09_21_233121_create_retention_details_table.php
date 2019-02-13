@@ -18,7 +18,7 @@ class CreateRetentionDetailsTable extends Migration
             $table->unsignedInteger('retention_id');
             $table->unsignedInteger('retention_tax_description_id');
             $table->unsignedDecimal('tax_base', 18, 6);
-            $table->unsignedDecimal('value', 18, 6);
+            $table->unsignedDecimal('rate', 5, 2);
             $table->string('support_doc_code', 40)->nullable();
             $table->timestamps();
             $table->foreign('retention_id')->references('id')->on('retentions');

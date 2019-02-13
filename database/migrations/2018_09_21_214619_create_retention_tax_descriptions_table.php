@@ -18,6 +18,9 @@ class CreateRetentionTaxDescriptionsTable extends Migration
             $table->unsignedInteger('retention_tax_id');
             $table->string('code', 5);
             $table->string('description', 300);
+            $table->unsignedDecimal('rate', 5, 2);
+            $table->unsignedDecimal('min_rate', 5, 2);
+            $table->unsignedDecimal('max_rate', 5, 2);
             $table->timestamps();
             $table->foreign('retention_tax_id')->references('id')->on('retention_taxes');
             $table->unique(['retention_tax_id', 'code'], 'retention_tax_description_unique');

@@ -16,8 +16,6 @@ class CreateCreditNotesTable extends Migration
         Schema::create('credit_notes', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('voucher_id');
-            $table->string('rise', 40);
-            $table->unsignedDecimal('value', 18, 6);
             $table->string('reason', 300);
             $table->timestamps();
             $table->foreign('voucher_id')->references('id')->on('vouchers');

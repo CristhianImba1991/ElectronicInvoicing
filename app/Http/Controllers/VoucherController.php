@@ -85,9 +85,9 @@ class VoucherController extends Controller
                     $rules['paymentMethod_term'] = 'required|array|min:1';
                     $rules['paymentMethod_term.*'] = 'required|numeric|gte:0';
                     $rules['additionaldetail_name'] = 'array|max:3';
-                    $rules['additionaldetail_name.*'] = 'required|alpha_dash|max:30';
+                    $rules['additionaldetail_name.*'] = 'required|string|max:30';
                     $rules['additionaldetail_value'] = 'array|max:3';
-                    $rules['additionaldetail_value.*'] = 'required|alpha_dash|max:300';
+                    $rules['additionaldetail_value.*'] = 'required|string|max:300';
                     $rules['waybill_establishment'] = 'required_with:waybill_emissionpoint,waybill_sequential|nullable|integer|min:1|max:999';
                     $rules['waybill_emissionpoint'] = 'required_with:waybill_establishment,waybill_sequential|nullable|integer|min:1|max:999';
                     $rules['waybill_sequential'] = 'required_with:waybill_establishment,waybill_emissionpoint|nullable|integer|min:1|max:999999999';
@@ -115,9 +115,9 @@ class VoucherController extends Controller
                     $rules['tax_base'] = 'required|array|min:1';
                     $rules['tax_base.*'] = 'required|numeric|gte:0';
                     $rules['additionaldetail_name'] = 'array|max:3';
-                    $rules['additionaldetail_name.*'] = 'required|alpha_dash|max:30';
+                    $rules['additionaldetail_name.*'] = 'required|string|max:30';
                     $rules['additionaldetail_value'] = 'array|max:3';
-                    $rules['additionaldetail_value.*'] = 'required|alpha_dash|max:300';
+                    $rules['additionaldetail_value.*'] = 'required|string|max:300';
                     $rules['extra_detail'] = 'nullable|max:300';
                     $rules['voucher_type_support_document'] = 'required|exists:voucher_types,id';
                     $rules['supportdocument_establishment'] = 'required|nullable|integer|min:1|max:999';
@@ -128,7 +128,6 @@ class VoucherController extends Controller
             }
         }
         return Validator::make($request->all(), $rules, array());
-        return !$validator->fails();
     }
 
     /**
@@ -508,10 +507,17 @@ class VoucherController extends Controller
                     return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                     break;
                 case 2:
+                    $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                     break;
                 case 3:
+                    return view('vouchers.' . $id, compact(['action']));
                     break;
                 case 4:
+                    return view('vouchers.' . $id, compact(['action']));
                     break;
                 case 5:
                     $voucherTypes = VoucherType::all();
@@ -529,10 +535,18 @@ class VoucherController extends Controller
                     return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'voucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                     break;
                 case 2:
+                    $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    $voucher = Voucher::find($voucherId);
+                    return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'voucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                     break;
                 case 3:
+                    return view('vouchers.' . $id, compact(['action']));
                     break;
                 case 4:
+                    return view('vouchers.' . $id, compact(['action']));
                     break;
                 case 5:
                     $voucher = Voucher::find($voucherId);
@@ -563,10 +577,17 @@ class VoucherController extends Controller
                 return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'draftVoucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                 break;
             case 2:
+                $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'draftVoucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                 break;
             case 3:
+                return view('vouchers.' . $id, compact(['action']));
                 break;
             case 4:
+                return view('vouchers.' . $id, compact(['action']));
                 break;
             case 5:
                 $voucherTypes = VoucherType::all();
@@ -728,14 +749,14 @@ class VoucherController extends Controller
                 $retention->save();
                 $tax = $request->tax;
                 $description = $request->description;
-                $value = $request->value;
+                $rate = $request->value;
                 $taxBase = $request->tax_base;
                 for ($i = 0; $i < count($tax); $i++) {
                     $retentionDetail = new RetentionDetail;
                     $retentionDetail->retention_id = $retention->id;
                     $retentionDetail->retention_tax_description_id = $description[$i];
                     $retentionDetail->tax_base = $taxBase[$i];
-                    $retentionDetail->value = $value[$i];
+                    $retentionDetail->rate = $rate[$i];
                     $retentionDetail->support_doc_code = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('dmY') .
                         str_pad(strval(VoucherType::find($request->voucher_type_support_document)->code), 2, '0', STR_PAD_LEFT) .
                         str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
@@ -953,7 +974,7 @@ class VoucherController extends Controller
                             'codigoRetencion'           => RetentionTaxDescription::find($detail->retention_tax_description_id)->code,
                             'baseImponible'             => number_format($detail->tax_base, 2, '.', ''),
                             'porcentajeRetener'         => number_format($detail->value, 2, '.', ''),
-                            'valorRetenido'             => number_format($detail->tax_base * $detail->value / 100.0, 2, '.', ''),
+                            'valorRetenido'             => number_format($detail->tax_base * $detail->rate / 100.0, 2, '.', ''),
                             'codDocSustento'            => substr($detail->support_doc_code, 8, 2),
                             'numDocSustento'            => substr($detail->support_doc_code, 10),
                             'fechaEmisionDocSustento'   => DateTime::createFromFormat('dmY', substr($detail->support_doc_code, 0, 8))->format('d/m/Y')

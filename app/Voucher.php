@@ -84,9 +84,9 @@ class Voucher extends Model
         return $this->hasMany('ElectronicInvoicing\CreditNote');
     }
 
-    public function debitNotes()
+    public function debitNotesTaxes()
     {
-        return $this->hasMany('ElectronicInvoicing\DebitNote');
+        return $this->hasMany('ElectronicInvoicing\DebitNoteTaxes');
     }
 
     public function retentions()
