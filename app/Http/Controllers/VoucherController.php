@@ -8,8 +8,11 @@ use ElectronicInvoicing\{
     AdditionalField,
     Branch,
     Company,
+    CreditNote,
     Currency,
     Customer,
+    DebitNote,
+    DebitNoteTax,
     Detail,
     EmissionPoint,
     Environment,
@@ -97,10 +100,48 @@ class VoucherController extends Controller
                     $rules['tip'] = 'required|numeric|min:0';
                     break;
                 case 2:
-                    // code...
+                    $rules['product'] = 'required|array|min:1';
+                    $rules['product.*'] = 'distinct|exists:products,id';
+                    $rules['product_quantity'] = 'required|array|min:1';
+                    $rules['product_quantity.*'] = 'required|numeric|gte:0';
+                    $rules['product_unitprice'] = 'required|array|min:1';
+                    $rules['product_unitprice.*'] = 'required|numeric|gte:0';
+                    $rules['product_discount'] = 'required|array|min:1';
+                    $rules['product_discount.*'] = 'required|numeric|gte:0';
+                    $rules['additionaldetail_name'] = 'array|max:3';
+                    $rules['additionaldetail_name.*'] = 'required|string|max:30';
+                    $rules['additionaldetail_value'] = 'array|max:3';
+                    $rules['additionaldetail_value.*'] = 'required|string|max:300';
+                    $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
+                    $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
+                    $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
+                    $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
+                    $rules['reason'] = 'required|string|max:300';
+                    $rules['extra_detail'] = 'nullable|max:300';
                     break;
                 case 3:
-                    // code...
+                    $rules['debit_reason'] = 'required|array|min:1';
+                    $rules['debit_reason.*'] = 'required|string|max:300';
+                    $rules['debit_value'] = 'required|array|min:1';
+                    $rules['debit_value.*'] = 'required|numeric|gte:0';
+                    $rules['paymentMethod'] = 'required|array|min:1';
+                    $rules['paymentMethod.*'] = 'exists:payment_methods,id';
+                    $rules['paymentMethod_value'] = 'required|array|min:1';
+                    $rules['paymentMethod_value.*'] = 'required|numeric|gte:0';
+                    $rules['paymentMethod_timeunit'] = 'required|array|min:1';
+                    $rules['paymentMethod_timeunit.*'] = 'exists:time_units,id';
+                    $rules['paymentMethod_term'] = 'required|array|min:1';
+                    $rules['paymentMethod_term.*'] = 'required|numeric|gte:0';
+                    $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
+                    $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
+                    $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
+                    $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
+                    $rules['additionaldetail_name'] = 'array|max:3';
+                    $rules['additionaldetail_name.*'] = 'required|string|max:30';
+                    $rules['additionaldetail_value'] = 'array|max:3';
+                    $rules['additionaldetail_value.*'] = 'required|string|max:300';
+                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['iva_tax'] = 'required|exists:iva_taxes,id';
                     break;
                 case 4:
                     // code...
@@ -514,7 +555,8 @@ class VoucherController extends Controller
                     return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                     break;
                 case 3:
-                    return view('vouchers.' . $id, compact(['action']));
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id, compact(['action', 'iva_taxes']));
                     break;
                 case 4:
                     return view('vouchers.' . $id, compact(['action']));
@@ -543,7 +585,8 @@ class VoucherController extends Controller
                     return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'voucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                     break;
                 case 3:
-                    return view('vouchers.' . $id, compact(['action']));
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id, compact(['action', 'iva_taxes']));
                     break;
                 case 4:
                     return view('vouchers.' . $id, compact(['action']));
@@ -584,7 +627,8 @@ class VoucherController extends Controller
                 return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'draftVoucher', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes']));
                 break;
             case 3:
-                return view('vouchers.' . $id, compact(['action']));
+                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                return view('vouchers.' . $id, compact(['action', 'iva_taxes']));
                 break;
             case 4:
                 return view('vouchers.' . $id, compact(['action']));
@@ -682,7 +726,7 @@ class VoucherController extends Controller
                 $quantities = $request->product_quantity;
                 $unitPrices = $request->product_unitprice;
                 $discounts = $request->product_discount;
-                foreach ($voucher->details as $detail) {
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
                     foreach ($detail->taxDetails as $taxDetail) {
                         $taxDetail->delete();
                     }
@@ -709,7 +753,7 @@ class VoucherController extends Controller
                     $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
                     $taxDetail->save();
                 }
-                foreach ($voucher->payments as $payment) {
+                foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
                     $payment->delete();
                 }
                 $paymentMethods = $request->paymentMethod;
@@ -727,10 +771,91 @@ class VoucherController extends Controller
                 }
                 break;
             case 2:
-
+                $issueDateSupportDocument = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document);
+                $voucher->support_document = $issueDateSupportDocument->format('dmY') . '01' .
+                    str_pad($request->supportdocument_establishment, 3, '0', STR_PAD_LEFT) .
+                    str_pad($request->supportdocument_emissionpoint, 3, '0', STR_PAD_LEFT) .
+                    str_pad($request->supportdocument_sequential, 9, '0', STR_PAD_LEFT);
+                $voucher->support_document_date = $issueDateSupportDocument->format('Y-m-d');
+                $voucher->save();
+                $products = $request->product;
+                $quantities = $request->product_quantity;
+                $unitPrices = $request->product_unitprice;
+                $discounts = $request->product_discount;
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
+                    foreach ($detail->taxDetails as $taxDetail) {
+                        $taxDetail->delete();
+                    }
+                    $detail->delete();
+                }
+                for ($i = 0; $i < count($products); $i++) {
+                    $product = Product::find($products[$i]);
+                    $ivaTax = IvaTax::find($product->taxes()->first()->iva_tax_id);
+                    //$iceTax = IceTax::find($product->taxes()->first()->ice_tax_id);
+                    //$irbpnrTax = IrbpnrTax::find($product->taxes()->first()->irbpnr_tax_id);
+                    $detail = new Detail;
+                    $detail->voucher_id = $voucher->id;
+                    $detail->product_id = $product->id;
+                    $detail->quantity = $quantities[$i];
+                    $detail->unit_price = $unitPrices[$i];
+                    $detail->discount = $discounts[$i];
+                    $detail->save();
+                    $taxDetail = new TaxDetail;
+                    $taxDetail->detail_id = $detail->id;
+                    $taxDetail->code = $ivaTax->code;
+                    $taxDetail->percentage_code = $ivaTax->auxiliary_code;
+                    $taxDetail->rate = $ivaTax->rate;
+                    $taxDetail->tax_base = $detail->quantity * $detail->unit_price - $detail->discount;
+                    $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
+                    $taxDetail->save();
+                }
+                $creditNote = new CreditNote;
+                $creditNote->voucher_id = $voucher->id;
+                $creditNote->reason = $request->reason;
+                $creditNote->save();
                 break;
             case 3:
-
+                $issueDateSupportDocument = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document);
+                $voucher->support_document = $issueDateSupportDocument->format('dmY') . '01' .
+                    str_pad($request->supportdocument_establishment, 3, '0', STR_PAD_LEFT) .
+                    str_pad($request->supportdocument_emissionpoint, 3, '0', STR_PAD_LEFT) .
+                    str_pad($request->supportdocument_sequential, 9, '0', STR_PAD_LEFT);
+                $voucher->support_document_date = $issueDateSupportDocument->format('Y-m-d');
+                $voucher->save();
+                foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
+                    $payment->delete();
+                }
+                $paymentMethods = $request->paymentMethod;
+                $values = $request->paymentMethod_value;
+                $timeUnits = $request->paymentMethod_timeunit;
+                $terms = $request->paymentMethod_term;
+                for ($i = 0; $i < count($paymentMethods); $i++) {
+                    $payment = new Payment;
+                    $payment->voucher_id = $voucher->id;
+                    $payment->payment_method_id = $paymentMethods[$i];
+                    $payment->time_unit_id = $timeUnits[$i];
+                    $payment->total = $values[$i];
+                    $payment->term = $terms[$i];
+                    $payment->save();
+                }
+                $debitReasons = $request->debit_reason;
+                $debitValues = $request->debit_value;
+                $taxBase = array_sum($debitValues);
+                $ivaTax = IvaTax::find($request->iva_tax);
+                $debitNoteTax = new DebitNoteTax;
+                $debitNoteTax->voucher_id = $voucher->id;
+                $debitNoteTax->code = $ivaTax->code;
+                $debitNoteTax->percentage_code = $ivaTax->auxiliary_code;
+                $debitNoteTax->rate = $ivaTax->rate;
+                $debitNoteTax->tax_base = $taxBase;
+                $debitNoteTax->save();
+                for ($i = 0; $i < count($debitReasons); $i++) {
+                    $debitNote = new DebitNote;
+                    $debitNote->debit_note_tax_id = $debitNoteTax->id;
+                    $debitNote->reason = $debitReasons[$i];
+                    $debitNote->value = $debitValues[$i];
+                    $debitNote->save();
+                }
                 break;
             case 4:
 
@@ -798,7 +923,7 @@ class VoucherController extends Controller
     private static function signVoucher($voucher)
     {
         $version = '1.0.0';
-        foreach ($voucher->details as $detail) {
+        foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
             if (strlen(substr(strrchr(strval(floatval($detail->quantity)), "."), 1)) > 2 || strlen(substr(strrchr(strval(floatval($detail->unit_price)), "."), 1)) > 2) {
                 $version = '1.1.0';
                 break;
@@ -868,7 +993,7 @@ class VoucherController extends Controller
                     $xml['infoFactura']['guiaRemision'] = substr($voucher->support_document, 0, 3) . '-' . substr($voucher->support_document, 3, 3) . '-' . substr($voucher->support_document, 6, 9);
                 }
                 $totalTaxes = array();
-                foreach ($voucher->details as $detail) {
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
                     foreach ($detail->taxDetails as $tax) {
                         $totalTaxes[$tax->code . '.' . $tax->percentage_code] = array(
                             'codigo' => $tax->code,
@@ -886,7 +1011,7 @@ class VoucherController extends Controller
                 }
                 $xml['infoFactura']['totalConImpuestos']['totalImpuesto'] = $voucherTaxes;
                 $voucherPayments = array();
-                foreach ($voucher->payments as $payment) {
+                foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
                     array_push($voucherPayments,
                         array(
                             'formaPago' => str_pad(strval(PaymentMethod::find($payment->payment_method_id)->code), 2, '0', STR_PAD_LEFT),
@@ -908,7 +1033,7 @@ class VoucherController extends Controller
                     $xml['infoFactura']['valRetRenta'] = number_format($voucher->rent_retention, 2, '.', '');
                 }
                 $voucherDetails = array();
-                foreach ($voucher->details as $detail) {
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
                     $detailTaxes = array();
                     foreach ($detail->taxDetails as $tax) {
                         array_push($detailTaxes,
@@ -942,9 +1067,135 @@ class VoucherController extends Controller
                 break;
             case 2:
                 $root = 'notaCredito';
+                $issueDate = DateTime::createFromFormat('Y-m-d', $voucher->issue_date);
+                $xml['infoNotaCredito'] = [
+                    'fechaEmision'                  => $issueDate->format('d/m/Y'),
+                    'dirEstablecimiento'            => $voucher->emissionPoint->branch->address,
+                    'tipoIdentificacionComprador'   => str_pad(strval($voucher->customer->identificationType->code), 2, '0', STR_PAD_LEFT),
+                    'razonSocialComprador'          => $voucher->customer->social_reason,
+                    'identificacionComprador'       => $voucher->customer->identification,
+                    'contribuyenteEspecial'         => NULL,
+                    'obligadoContabilidad'          => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
+                    'codDocModificado'              => '01',
+                    'numDocModificado'              => substr($voucher->support_document, 10, 3) . '-' . substr($voucher->support_document, 13, 3) . '-' . substr($voucher->support_document, 16, 9),
+                    'fechaEmisionDocSustento'       => $issueDate->format('d/m/Y'),
+                    'totalSinImpuestos'             => number_format($voucher->subtotalWithoutTaxes(), 2, '.', ''),
+                    'valorModificacion'             => number_format($voucher->total(), 2, '.', ''),
+                    'moneda'                        => $voucher->currency->name,
+                    'totalConImpuestos'             => [
+                        'totalImpuesto' => array(),
+                    ],
+                    'motivo'                        => $voucher->creditNotes->first()->reason
+                ];
+                if ($voucher->emissionPoint->branch->company->special_contributor === NULL) {
+                    unset($xml['infoNotaCredito']['contribuyenteEspecial']);
+                } else {
+                    $xml['infoNotaCredito']['contribuyenteEspecial'] = $voucher->emissionPoint->branch->company->special_contributor;
+                }
+                $totalTaxes = array();
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
+                    foreach ($detail->taxDetails as $tax) {
+                        $totalTaxes[$tax->code . '.' . $tax->percentage_code] = array(
+                            'codigo' => $tax->code,
+                            'codigoPorcentaje' => $tax->percentage_code,
+                            'baseImponible' => (array_key_exists($tax->code . '.' . $tax->percentage_code, $totalTaxes) ? $totalTaxes[$tax->code . '.' . $tax->percentage_code]['baseImponible'] : 0) + $tax->tax_base,
+                            'valor' => (array_key_exists($tax->code . '.' . $tax->percentage_code, $totalTaxes) ? $totalTaxes[$tax->code . '.' . $tax->percentage_code]['valor'] : 0) + $tax->value,
+                        );
+                    }
+                }
+                $voucherTaxes = array();
+                foreach ($totalTaxes as $totalTax) {
+                    $totalTax['baseImponible'] = number_format($totalTax['baseImponible'], 2, '.', '');
+                    $totalTax['valor'] = number_format($totalTax['valor'], 2, '.', '');
+                    array_push($voucherTaxes, $totalTax);
+                }
+                $xml['infoNotaCredito']['totalConImpuestos']['totalImpuesto'] = $voucherTaxes;
+                $voucherDetails = array();
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
+                    $detailTaxes = array();
+                    foreach ($detail->taxDetails as $tax) {
+                        array_push($detailTaxes,
+                            array(
+                                'codigo'            => $tax->code,
+                                'codigoPorcentaje'  => $tax->percentage_code,
+                                'tarifa'            => $tax->rate,
+                                'baseImponible'     => number_format($tax->tax_base, 2, '.', ''),
+                                'valor'             => number_format($tax->value, 2, '.', ''),
+                            )
+                        );
+                    }
+                    array_push($voucherDetails,
+                        array(
+                            'codigoInterno'             => $detail->product->main_code,
+                            'codigoAdicional'           => $detail->product->auxiliary_code,
+                            'descripcion'               => $detail->product->description,
+                            'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
+                            'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
+                            'descuento'                 => number_format($detail->discount, 2, '.', ''),
+                            'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
+                            'impuestos'                 => [
+                                'impuesto' => $detailTaxes,
+                            ]
+                        )
+                    );
+                }
+                $xml['detalles'] = [
+                    'detalle' => $voucherDetails,
+                ];
                 break;
             case 3:
                 $root = 'notaDebito';
+                $issueDate = DateTime::createFromFormat('Y-m-d', $voucher->issue_date);
+                $xml['infoNotaDebito'] = [
+                    'fechaEmision'                  => $issueDate->format('d/m/Y'),
+                    'dirEstablecimiento'            => $voucher->emissionPoint->branch->address,
+                    'tipoIdentificacionComprador'   => str_pad(strval($voucher->customer->identificationType->code), 2, '0', STR_PAD_LEFT),
+                    'razonSocialComprador'          => $voucher->customer->social_reason,
+                    'identificacionComprador'       => $voucher->customer->identification,
+                    'contribuyenteEspecial'         => NULL,
+                    'obligadoContabilidad'          => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
+                    'codDocModificado'              => '01',
+                    'numDocModificado'              => substr($voucher->support_document, 10, 3) . '-' . substr($voucher->support_document, 13, 3) . '-' . substr($voucher->support_document, 16, 9),
+                    'fechaEmisionDocSustento'       => $issueDate->format('d/m/Y'),
+                    'totalSinImpuestos'             => number_format($voucher->debitNotesTaxes()->first()->tax_base, 2, '.', ''),
+                    'impuestos'                     => [
+                        'impuesto' => [
+                            'codigo'            => $voucher->debitNotesTaxes()->first()->code,
+                            'codigoPorcentaje'  => $voucher->debitNotesTaxes()->first()->percentage_code,
+                            'tarifa'            => $voucher->debitNotesTaxes()->first()->rate,
+                            'baseImponible'     => number_format($voucher->debitNotesTaxes()->first()->tax_base, 2, '.', ''),
+                            'valor'             => number_format($voucher->debitNotesTaxes()->first()->tax_base * $voucher->debitNotesTaxes()->first()->rate / 100.0, 2, '.', ''),
+                        ],
+                    ],
+                    'valorTotal'                    => number_format($voucher->debitNotesTaxes()->first()->tax_base * (1 + $voucher->debitNotesTaxes()->first()->rate / 100.0), 2, '.', ''),
+                    'pagos'                         => [
+                        'pago' => array(),
+                    ],
+                ];
+                if ($voucher->emissionPoint->branch->company->special_contributor === NULL) {
+                    unset($xml['infoNotaDebito']['contribuyenteEspecial']);
+                } else {
+                    $xml['infoNotaDebito']['contribuyenteEspecial'] = $voucher->emissionPoint->branch->company->special_contributor;
+                }
+                $voucherPayments = array();
+                foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
+                    array_push($voucherPayments,
+                        array(
+                            'formaPago' => str_pad(strval(PaymentMethod::find($payment->payment_method_id)->code), 2, '0', STR_PAD_LEFT),
+                            'total' => number_format($payment->total, 2, '.', ''),
+                            'plazo' => $payment->term,
+                            'unidadTiempo' => TimeUnit::find($payment->time_unit_id)->name,
+                        )
+                    );
+                }
+                $xml['infoNotaDebito']['pagos']['pago'] = $voucherPayments;
+                $voucherReasons = array();
+                foreach ($voucher->debitNotesTaxes()->first()->debitNotes()->get() as $reason) {
+                    $debitReason['razon'] = $reason->reason;
+                    $debitReason['valor'] = $reason->value;
+                    array_push($voucherReasons, $debitReason);
+                }
+                $xml['motivos']['motivo'] = $voucherReasons;
                 break;
             case 4:
                 $root = 'guiaRemision';

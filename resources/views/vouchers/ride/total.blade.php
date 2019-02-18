@@ -24,18 +24,22 @@
           <td>SUBTOTAL SIN IMPUESTOS</td>
           <td class="text-right">{{ number_format($voucher->subtotalWithoutTaxes(), 2, '.', '') }}</td>
         </tr>
-        <tr>
-          <td>DESCUENTO</td>
-          <td class="text-right">{{ number_format($voucher->totalDiscounts(), 2, '.', '') }}</td>
-        </tr>
+        @if($voucher->totalDiscounts() !== NULL)
+            <tr>
+              <td>DESCUENTO</td>
+              <td class="text-right">{{ number_format($voucher->totalDiscounts(), 2, '.', '') }}</td>
+            </tr>
+        @endif
         <tr>
           <td>IVA 12%</td>
           <td class="text-right">{{ number_format($voucher->iva(), 2, '.', '') }}</td>
         </tr>
-        <tr>
-          <td>PROPINA</td>
-          <td class="text-right">{{ number_format($voucher->tip, 2, '.', '') }}</td>
-        </tr>
+        @if($voucher->tip !== NULL)
+            <tr>
+              <td>PROPINA</td>
+              <td class="text-right">{{ number_format($voucher->tip, 2, '.', '') }}</td>
+            </tr>
+        @endif
         <tr>
           <td>TOTAL</td>
           <td class="text-right">{{ number_format($voucher->total(), 2, '.', '') }}</td>

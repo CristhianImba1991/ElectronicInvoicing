@@ -4,10 +4,10 @@ $(document).ready(function(){
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
         var voucher = {
-            "product": @json($voucher->details()->get()->pluck('product_id')),
-            "product_quantity": @json($voucher->details()->get()->pluck('quantity')),
-            "product_unitprice": @json($voucher->details()->get()->pluck('unit_price')),
-            "product_discount": @json($voucher->details()->get()->pluck('discount')),
+            "product": @json(Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('product_id')),
+            "product_quantity": @json(Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('quantity')),
+            "product_unitprice": @json(Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('unit_price')),
+            "product_discount": @json(Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('discount')),
             "paymentMethod": @json($voucher->payments()->get()->pluck('payment_method_id')),
             "paymentMethod_value": @json($voucher->payments()->get()->pluck('total')),
             "paymentMethod_timeunit": @json($voucher->payments()->get()->pluck('time_unit_id')),
@@ -248,14 +248,10 @@ $(document).ready(function(){
                             if (products[id[i]]['iva'] != null) {
                                 switch (products[id[i]]['iva']['auxiliary_code']) {
                                     case 0: iva0Subtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
-                                    case 2:
-                                    ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
-                                    ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
-                                    break;
-                                    case 3:
-                                    ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
-                                    ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
-                                    break;
+                                    case 2: case 3:
+                                        ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
+                                        ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
+                                        break;
                                     case 6: notSubjectIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
                                     case 7: exemptIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
                                 }

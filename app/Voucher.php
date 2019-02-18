@@ -86,7 +86,7 @@ class Voucher extends Model
 
     public function debitNotesTaxes()
     {
-        return $this->hasMany('ElectronicInvoicing\DebitNoteTaxes');
+        return $this->hasMany('ElectronicInvoicing\DebitNoteTax');
     }
 
     public function retentions()
@@ -102,14 +102,23 @@ class Voucher extends Model
     public function subtotalWithoutTaxes()
     {
         $subtotalWithoutTaxes = 0.0;
-        foreach ($this->details()->get() as $detail) {
-            $subtotalWithoutTaxes += $detail->quantity * $detail->unit_price - $detail->discount;
+        switch ($this->voucher_type_id) {
+            case 1:
+                foreach ($this->details()->get() as $detail) {
+                    $subtotalWithoutTaxes += $detail->quantity * $detail->unit_price - $detail->discount;
+                }
+            case 3:
+                $subtotalWithoutTaxes += $this->debitNotesTaxes()->first()->tax_base;
+                break;
         }
         return $subtotalWithoutTaxes;
     }
 
     public function totalDiscounts()
     {
+        if (count($this->details()->get()) === 0) {
+            return NULL;
+        }
         $discounts = 0.0;
         foreach ($this->details()->get() as $detail) {
             $discounts += $detail->discount;
@@ -120,8 +129,14 @@ class Voucher extends Model
     public function total()
     {
         $total = self::subtotalWithoutTaxes();
-        foreach ($this->details()->get() as $detail) {
-            $total += $detail->taxDetails()->first()->value;
+        switch ($this->voucher_type_id) {
+            case 1:
+                foreach ($this->details()->get() as $detail) {
+                    $total += $detail->taxDetails()->first()->value;
+                }
+            case 3:
+                $total *= (1 + $this->debitNotesTaxes()->first()->rate / 100.0);
+                break;
         }
         return $total;
     }
@@ -132,12 +147,19 @@ class Voucher extends Model
         foreach (IvaTax::all() as $ivaTax) {
             $iva[strval($ivaTax->auxiliary_code)] = 0.00;
         }
-        foreach ($this->details()->get() as $detail) {
-            foreach ($detail->taxDetails()->get() as $tax) {
-                if ($tax->code === 2) {
-                    $iva[strval($tax->percentage_code)] += $detail->quantity * $detail->unit_price - $detail->discount;
+        switch ($this->voucher_type_id) {
+            case 1:
+                foreach ($this->details()->get() as $detail) {
+                    foreach ($detail->taxDetails()->get() as $tax) {
+                        if ($tax->code === 2) {
+                            $iva[strval($tax->percentage_code)] += $detail->quantity * $detail->unit_price - $detail->discount;
+                        }
+                    }
                 }
-            }
+                break;
+            case 3:
+                $iva[strval($this->debitNotesTaxes()->first()->percentage_code)] += $this->debitNotesTaxes()->first()->tax_base;
+                break;
         }
         return $iva;
     }
@@ -145,12 +167,19 @@ class Voucher extends Model
     public function iva()
     {
         $iva = 0.00;
-        foreach ($this->details()->get() as $detail) {
-            foreach ($detail->taxDetails()->get() as $tax) {
-                if ($tax->code === 2 && ($tax->percentage_code === 2 || $tax->percentage_code === 3)) {
-                    $iva += $tax->value;
+        switch ($this->voucher_type_id) {
+            case 1:
+                foreach ($this->details()->get() as $detail) {
+                    foreach ($detail->taxDetails()->get() as $tax) {
+                        if ($tax->code === 2 && ($tax->percentage_code === 2 || $tax->percentage_code === 3)) {
+                            $iva += $tax->value;
+                        }
+                    }
                 }
-            }
+                break;
+            case 3:
+                $iva += $this->debitNotesTaxes()->first()->tax_base * $this->debitNotesTaxes()->first()->rate / 100.0;
+                break;
         }
         return $iva;
     }

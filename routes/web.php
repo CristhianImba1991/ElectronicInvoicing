@@ -47,6 +47,7 @@ Route::group(['prefix' => 'resource'], function () {
     });
     Route::get('/paymentmethods', 'PaymentMethodController@paymentMethods')->name('paymentmethods');
     Route::get('/timeunits', 'TimeUnitController@timeUnits')->name('timeunits');
+    Route::post('/ivataxes', 'IvaTaxController@tax')->name('ivataxes');
 });
 
 Route::group(['prefix' => 'manage'], function () {

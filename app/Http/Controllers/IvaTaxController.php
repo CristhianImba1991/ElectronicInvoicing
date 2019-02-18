@@ -82,4 +82,12 @@ class IvaTaxController extends Controller
     {
         //
     }
+
+    public function tax(Request $request) {
+        if (is_array($request->id)) {
+            return IvaTax::whereIn('id', $request->id)->get()->toJson();
+        } else if (is_string($request->id)) {
+            return IvaTax::where('id', $request->id)->first()->toJson();
+        }
+    }
 }

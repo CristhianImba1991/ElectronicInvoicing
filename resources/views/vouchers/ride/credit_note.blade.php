@@ -9,11 +9,21 @@
           <td class="align-middle"><b>IDENTIFICACIÓN: </b>{{ $voucher->customer->identification }}</td>
         </tr>
         <tr>
-          <td class="align-middle"><b>FECHA DE EMISIÓN: </b>{{ $voucher->issue_date }}</td>
-          <td class="align-middle"><b>GUÍA DE REMISIÓN: </b>{{ $voucher->support_document }}</td>
+          <td class="align-middle" colspan="2"><b>FECHA DE EMISIÓN: </b>{{ $voucher->issue_date }}</td>
         </tr>
         <tr>
-          <td class="align-middle" colspan="2"><b>DIRECCIÓN: </b>{{ $voucher->customer->address }}</td>
+          <td class="align-middle" colspan="2"><hr></td>
+        </tr>
+        <tr>
+          <td class="align-middle"><b>COMPROBANTE QUE SE MODIFICA</b></td>
+          <td class="align-middle"><b>FACTURA: </b>{{ substr($voucher->support_document, 10, 3) . '-' . substr($voucher->support_document, 13, 3) . '-' . substr($voucher->support_document, 16, 9) }}</td>
+        </tr>
+        <tr>
+          <td class="align-middle"><b>FECHA DE EMISIÓN (COMPROBANTE A MODIFICAR): </b></td>
+          <td class="align-middle">{{ \DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('d/m/Y') }}</td>
+        </tr>
+        <tr>
+          <td class="align-middle" colspan="2"><b>RAZÓN: </b>{{ $voucher->creditNotes->first()->reason }}</td>
         </tr>
       </tbody>
     </table>
@@ -61,7 +71,7 @@
 <table class="table table-borderless">
     <tbody>
         <tr>
-            <td>@include('vouchers.ride.additionalinformation') @include('vouchers.ride.payment')</td>
+            <td>@include('vouchers.ride.additionalinformation')</td>
             <td>@include('vouchers.ride.total')</td>
         </tr>
     </tbody>

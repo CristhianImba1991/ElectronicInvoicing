@@ -173,10 +173,173 @@ $(document).ready(function(){
                     @endif
                     var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0);
                     reference.closest('tr').find('input[id *= product-subtotal]').val(productSubtotal.toFixed(2));
-                    //updateTotal();
+                    updateTotal();
                 }
             });
         }
     }
+    function updateTotal() {
+        var details = $('select[id *= product]');
+        var _token = $('input[name = "_token"]').val();
+        var id = $.map(details, function(option) {
+            return option.value;
+        });
+        var quantities = $.map($('input[id *= product_quantity]'), function(option) {
+            return Number(option.value);
+        });
+        var unitPrices = $.map($('input[id *= product_unitprice]'), function(option) {
+            return Number(option.value);
+        });
+        var discounts = $.map($('input[id *= product_discount]'), function(option) {
+            return Number(option.value);
+        });
+        if (id.length > 0) {
+            $.ajax({
+                url: "{{ route('products.taxes') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    const arrayToObject = (array) => array.reduce((object, item) => {
+                        object[item.id] = item
+                        return object
+                    }, {});
+                    var products = arrayToObject(JSON.parse(result));
+                    var ivaSubtotal = 0.0;
+                    var iva0Subtotal = 0.0;
+                    var notSubjectIvaSubtotal = 0.0;
+                    var exemptIvaSubtotal = 0.0;
+                    var iceValue = 0.0;
+                    var irbpnrValue = 0.0;
+                    var ivaValue = 0.0;
+                    for (var i = 0; i < id.length; i++) {
+                        if (id[i] != "") {
+                            if (products[id[i]]['iva'] != null) {
+                                switch (products[id[i]]['iva']['auxiliary_code']) {
+                                    case 0: iva0Subtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                    case 2:
+                                    ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
+                                    ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
+                                    break;
+                                    case 3:
+                                    ivaSubtotal += quantities[i] * unitPrices[i] - discounts[i];
+                                    ivaValue += (quantities[i] * unitPrices[i] - discounts[i]) * Number(products[id[i]]['iva']['rate']) / 100.0;
+                                    break;
+                                    case 6: notSubjectIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                    case 7: exemptIvaSubtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
+                                }
+                            }
+                        }
+                    }
+                    var subtotal = iva0Subtotal + ivaSubtotal + notSubjectIvaSubtotal + exemptIvaSubtotal;
+                    var totalDiscount = discounts.reduce(function(a, b) {
+                        return a + b;
+                    }, 0.0);
+                    var total = subtotal + iceValue + irbpnrValue + ivaValue;
+                    $('#iva0subtotal').val(iva0Subtotal.toFixed(2));
+                    $('#ivasubtotal').val(ivaSubtotal.toFixed(2));
+                    $('#notsubjectivasubtotal').val(notSubjectIvaSubtotal.toFixed(2));
+                    $('#exemptivasubtotal').val(exemptIvaSubtotal.toFixed(2));
+                    $('#subtotal').val(subtotal.toFixed(2));
+                    $('#totaldiscount').val(totalDiscount.toFixed(2));
+                    //$('#icevalue').val(iceValue.toFixed(2));
+                    //$('#irbpnrvalue').val(irbpnrValue.toFixed(2));
+                    $('#ivavalue').val(ivaValue.toFixed(2));
+                    $('#total').val(total.toFixed(2));
+                }
+            });
+        }
+    }
+    $('#creditNote-table tbody').on('changed.bs.select', 'select[id *= product]', function(){
+        loadProductData($(this), '');
+    });
+    $('#creditNote-table tbody').on('change', 'input[id *= product_quantity]', function(){
+        loadProductData($(this), 'productQuantity');
+    });
+    $('#creditNote-table tbody').on('change', 'input[id *= product_unitprice]', function(){
+        loadProductData($(this), 'productUnitPrice');
+    });
+    $('#creditNote-table tbody').on('change', 'input[id *= product_discount]', function(){
+        loadProductData($(this), 'productDiscount');
+    });
+    @if($action === 'edit' || $action === 'draft')
+        if ('product' in voucher) {
+            for (var i = 0; i < voucher['product'].length; i++) {
+                addRowProduct();
+            }
+        }
+    @endif
+    $('#creditNote-table tbody').on('click', 'button.btn.btn-danger.btn-sm', function(){
+        creditNoteTable
+            .row($(this).parents('tr'))
+            .remove()
+            .draw();
+        updateTotal();
+    });
+    $('#issue_date_support_document').datepicker({
+        autoclose: true,
+        todayBtn: 'linked',
+        todayHighlight: true,
+        endDate: '0d',
+        format: 'yyyy/mm/dd',
+        daysOfWeekHighlighted: "0,6"
+    });
+    var additionalDetailCount = 0;
+    function addRowAdditionalDetail() {
+        if (additionalDetailCount < 3) {
+            additionalDetailTable.row.add([
+                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="">',
+                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="">',
+                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+            ]).draw(false);
+            additionalDetailCount++;
+            @if($action === 'edit' || $action === 'draft')
+                if ('additionaldetail_name' in voucher) {
+                    if ($("input[id ~= 'additionaldetail_name[]']").length == voucher['additionaldetail_name'].length && voucher['additionaldetail_name'].length > 0) {
+                        $("input[id ~= 'additionaldetail_name[]']").each(function() {
+                            $(this).val(voucher['additionaldetail_name'][0]);
+                            voucher['additionaldetail_name'].shift();
+                        });
+                    }
+                }
+                if ('additionaldetail_value' in voucher) {
+                    if ($("input[id ~= 'additionaldetail_value[]']").length == voucher['additionaldetail_value'].length && voucher['additionaldetail_value'].length > 0) {
+                        $("input[id ~= 'additionaldetail_value[]']").each(function() {
+                            $(this).val(voucher['additionaldetail_value'][0]);
+                            voucher['additionaldetail_value'].shift();
+                        });
+                    }
+                }
+            @endif
+        }
+    }
+    var additionalDetailTable = $('#additionaldetail-table').DataTable({
+        paging: false,
+        dom: 'Bfrtip',
+        searching: false,
+        buttons: [{
+            text: 'Add row',
+            action: function(e, dt, node, config){
+                addRowAdditionalDetail();
+            }
+        }]
+    });
+    $('#additionaldetail-table tbody').on('click', 'button.btn.btn-danger.btn-sm', function(){
+        additionalDetailTable
+            .row($(this).parents('tr'))
+            .remove()
+            .draw();
+        additionalDetailCount--;
+    });
+    @if($action === 'edit' || $action === 'draft')
+        if ('additionaldetail_name' in voucher) {
+            for (var i = 0; i < voucher['additionaldetail_name'].length; i++) {
+                addRowAdditionalDetail();
+            }
+        }
+        $('#extra_detail').val(voucher['extra_detail']);
+    @endif
 });
 </script>
