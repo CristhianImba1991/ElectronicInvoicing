@@ -94,7 +94,7 @@ class VoucherController extends Controller
                     $rules['waybill_establishment'] = 'required_with:waybill_emissionpoint,waybill_sequential|nullable|integer|min:1|max:999';
                     $rules['waybill_emissionpoint'] = 'required_with:waybill_establishment,waybill_sequential|nullable|integer|min:1|max:999';
                     $rules['waybill_sequential'] = 'required_with:waybill_establishment,waybill_emissionpoint|nullable|integer|min:1|max:999999999';
-                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['extra_detail'] = 'nullable|string';
                     $rules['ivaRetentionValue'] = 'nullable|numeric|min:0';
                     $rules['rentRetentionValue'] = 'nullable|numeric|min:0';
                     $rules['tip'] = 'required|numeric|min:0';
@@ -117,7 +117,7 @@ class VoucherController extends Controller
                     $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
                     $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
                     $rules['reason'] = 'required|string|max:300';
-                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['extra_detail'] = 'nullable|string';
                     break;
                 case 3:
                     $rules['debit_reason'] = 'required|array|min:1';
@@ -140,7 +140,7 @@ class VoucherController extends Controller
                     $rules['additionaldetail_name.*'] = 'required|string|max:30';
                     $rules['additionaldetail_value'] = 'array|max:3';
                     $rules['additionaldetail_value.*'] = 'required|string|max:300';
-                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['extra_detail'] = 'nullable|string';
                     $rules['iva_tax'] = 'required|exists:iva_taxes,id';
                     break;
                 case 4:
@@ -159,7 +159,7 @@ class VoucherController extends Controller
                     $rules['additionaldetail_name.*'] = 'required|string|max:30';
                     $rules['additionaldetail_value'] = 'array|max:3';
                     $rules['additionaldetail_value.*'] = 'required|string|max:300';
-                    $rules['extra_detail'] = 'nullable|max:300';
+                    $rules['extra_detail'] = 'nullable|string';
                     $rules['voucher_type_support_document'] = 'required|exists:voucher_types,id';
                     $rules['supportdocument_establishment'] = 'required|nullable|integer|min:1|max:999';
                     $rules['supportdocument_emissionpoint'] = 'required|nullable|integer|min:1|max:999';

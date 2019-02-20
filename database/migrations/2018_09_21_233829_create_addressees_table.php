@@ -16,17 +16,17 @@ class CreateAddresseesTable extends Migration
         Schema::create('addressees', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('waybill_id');
-            $table->string('identification', 20);
-            $table->string('social_reason', 300);
+            $table->unsignedInteger('customer_id');
             $table->string('address', 300);
             $table->string('transfer_reason', 300);
-            $table->string('single_customs_doc', 20);
+            $table->string('single_customs_doc', 20)->nullable();
             $table->unsignedSmallInteger('destination_establishment_code');
             $table->string('route', 300);
-            $table->string('support_doc_code', 40);
+            $table->string('support_doc_code', 49);
             $table->timestamps();
             $table->foreign('waybill_id')->references('id')->on('waybills');
-            $table->unique(['waybill_id', 'identification'], 'addressee_unique');
+            $table->foreign('customer_id')->references('id')->on('customers');
+            $table->unique(['waybill_id', 'customer_id'], 'addressee_unique');
         });
     }
 

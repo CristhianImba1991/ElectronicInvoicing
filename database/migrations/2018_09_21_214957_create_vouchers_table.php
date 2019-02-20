@@ -29,7 +29,7 @@ class CreateVouchersTable extends Migration
             $table->unsignedDecimal('iva_retention', 18, 6)->nullable();
             $table->unsignedDecimal('rent_retention', 18, 6)->nullable();
             $table->string('xml', 300)->nullable();
-            $table->string('extra_detail', 300)->nullable();
+            $table->text('extra_detail')->nullable();
             $table->unsignedInteger('user_id');
             $table->string('support_document', 49)->nullable();
             $table->date('support_document_date')->nullable();

@@ -8,9 +8,7 @@ class DetailAddressee extends Model
 {
     protected $fillable = [
         'addressee_id',
-        'internal_code',
-        'additional_code',
-        'description',
+        'product_id',
         'quantity'
     ];
 

@@ -8,8 +8,7 @@ class Addressee extends Model
 {
     protected $fillable = [
         'waybill_id',
-        'identification',
-        'social_reason',
+        'customer_id',
         'address',
         'transfer_reason',
         'single_customs_doc',
