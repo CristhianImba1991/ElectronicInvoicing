@@ -26,4 +26,9 @@ class Waybill extends Model
     {
         return $this->hasMany('ElectronicInvoicing\Addressee');
     }
+
+    public function identificationType()
+    {
+        return $this->belongsTo('ElectronicInvoicing\IdentificationType');
+    }
 }

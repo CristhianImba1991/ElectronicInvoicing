@@ -49,7 +49,7 @@
                 <td class="align-middle">{{ $detail->product->description }}</td>
                 <td class="text-right align-middle">{{ $version ? $detail->unit_price : number_format($detail->unit_price, 2, '.', '') }}</td>
                 <td class="text-right align-middle">{{ number_format($detail->discount, 2, '.', '') }}</td>
-                <td class="text-right align-middle">{{ $detail->quantity * $detail->unit_price - $detail->discount }}</td>
+                <td class="text-right align-middle">{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', '') }}</td>
               </tr>
           @endforeach
       </tbody>

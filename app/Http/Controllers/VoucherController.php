@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use ElectronicInvoicing\{
     AdditionalField,
+    Addressee,
     Branch,
     Company,
     CreditNote,
@@ -14,6 +15,7 @@ use ElectronicInvoicing\{
     DebitNote,
     DebitNoteTax,
     Detail,
+    DetailAddressee,
     EmissionPoint,
     Environment,
     IceTax,
@@ -32,7 +34,8 @@ use ElectronicInvoicing\{
     User,
     Voucher,
     VoucherState,
-    VoucherType
+    VoucherType,
+    Waybill
 };
 use ElectronicInvoicing\Http\Controllers\CompanyUser;
 use ElectronicInvoicing\Http\Logic\DraftJson;
@@ -144,7 +147,28 @@ class VoucherController extends Controller
                     $rules['iva_tax'] = 'required|exists:iva_taxes,id';
                     break;
                 case 4:
-                    // code...
+                    $rules['product'] = 'required|array|min:1';
+                    $rules['product.*'] = 'distinct|exists:products,id';
+                    $rules['product_quantity'] = 'required|array|min:1';
+                    $rules['product_quantity.*'] = 'required|numeric|gte:0';
+                    $rules['identification_type'] = 'required|exists:identification_types,id';
+                    $rules['carrier_ruc'] = 'required|max:20';
+                    $rules['carrier_social_reason'] = 'required|max:300';
+                    $rules['licence_plate'] = 'required|max:20';
+                    $rules['starting_address'] = 'required|max:300';
+                    $rules['start_date_transport'] = 'required|date|before_or_equal:end_date_transport';
+                    $rules['end_date_transport'] = 'required|date|after_or_equal:start_date_transport';
+                    $rules['additionaldetail_name'] = 'array|max:3';
+                    $rules['additionaldetail_name.*'] = 'required|string|max:30';
+                    $rules['additionaldetail_value'] = 'array|max:3';
+                    $rules['additionaldetail_value.*'] = 'required|string|max:300';
+                    $rules['extra_detail'] = 'nullable|string';
+                    $rules['authorization_number'] = 'required|digits:49';
+                    $rules['single_customs_doc'] = 'nullable|string|max:20';
+                    $rules['address'] = 'required|string|max:300';
+                    $rules['transfer_reason'] = 'required|string|max:300';
+                    $rules['destination_establishment_code'] = 'required|min:1|max:999|integer';
+                    $rules['route'] = 'required|string|max:300';
                     break;
                 case 5:
                     $rules['tax'] = 'required|array|min:1';
@@ -559,7 +583,12 @@ class VoucherController extends Controller
                     return view('vouchers.' . $id, compact(['action', 'iva_taxes']));
                     break;
                 case 4:
-                    return view('vouchers.' . $id, compact(['action']));
+                    $identificationTypes = IdentificationType::where('code', '!=', 7)->get();
+                    $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes']));
                     break;
                 case 5:
                     $voucherTypes = VoucherType::all();
@@ -586,14 +615,21 @@ class VoucherController extends Controller
                     break;
                 case 3:
                     $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
-                    return view('vouchers.' . $id, compact(['action', 'iva_taxes']));
+                    $voucher = Voucher::find($voucherId);
+                    return view('vouchers.' . $id, compact(['action', 'iva_taxes', 'voucher']));
                     break;
                 case 4:
-                    return view('vouchers.' . $id, compact(['action']));
+                    $identificationTypes = IdentificationType::where('code', '!=', 7)->get();
+                    $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                    $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                    $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                    $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                    $voucher = Voucher::find($voucherId);
+                    return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes', 'voucher']));
                     break;
                 case 5:
-                    $voucher = Voucher::find($voucherId);
                     $voucherTypes = VoucherType::all();
+                    $voucher = Voucher::find($voucherId);
                     return view('vouchers.' . $id, compact(['action', 'voucherTypes', 'voucher']));
                     break;
             }
@@ -631,7 +667,12 @@ class VoucherController extends Controller
                 return view('vouchers.' . $id, compact(['action', 'iva_taxes']));
                 break;
             case 4:
-                return view('vouchers.' . $id, compact(['action']));
+                $identificationTypes = IdentificationType::where('code', '!=', 7)->get();
+                $companiesproduct = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
+                $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
+                $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
+                return view('vouchers.' . $id, compact(['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes']));
                 break;
             case 5:
                 $voucherTypes = VoucherType::all();
@@ -858,7 +899,36 @@ class VoucherController extends Controller
                 }
                 break;
             case 4:
-
+                $voucher->save();
+                $waybill = new Waybill;
+                $waybill->voucher_id = $voucher->id;
+                $waybill->identification_type_id = $request->identification_type;
+                $waybill->carrier_ruc = $request->carrier_ruc;
+                $waybill->carrier_social_reason = $request->carrier_social_reason;
+                $waybill->starting_address = $request->starting_address;
+                $waybill->start_date_transport = $request->start_date_transport;
+                $waybill->end_date_transport = $request->end_date_transport;
+                $waybill->licence_plate = $request->licence_plate;
+                $waybill->save();
+                $addressee = new Addressee;
+                $addressee->waybill_id = $waybill->id;
+                $addressee->customer_id = Customer::find($request->customer)->id;
+                $addressee->address = $request->address;
+                $addressee->transfer_reason = $request->transfer_reason;
+                $addressee->single_customs_doc = $request->single_customs_doc;
+                $addressee->destination_establishment_code = $request->destination_establishment_code;
+                $addressee->route = $request->route;
+                $addressee->support_doc_code = $request->authorization_number;
+                $addressee->save();
+                $products = $request->product;
+                $quantities = $request->product_quantity;
+                for ($i = 0; $i < count($products); $i++) {
+                    $detailAddressee = new DetailAddressee;
+                    $detailAddressee->addressee_id = $addressee->id;
+                    $detailAddressee->product_id = Product::find($products[$i])->id;
+                    $detailAddressee->quantity = $quantities[$i];
+                    $detailAddressee->save();
+                }
                 break;
             case 5:
                 $voucher->support_document = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('dmY') .
@@ -927,6 +997,16 @@ class VoucherController extends Controller
             if (strlen(substr(strrchr(strval(floatval($detail->quantity)), "."), 1)) > 2 || strlen(substr(strrchr(strval(floatval($detail->unit_price)), "."), 1)) > 2) {
                 $version = '1.1.0';
                 break;
+            }
+        }
+        $waybill = Waybill::where('voucher_id', '=', $voucher->id)->first();
+        if ($waybill !== NULL) {
+            $addressee = Addressee::where('waybill_id', '=', $waybill->id)->first();
+            foreach (DetailAddressee::where('addressee_id', '=', $addressee->id)->get() as $detailAddressee) {
+                if (strlen(substr(strrchr(strval(floatval($detailAddressee->quantity)), "."), 1)) > 2) {
+                    $version = '1.1.0';
+                    break;
+                }
             }
         }
         $issueDate = DateTime::createFromFormat('Y-m-d', $voucher->issue_date);
@@ -1199,6 +1279,66 @@ class VoucherController extends Controller
                 break;
             case 4:
                 $root = 'guiaRemision';
+                $xml['infoGuiaRemision'] = [
+                    'dirEstablecimiento'                => $voucher->emissionPoint->branch->address,
+                    'dirPartida'                        => $voucher->waybills()->first()->starting_address,
+                    'razonSocialTransportista'          => $voucher->waybills()->first()->carrier_social_reason,
+                    'tipoIdentificacionTransportista'   => str_pad(strval($voucher->waybills()->first()->identificationType->code), 2, '0', STR_PAD_LEFT),
+                    'rucTransportista'                  => $voucher->waybills()->first()->carrier_ruc,
+                    'obligadoContabilidad'              => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
+                    'contribuyenteEspecial'             => NULL,
+                    'fechaIniTransporte'                => DateTime::createFromFormat('Y-m-d', $voucher->waybills()->first()->start_date_transport)->format('d/m/Y'),
+                    'fechaFinTransporte'                => DateTime::createFromFormat('Y-m-d', $voucher->waybills()->first()->end_date_transport)->format('d/m/Y'),
+                    'placa'                             => $voucher->waybills()->first()->licence_plate
+                ];
+                if ($voucher->emissionPoint->branch->company->special_contributor === NULL) {
+                    unset($xml['infoGuiaRemision']['contribuyenteEspecial']);
+                } else {
+                    $xml['infoGuiaRemision']['contribuyenteEspecial'] = $voucher->emissionPoint->branch->company->special_contributor;
+                }
+                $waybill = $voucher->waybills()->first();
+                if ($waybill !== NULL) {
+                    $voucherAddressees = array();
+                    foreach (Addressee::where('waybill_id', '=', $waybill->id)->get() as $addressee) {
+                        $detailAddressees = array();
+                        foreach ($addressee->details as $detail) {
+                            array_push($detailAddressees,
+                                array(
+                                    'codigoInterno'     => $detail->product->main_code,
+                                    'codigoAdicional'   => $detail->product->auxiliary_code,
+                                    'descripcion'       => $detail->product->description,
+                                    'cantidad'          => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
+                                )
+                            );
+                        }
+                        array_push($voucherAddressees,
+                            array(
+                                'identificacionDestinatario'    => $addressee->customer->identification,
+                                'razonSocialDestinatario'       => $addressee->customer->social_reason,
+                                'dirDestinatario'               => $addressee->address,
+                                'motivoTraslado'                => $addressee->transfer_reason,
+                                'docAduaneroUnico'              => NULL,
+                                'codEstabDestino'               => str_pad(strval($addressee->destination_establishment_code), 3, '0', STR_PAD_LEFT),
+                                'ruta'                          => $addressee->route,
+                                'codDocSustento'                => substr($addressee->support_doc_code, 8, 2),
+                                'numDocSustento'                => substr($addressee->support_doc_code, 24, 3) . '-' . substr($addressee->support_doc_code, 27, 3) . '-' . substr($addressee->support_doc_code, 30, 9),
+                                'numAutDocSustento'             => $addressee->support_doc_code,
+                                'fechaEmisionDocSustento'       => DateTime::createFromFormat('dmY', substr($addressee->support_doc_code, 0, 8))->format('d/m/Y'),
+                                'detalles'                      => [
+                                    'detalle' => $detailAddressees,
+                                ]
+                            )
+                        );
+                        if ($addressee->single_customs_doc === NULL) {
+                            unset($voucherAddressees[count($voucherAddressees) - 1]['docAduaneroUnico']);
+                        } else {
+                            $voucherAddressees[count($voucherAddressees) - 1]['docAduaneroUnico'] = $addressee->single_customs_doc;
+                        }
+                    }
+                    $xml['destinatarios'] = [
+                        'destinatario' => $voucherAddressees,
+                    ];
+                }
                 break;
             case 5:
                 $root = 'comprobanteRetencion';

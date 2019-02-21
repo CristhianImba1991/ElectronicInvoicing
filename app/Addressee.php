@@ -22,6 +22,11 @@ class Addressee extends Model
         return $this->belongsTo('ElectronicInvoicing\Waybill');
     }
 
+    public function customer()
+    {
+        return $this->belongsTo('ElectronicInvoicing\Customer');
+    }
+
     public function details()
     {
         return $this->hasMany('ElectronicInvoicing\DetailAddressee');

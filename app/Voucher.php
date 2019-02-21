@@ -107,6 +107,7 @@ class Voucher extends Model
                 foreach ($this->details()->get() as $detail) {
                     $subtotalWithoutTaxes += $detail->quantity * $detail->unit_price - $detail->discount;
                 }
+                break;
             case 3:
                 $subtotalWithoutTaxes += $this->debitNotesTaxes()->first()->tax_base;
                 break;
@@ -134,6 +135,7 @@ class Voucher extends Model
                 foreach ($this->details()->get() as $detail) {
                     $total += $detail->taxDetails()->first()->value;
                 }
+                break;
             case 3:
                 $total *= (1 + $this->debitNotesTaxes()->first()->rate / 100.0);
                 break;

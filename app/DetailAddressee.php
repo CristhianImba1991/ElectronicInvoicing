@@ -17,6 +17,11 @@ class DetailAddressee extends Model
         return $this->belongsTo('ElectronicInvoicing\Addressee');
     }
 
+    public function product()
+    {
+        return $this->belongsTo('ElectronicInvoicing\Product');
+    }
+
     public function additionalDetails()
     {
         return $this->hasMany('ElectronicInvoicing\AdditionalDetailAddressee');
