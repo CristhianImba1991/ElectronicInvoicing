@@ -32,22 +32,13 @@
             </tr>
         </thead>
       <tbody>
-          @php
-              $version = false;
-              foreach (\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
-                  if (strlen(substr(strrchr(strval(floatval($detail->quantity)), "."), 1)) > 2 || strlen(substr(strrchr(strval(floatval($detail->unit_price)), "."), 1)) > 2) {
-                      $version = true;
-                      break;
-                  }
-              }
-          @endphp
           @foreach(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get() as $detail)
               <tr>
                 <td class="align-middle">{{ $detail->product->main_code }}</td>
                 <td class="align-middle">{{ $detail->product->auxiliary_code }}</td>
-                <td class="text-center align-middle">{{ $version ? $detail->quantity : number_format($detail->quantity, 2, '.', '') }}</td>
+                <td class="text-center align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity }}</td>
                 <td class="align-middle">{{ $detail->product->description }}</td>
-                <td class="text-right align-middle">{{ $version ? $detail->unit_price : number_format($detail->unit_price, 2, '.', '') }}</td>
+                <td class="text-right align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price }}</td>
                 <td class="text-right align-middle">{{ number_format($detail->discount, 2, '.', '') }}</td>
                 <td class="text-right align-middle">{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', '') }}</td>
               </tr>

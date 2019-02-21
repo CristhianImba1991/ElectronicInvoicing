@@ -200,6 +200,46 @@ class Voucher extends Model
         return $accessKey . self::getCheckDigit($accessKey);
     }
 
+    public function version()
+    {
+        $version = '1.0.0';
+        switch ($this->voucher_type_id) {
+            case 1: case 2:
+                foreach (Detail::where('voucher_id', '=', $this->id)->get() as $detail) {
+                    if (strlen(substr(strrchr(strval(floatval($detail->quantity)), "."), 1)) > 2 || strlen(substr(strrchr(strval(floatval($detail->unit_price)), "."), 1)) > 2) {
+                        $version = '1.1.0';
+                        break;
+                    }
+                }
+                break;
+            case 4:
+                $waybill = Waybill::where('voucher_id', '=', $this->id)->first();
+                if ($waybill !== NULL) {
+                    $addressee = Addressee::where('waybill_id', '=', $waybill->id)->first();
+                    foreach (DetailAddressee::where('addressee_id', '=', $addressee->id)->get() as $detailAddressee) {
+                        if (strlen(substr(strrchr(strval(floatval($detailAddressee->quantity)), "."), 1)) > 2) {
+                            $version = '1.1.0';
+                            break;
+                        }
+                    }
+                }
+                break;
+        }
+        return $version;
+    }
+
+    public function getViewType()
+    {
+        switch ($this->voucher_type_id) {
+            case 1: $voucherType = 'invoice'; break;
+            case 2: $voucherType = 'credit_note'; break;
+            case 3: $voucherType = 'debit_note'; break;
+            case 4: $voucherType = 'waybill'; break;
+            case 5: $voucherType = 'retention'; break;
+        }
+        return $voucherType;
+    }
+
     private static function getCheckDigit($accessKey)
     {
         $summation = 0;

@@ -6,16 +6,15 @@
       <tbody>
         <tr>
           <td class="align-middle"><b>IDENTIFICACIÓN (TRANSPORTISTA): </b></td>
-          <td class="align-middle">{{ $voucher->waybills()->first()->carrier_ruc }}</td>
+          <td class="align-middle" colspan="3">{{ $voucher->waybills()->first()->carrier_ruc }}</td>
         </tr>
         <tr>
           <td class="align-middle"><b>RAZÓN SOCIAL /  NOMBRES Y APELLIDOS: </b></td>
-          <td class="align-middle">{{ $voucher->waybills()->first()->carrier_social_reason }}</td>
+          <td class="align-middle" colspan="3">{{ $voucher->waybills()->first()->carrier_social_reason }}</td>
         </tr>
-      </tbody>
-    </table>
-    <table class="table table-sm">
-      <tbody>
+        <tr>
+          <td class="align-middle" colspan="4"></td>
+        </tr>
         <tr>
           <td class="align-middle"><b>PLACA: </b></td>
           <td class="align-middle" colspan="3">{{ $voucher->waybills()->first()->licence_plate }}</td>
@@ -90,18 +89,9 @@
                             </tr>
                         </thead>
                       <tbody>
-                          @php
-                              $version = false;
-                              foreach (\ElectronicInvoicing\DetailAddressee::where('addressee_id', '=', $addressee->id)->get() as $detailAddressee) {
-                                  if (strlen(substr(strrchr(strval(floatval($detailAddressee->quantity)), "."), 1)) > 2) {
-                                      $version = true;
-                                      break;
-                                  }
-                              }
-                          @endphp
                           @foreach($addressee->details as $detail)
                           <tr>
-                            <td class="align-middle">{{ $version ? $detail->quantity : number_format($detail->quantity, 2, '.', '') }}</td>
+                            <td class="align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity }}</td>
                             <td class="align-middle">{{ $detail->product->description }}</td>
                             <td class="align-middle">{{ $detail->product->main_code }}</td>
                             <td class="align-middle">{{ $detail->product->auxiliary_code }}</td>
