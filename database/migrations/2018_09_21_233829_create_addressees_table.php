@@ -20,7 +20,7 @@ class CreateAddresseesTable extends Migration
             $table->string('address', 300);
             $table->string('transfer_reason', 300);
             $table->string('single_customs_doc', 20)->nullable();
-            $table->unsignedSmallInteger('destination_establishment_code');
+            $table->unsignedSmallInteger('destination_establishment_code')->nullable();
             $table->string('route', 300);
             $table->string('support_doc_code', 49);
             $table->timestamps();

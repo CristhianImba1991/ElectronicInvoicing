@@ -167,7 +167,7 @@ class VoucherController extends Controller
                     $rules['single_customs_doc'] = 'nullable|string|max:20';
                     $rules['address'] = 'required|string|max:300';
                     $rules['transfer_reason'] = 'required|string|max:300';
-                    $rules['destination_establishment_code'] = 'required|min:1|max:999|integer';
+                    $rules['destination_establishment_code'] = 'nullable|min:1|max:999|integer';
                     $rules['route'] = 'required|string|max:300';
                     break;
                 case 5:
@@ -1265,7 +1265,7 @@ class VoucherController extends Controller
                                 'dirDestinatario'               => $addressee->address,
                                 'motivoTraslado'                => $addressee->transfer_reason,
                                 'docAduaneroUnico'              => NULL,
-                                'codEstabDestino'               => str_pad(strval($addressee->destination_establishment_code), 3, '0', STR_PAD_LEFT),
+                                'codEstabDestino'               => NULL,
                                 'ruta'                          => $addressee->route,
                                 'codDocSustento'                => substr($addressee->support_doc_code, 8, 2),
                                 'numDocSustento'                => substr($addressee->support_doc_code, 24, 3) . '-' . substr($addressee->support_doc_code, 27, 3) . '-' . substr($addressee->support_doc_code, 30, 9),
@@ -1280,6 +1280,11 @@ class VoucherController extends Controller
                             unset($voucherAddressees[count($voucherAddressees) - 1]['docAduaneroUnico']);
                         } else {
                             $voucherAddressees[count($voucherAddressees) - 1]['docAduaneroUnico'] = $addressee->single_customs_doc;
+                        }
+                        if ($addressee->destination_establishment_code === NULL) {
+                            unset($voucherAddressees[count($voucherAddressees) - 1]['codEstabDestino']);
+                        } else {
+                            $voucherAddressees[count($voucherAddressees) - 1]['codEstabDestino'] = str_pad(strval($addressee->destination_establishment_code), 3, '0', STR_PAD_LEFT);
                         }
                     }
                     $xml['destinatarios'] = [

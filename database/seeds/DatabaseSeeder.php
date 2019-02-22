@@ -101,7 +101,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         DB::table('currencies')->insert([
-            ['id' => 1, 'name' => 'DÓLAR', 'created_at' => Carbon::now()]
+            ['id' => 1, 'symbol' => '$', 'iso' => 'USD', 'name' => 'DÓLAR', 'created_at' => Carbon::now()]
         ]);
 
         DB::table('time_units')->insert([
