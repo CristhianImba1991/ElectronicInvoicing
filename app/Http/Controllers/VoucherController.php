@@ -1549,15 +1549,15 @@ class VoucherController extends Controller
         self::signVoucher($voucher);
         self::moveXmlFile($voucher, VoucherStates::SENDED);
         $wsdlReceipt = '';
-        $wsdlValidation = '';
+        $wsdlAuthorization = '';
         switch ($voucher->environment->code) {
             case 1:
                 $wsdlReceipt = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl';
-                $wsdlValidation = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+                $wsdlAuthorization = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
                 break;
             case 2:
                 $wsdlReceipt = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl';
-                $wsdlValidation = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+                $wsdlAuthorization = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
                 break;
         }
         $options = array(
@@ -1566,6 +1566,9 @@ class VoucherController extends Controller
         $soapClientReceipt = new SoapClient($wsdlReceipt, $options);
         $xml['xml'] = file_get_contents(storage_path('app/' . $voucher->xml));
         $resultReceipt = json_decode(json_encode($soapClientReceipt->validarComprobante($xml)), True);
+        info('**** RECEIPT RESULT *******************************************');
+        info($resultReceipt);
+        info('**** END RECEIPT RESULT ***************************************');
         switch ($resultReceipt['RespuestaRecepcionComprobante']['estado']) {
             case 'RECIBIDA':
                 $voucher->voucher_state_id = VoucherStates::RECEIVED;
@@ -1587,29 +1590,32 @@ class VoucherController extends Controller
         }
 
         if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
-            $soapClientValidation = new SoapClient($wsdlValidation);
+            $soapClientValidation = new SoapClient($wsdlAuthorization);
             $accessKey = array(
                 'autorizacionComprobante' => array(
                     'claveAccesoComprobante' =>  $voucher->accessKey()
                 )
             );
-            $resultValidation = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
+            $resultAuthorization = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
+            info('**** AUTHORIZATION RESULT *********************************');
+            info($resultAuthorization);
+            info('**** END AUTHORIZATION RESULT *****************************');
             $xmlReponse = [
-                'estado' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
+                'estado' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
                 'numeroAutorizacion' => NULL,
                 'fechaAutorizacion' => array(
                     '_attributes' => ['class' => 'fechaAutorizacion'],
-                    '_value' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                    '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
                 ),
                 'comprobante' => array(
-                    '_cdata' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                    '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
                 ),
-                'mensajes' => $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
+                'mensajes' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
             ];
 
-            switch ($resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
+            switch ($resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
                 case 'AUTORIZADO':
-                    $xmlReponse['numeroAutorizacion'] = $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
+                    $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
                     $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
                     break;
                 case 'NO AUTORIZADO':
@@ -1620,7 +1626,7 @@ class VoucherController extends Controller
                     $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
                     break;
             }
-            $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultValidation['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+            $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
             $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
             $voucher->save();
             $xmlPath = 'xmls/' .

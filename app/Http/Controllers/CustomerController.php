@@ -128,6 +128,7 @@ class CustomerController extends Controller
             $input['password'] = Hash::make($request->identification);
             $user = User::create($input);
             $user->assignRole('customer');
+            MailController::sendMailNewUser($user, $request->identification);
         } else {
             $user = User::where('email', '=', $userEmail)->first();
         }

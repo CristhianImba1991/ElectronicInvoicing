@@ -16,7 +16,7 @@
             <div class="card">
                 <div class="card-header">
                     Customers
-                    @if(auth()->user()->can('create_branches'))
+                    @if(auth()->user()->can('create_customers'))
                         <a href="{{ route('customers.create') }}" class="btn btn-sm btn-primary float-right">New</a>
                     @endif
                 </div>
