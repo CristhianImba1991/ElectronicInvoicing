@@ -52,11 +52,11 @@ class UserController extends Controller
                 'name' => 'required|max:255',
                 'email' => 'required|email|max:255|unique:users',
                 'password' => 'required|min:6|confirmed',
-                'company' => 'required_unless:role,admin|min:1',
+                'company' => 'required_unless:role,api,admin|min:1',
                 'company.*' => 'exists:companies,id',
-                'branch' => 'required_unless:role,admin,owner|min:1',
+                'branch' => 'required_unless:role,admin,api,owner|min:1',
                 'branch.*' => 'exists:branches,id',
-                'emission_point' => 'required_unless:role,admin,owner|min:1',
+                'emission_point' => 'required_unless:role,admin,api,owner|min:1',
                 'emission_point.*' => 'exists:emission_points,id',
             ], [
                 'company.required_unless' => 'The :attribute field is required.',
@@ -131,7 +131,7 @@ class UserController extends Controller
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
         $user->assignRole($request->role);
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasRole('admin') && !$user->hasRole('api')) {
             if ($user->hasRole('owner')) {
                 $branches = Branch::withTrashed()->whereIn('company_id', $request->company)->get();
                 $emissionPointsGroup = collect();

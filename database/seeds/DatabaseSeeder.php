@@ -268,6 +268,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $role_admin = Role::create(['name' => 'admin']);
+        $role_api = Role::create(['name' => 'api']);
         $role_owner = Role::create(['name' => 'owner']);
         $role_supervisor = Role::create(['name' => 'supervisor']);
         $role_employee = Role::create(['name' => 'employee']);
@@ -345,6 +346,11 @@ class DatabaseSeeder extends Seeder
         $role_admin->givePermissionTo($permission_update_customers);
         $role_admin->givePermissionTo($permission_delete_soft_customers);
         $role_admin->givePermissionTo($permission_delete_hard_customers);
+        $role_api->givePermissionTo($permission_create_customers);
+        $role_api->givePermissionTo($permission_read_customers);
+        $role_api->givePermissionTo($permission_update_customers);
+        $role_api->givePermissionTo($permission_delete_soft_customers);
+        $role_api->givePermissionTo($permission_delete_hard_customers);
         $role_owner->givePermissionTo($permission_create_customers);
         $role_owner->givePermissionTo($permission_read_customers);
         $role_owner->givePermissionTo($permission_update_customers);
@@ -378,6 +384,11 @@ class DatabaseSeeder extends Seeder
         $role_admin->givePermissionTo($permission_update_products);
         $role_admin->givePermissionTo($permission_delete_soft_products);
         $role_admin->givePermissionTo($permission_delete_hard_products);
+        $role_api->givePermissionTo($permission_create_products);
+        $role_api->givePermissionTo($permission_read_products);
+        $role_api->givePermissionTo($permission_update_products);
+        $role_api->givePermissionTo($permission_delete_soft_products);
+        $role_api->givePermissionTo($permission_delete_hard_products);
         $role_owner->givePermissionTo($permission_create_products);
         $role_owner->givePermissionTo($permission_read_products);
         $role_owner->givePermissionTo($permission_update_products);
@@ -395,6 +406,10 @@ class DatabaseSeeder extends Seeder
         $role_admin->givePermissionTo($permission_read_vouchers);
         $role_admin->givePermissionTo($permission_update_vouchers);
         $role_admin->givePermissionTo($permission_delete_vouchers);
+        $role_api->givePermissionTo($permission_create_vouchers);
+        $role_api->givePermissionTo($permission_read_vouchers);
+        $role_api->givePermissionTo($permission_update_vouchers);
+        $role_api->givePermissionTo($permission_delete_vouchers);
         $role_owner->givePermissionTo($permission_create_vouchers);
         $role_owner->givePermissionTo($permission_read_vouchers);
         $role_owner->givePermissionTo($permission_update_vouchers);
@@ -410,10 +425,12 @@ class DatabaseSeeder extends Seeder
         $role_customer->givePermissionTo($permission_read_vouchers);
 
         $role_admin->givePermissionTo($permission_send_vouchers);
+        $role_api->givePermissionTo($permission_send_vouchers);
         $role_owner->givePermissionTo($permission_send_vouchers);
         $role_supervisor->givePermissionTo($permission_send_vouchers);
 
         $role_admin->givePermissionTo($permission_report_vouchers);
+        $role_api->givePermissionTo($permission_report_vouchers);
         $role_owner->givePermissionTo($permission_report_vouchers);
         $role_supervisor->givePermissionTo($permission_report_vouchers);
         $role_employee->givePermissionTo($permission_report_vouchers);

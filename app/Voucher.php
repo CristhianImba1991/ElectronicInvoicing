@@ -103,7 +103,7 @@ class Voucher extends Model
     {
         $subtotalWithoutTaxes = 0.0;
         switch ($this->voucher_type_id) {
-            case 1:
+            case 1: case 2:
                 foreach ($this->details()->get() as $detail) {
                     $subtotalWithoutTaxes += $detail->quantity * $detail->unit_price - $detail->discount;
                 }
@@ -131,7 +131,7 @@ class Voucher extends Model
     {
         $total = self::subtotalWithoutTaxes();
         switch ($this->voucher_type_id) {
-            case 1:
+            case 1: case 2:
                 foreach ($this->details()->get() as $detail) {
                     $total += $detail->taxDetails()->first()->value;
                 }
@@ -150,7 +150,7 @@ class Voucher extends Model
             $iva[strval($ivaTax->auxiliary_code)] = 0.00;
         }
         switch ($this->voucher_type_id) {
-            case 1:
+            case 1: case 2:
                 foreach ($this->details()->get() as $detail) {
                     foreach ($detail->taxDetails()->get() as $tax) {
                         if ($tax->code === 2) {
@@ -170,7 +170,7 @@ class Voucher extends Model
     {
         $iva = 0.00;
         switch ($this->voucher_type_id) {
-            case 1:
+            case 1: case 2:
                 foreach ($this->details()->get() as $detail) {
                     foreach ($detail->taxDetails()->get() as $tax) {
                         if ($tax->code === 2 && ($tax->percentage_code === 2 || $tax->percentage_code === 3)) {

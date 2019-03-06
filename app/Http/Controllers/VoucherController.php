@@ -1095,6 +1095,7 @@ class VoucherController extends Controller
             case 2:
                 $root = 'notaCredito';
                 $issueDate = DateTime::createFromFormat('Y-m-d', $voucher->issue_date);
+                $supportDocumentDate = DateTime::createFromFormat('Y-m-d', $voucher->support_document_date);
                 $xml['infoNotaCredito'] = [
                     'fechaEmision'                  => $issueDate->format('d/m/Y'),
                     'dirEstablecimiento'            => $voucher->emissionPoint->branch->address,
@@ -1105,7 +1106,7 @@ class VoucherController extends Controller
                     'obligadoContabilidad'          => $voucher->emissionPoint->branch->company->keep_accounting ? 'SI' : 'NO',
                     'codDocModificado'              => '01',
                     'numDocModificado'              => substr($voucher->support_document, 10, 3) . '-' . substr($voucher->support_document, 13, 3) . '-' . substr($voucher->support_document, 16, 9),
-                    'fechaEmisionDocSustento'       => $issueDate->format('d/m/Y'),
+                    'fechaEmisionDocSustento'       => $supportDocumentDate->format('d/m/Y'),
                     'totalSinImpuestos'             => number_format($voucher->subtotalWithoutTaxes(), 2, '.', ''),
                     'valorModificacion'             => number_format($voucher->total(), 2, '.', ''),
                     'moneda'                        => $voucher->currency->name,
@@ -1565,28 +1566,37 @@ class VoucherController extends Controller
         );
         $soapClientReceipt = new SoapClient($wsdlReceipt, $options);
         $xml['xml'] = file_get_contents(storage_path('app/' . $voucher->xml));
-        $resultReceipt = json_decode(json_encode($soapClientReceipt->validarComprobante($xml)), True);
-        info('**** RECEIPT RESULT *******************************************');
-        info($resultReceipt);
-        info('**** END RECEIPT RESULT ***************************************');
-        switch ($resultReceipt['RespuestaRecepcionComprobante']['estado']) {
-            case 'RECIBIDA':
-                $voucher->voucher_state_id = VoucherStates::RECEIVED;
-                $voucher->save();
-                self::moveXmlFile($voucher, VoucherStates::RECEIVED);
-                break;
-            case 'DEVUELTA':
-                $voucher->voucher_state_id = VoucherStates::RETURNED;
-                $message = $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['tipo'] . ' ' .
-                    $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['identificador'] . ': ' .
-                    $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['mensaje'];
-                if (array_key_exists('informacionAdicional', $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje'])) {
-                    $message .= '. ' . $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['informacionAdicional'];
-                }
-                $voucher->extra_detail = $message;
-                $voucher->save();
-                self::moveXmlFile($voucher, VoucherStates::RETURNED);
-                break;
+        try {
+            $resultReceipt = json_decode(json_encode($soapClientReceipt->validarComprobante($xml)), True);
+            info('**** RECEIPT RESULT *******************************************');
+            info($resultReceipt);
+            info('**** END RECEIPT RESULT ***************************************');
+            switch ($resultReceipt['RespuestaRecepcionComprobante']['estado']) {
+                case 'RECIBIDA':
+                    $voucher->voucher_state_id = VoucherStates::RECEIVED;
+                    $voucher->save();
+                    self::moveXmlFile($voucher, VoucherStates::RECEIVED);
+                    break;
+                case 'DEVUELTA':
+                    $voucher->voucher_state_id = VoucherStates::RETURNED;
+                    $message = $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['tipo'] . ' ' .
+                        $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['identificador'] . ': ' .
+                        $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['mensaje'];
+                    if (array_key_exists('informacionAdicional', $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje'])) {
+                        $message .= '. ' . $resultReceipt['RespuestaRecepcionComprobante']['comprobantes']['comprobante']['mensajes']['mensaje']['informacionAdicional'];
+                    }
+                    $voucher->extra_detail = $message;
+                    $voucher->save();
+                    self::moveXmlFile($voucher, VoucherStates::RETURNED);
+                    break;
+            }
+        } catch (\Exception $e) {
+            info('#### ERROR IN VALIDARCOMPROBANTE WS #######################');
+            info(' CODE: ' . $e->getCode());
+            info(' FILE: ' . $e->getFile());
+            info(' LINE: ' . $e->getLine());
+            info(' MESSAGE: ' . $e->getMessage());
+            info('#### END ERROR IN VALIDARCOMPROBANTE WS ###################');
         }
 
         if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
@@ -1596,50 +1606,59 @@ class VoucherController extends Controller
                     'claveAccesoComprobante' =>  $voucher->accessKey()
                 )
             );
-            $resultAuthorization = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
-            info('**** AUTHORIZATION RESULT *********************************');
-            info($resultAuthorization);
-            info('**** END AUTHORIZATION RESULT *****************************');
-            $xmlReponse = [
-                'estado' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
-                'numeroAutorizacion' => NULL,
-                'fechaAutorizacion' => array(
-                    '_attributes' => ['class' => 'fechaAutorizacion'],
-                    '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
-                ),
-                'comprobante' => array(
-                    '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
-                ),
-                'mensajes' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
-            ];
+            try {
+                $resultAuthorization = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
+                info('**** AUTHORIZATION RESULT *********************************');
+                info($resultAuthorization);
+                info('**** END AUTHORIZATION RESULT *****************************');
+                $xmlReponse = [
+                    'estado' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
+                    'numeroAutorizacion' => NULL,
+                    'fechaAutorizacion' => array(
+                        '_attributes' => ['class' => 'fechaAutorizacion'],
+                        '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                    ),
+                    'comprobante' => array(
+                        '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                    ),
+                    'mensajes' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
+                ];
 
-            switch ($resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
-                case 'AUTORIZADO':
-                    $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
-                    $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
-                    break;
-                case 'NO AUTORIZADO':
-                    unset($xmlReponse['numeroAutorizacion']);
-                    $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
-                    break;
-                default:
-                    $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
-                    break;
-            }
-            $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
-            $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
-            $voucher->save();
-            $xmlPath = 'xmls/' .
-                $voucher->emissionPoint->branch->company->ruc . '/' .
-                VoucherState::find($voucher->voucher_state_id)->name . '/' .
-                DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y/m') . '/' .
-                $voucher->accessKey() . '.xml';
-            Storage::put($xmlPath, ArrayToXml::convert($xmlReponse, 'autorizacion', false, 'UTF-8'));
-            Storage::delete($voucher->xml);
-            $voucher->xml = $xmlPath;
-            $voucher->save();
-            if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED) {
-                MailController::sendMailNewVoucher($voucher);
+                switch ($resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
+                    case 'AUTORIZADO':
+                        $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
+                        $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
+                        break;
+                    case 'NO AUTORIZADO':
+                        unset($xmlReponse['numeroAutorizacion']);
+                        $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
+                        break;
+                    default:
+                        $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
+                        break;
+                }
+                $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+                $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
+                $voucher->save();
+                $xmlPath = 'xmls/' .
+                    $voucher->emissionPoint->branch->company->ruc . '/' .
+                    VoucherState::find($voucher->voucher_state_id)->name . '/' .
+                    DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y/m') . '/' .
+                    $voucher->accessKey() . '.xml';
+                Storage::put($xmlPath, ArrayToXml::convert($xmlReponse, 'autorizacion', false, 'UTF-8'));
+                Storage::delete($voucher->xml);
+                $voucher->xml = $xmlPath;
+                $voucher->save();
+                if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED) {
+                    //MailController::sendMailNewVoucher($voucher);
+                }
+            } catch (\Exception $e) {
+                info('#### ERROR IN AUTORIZARCOMPROBANTE WS #######################');
+                info(' CODE: ' . $e->getCode());
+                info(' FILE: ' . $e->getFile());
+                info(' LINE: ' . $e->getLine());
+                info(' MESSAGE: ' . $e->getMessage());
+                info('#### END ERROR IN AUTORIZARCOMPROBANTE WS ###################');
             }
         } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
             info(' *** ' . $voucher->extra_detail . ' *** ');

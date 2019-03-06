@@ -20,7 +20,7 @@
         </tr>
         <tr>
           <td class="align-middle"><b>FECHA DE EMISIÓN (COMPROBANTE A MODIFICAR): </b></td>
-          <td class="align-middle">{{ \DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('d/m/Y') }}</td>
+          <td class="align-middle">{{ \DateTime::createFromFormat('Y-m-d', $voucher->support_document_date)->format('d/m/Y') }}</td>
         </tr>
         <tr>
           <td class="align-middle" colspan="2"><b>RAZÓN: </b>{{ $voucher->creditNotes->first()->reason }}</td>
