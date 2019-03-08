@@ -238,7 +238,7 @@ class UserController extends Controller
                     foreach ($branches as $branch) {
                         $emissionPoints->push(EmissionPoint::withTrashed()->where('branch_id', $branch->id)->get());
                     }
-                    $user->emissionPoints()->detach();
+                    $user->emissionPoints()->detach();info($emissionPoints);
                     foreach ($emissionPoints as $emissionPoint) {
                         $user->emissionPoints()->save(EmissionPoint::where('id', $emissionPoint->id)->first());
                     }
