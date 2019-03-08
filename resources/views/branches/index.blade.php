@@ -15,9 +15,9 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Branches
+                    {{ ucfirst(trans_choice(__('view.branch'), 1)) }}
                     @if(auth()->user()->can('create_branches'))
-                        <a href="{{ route('branches.create') }}" class="btn btn-sm btn-primary float-right">New</a>
+                        <a href="{{ route('branches.create') }}" class="btn btn-sm btn-primary float-right">{{ __('view.new') }}</a>
                     @endif
                 </div>
 
@@ -30,9 +30,9 @@
                     <table id="table" class="display">
                         <thead>
                             <tr>
-                                <th>Company</th>
-                                <th>Establishment</th>
-                                <th>Name</th>
+                                <th>{{ ucfirst(trans_choice(__('view.company'), 0)) }}</th>
+                                <th>{{ ucfirst(__('view.establishment')) }}</th>
+                                <th>{{ ucfirst(__('view.name')) }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -58,37 +58,37 @@
                                         @if($branch->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_branches'))
                                                 <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#confirmation"
-                                                    data-title="Are you sure you want to activate the branch {{ $branch->name }}?"
-                                                    data-body="All branch data will be restored."
+                                                    data-title="{{ __('view.are_you_sure_you_want_to_activate_the_model', ['model' => trans_choice(__('view.branch'), 0), 'name' => $branch->name]) }}"
+                                                    data-body="{{ __('view.all_model_data_will_be_restored', ['model' => trans_choice(__('view.branch'), 0)]) }}"
                                                     data-form="{{ route('branches.restore', $branch->id) }}"
                                                     data-method="POST"
                                                     data-class="btn btn-sm btn-success"
-                                                    data-action="Activate">Activate</button>
+                                                    data-action="{{ __('view.activate') }}">{{ __('view.activate') }}</button>
                                                 <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
-                                                    data-title="Are you sure you want to delete the branch {{ $branch->name }}?"
-                                                    data-body="WARNING: All branch data will be deleted. This action can not be undone."
+                                                    data-title="{{ __('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.branch'), 0), 'name' => $branch->name]) }}"
+                                                    data-body="{{ __('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.branch'), 0)]) }}"
                                                     data-form="{{ route('branches.destroy', $branch->id) }}"
                                                     data-method="DELETE"
                                                     data-class="btn btn-sm btn-danger"
-                                                    data-action="Delete">Delete</button>
+                                                    data-action="{{ __('view.delete') }}">{{ __('view.delete') }}</button>
                                             @endif
                                         @else
                                             @if(auth()->user()->can('delete_hard_branches'))
                                                 <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
-                                                    data-title="Are you sure you want to deactivate the branch {{ $branch->name }}?"
-                                                    data-body="The data of the branch will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
+                                                    data-title="{{ __('view.are_you_sure_you_want_to_deactivate_the_model', ['model' => trans_choice(__('view.branch'), 0), 'name' => $branch->name]) }}"
+                                                    data-body="{{ __('view.the_data_of_the_model_will_remain_in_the_application', ['model' => trans_choice(__('view.branch'), 0)]) }}"
                                                     data-form="{{ route('branches.delete', $branch) }}"
                                                     data-method="DELETE"
                                                     data-class="btn btn-sm btn-warning"
-                                                    data-action="Deactivate">Deactivate</button>
+                                                    data-action="{{ __('view.deactivate') }}">{{ __('view.deactivate') }}</button>
                                             @else
                                                 <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
-                                                    data-title="Are you sure you want to deactivate the branch {{ $branch->name }}?"
-                                                    data-body="The data of the branch will remain in the application, but the users that depend on it will not be able to access the data. If you want to restore it, contact the administrator."
+                                                    data-title="{{ __('view.are_you_sure_you_want_to_deactivate_the_model', ['model' => trans_choice(__('view.branch'), 0), 'name' => $branch->name]) }}"
+                                                    data-body="{{ __('view.the_data_of_the_model_will_remain_in_the_application', ['model' => trans_choice(__('view.branch'), 0)]) }}"
                                                     data-form="{{ route('branches.delete', $branch) }}"
                                                     data-method="DELETE"
                                                     data-class="btn btn-sm btn-warning"
-                                                    data-action="Delete">Delete</button>
+                                                    data-action="{{ __('view.delete') }}">{{ __('view.delete') }}</button>
                                             @endif
                                         @endif
                                     </td>

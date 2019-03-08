@@ -41,8 +41,8 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    New customer
-                    <a href="{{ route('customers.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    {{ __('view.new_model', ['model' => trans_choice(__('view.customer'), 0)]) }}
+                    <a href="{{ route('customers.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
                 <form id="create_form">
@@ -51,46 +51,46 @@
                     <div class="card-body">
 
                         <div class="form-group">
-                            <label for="company">Company</label>
-                            <select class="form-control selectpicker" id="company" name="company" data-live-search="true" title="Select a company ...">
+                            <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
+                            <select class="form-control selectpicker" id="company" name="company" data-live-search="true" title="{{ __('view.select_a_company') }}">
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="identification_type">Identification type</label>
-                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="Select a identification type ...">
+                            <label for="identification_type">{{ __('view.identification_type') }}</label>
+                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="{{ __('view.select_a_identification_type') }}">
                                 @foreach($identificationTypes as $identificationType)
                                     <option value="{{ $identificationType->id }}">{{ $identificationType->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="identification">Identification</label>
+                            <label for="identification">{{ __('view.identification') }}</label>
                             <input class="form-control" type="text" id="identification" name="identification" value="">
                         </div>
                         <div class="form-group">
-                            <label for="social_reason">Social reason</label>
+                            <label for="social_reason">{{ __('view.social_reason') }}</label>
                             <input class="form-control" type="text" id="social_reason" name="social_reason" value="">
                         </div>
                         <div class="form-group">
-                            <label for="name">Address</label>
+                            <label for="name">{{ __('view.address') }}</label>
                             <input class="form-control" type="text" id="address" name="address" value="">
                         </div>
                         <div class="form-group">
-                            <label for="phone">Phone</label>
+                            <label for="phone">{{ __('view.phone') }}</label>
                             <input class="form-control" type="text" id="phone" name="phone" value="">
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">{{ __('view.identification_type') }}</label>
                             <input class="form-control" type="email" id="email" name="email" value="" multiple>
                         </div>
 
                     </div>
 
                     <div class="card-footer">
-                        <button id="submit" type="button" class="btn btn-sm btn-success">Add</button>
+                        <button id="submit" type="button" class="btn btn-sm btn-success">{{ __('view.add') }}</button>
                     </div>
 
                 </form>

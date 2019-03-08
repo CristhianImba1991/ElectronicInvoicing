@@ -236,7 +236,7 @@ class UserController extends Controller
                     $branches = Branch::withTrashed()->whereIn('company_id', $request->company)->get();
                     $emissionPoints = collect();
                     foreach ($branches as $branch) {
-                        $emissionPoints->push(EmissionPoint::withTrashed()->whereIn('branch_id', $branch->id)->get());
+                        $emissionPoints->push(EmissionPoint::withTrashed()->where('branch_id', $branch->id)->get());
                     }
                     $user->emissionPoints()->detach();
                     foreach ($emissionPoints as $emissionPoint) {

@@ -44,8 +44,8 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Edit company
-                    <a href="{{ route('companies.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    {{ __('view.edit_model', ['model' => trans_choice(__('view.company'), 0)]) }}
+                    <a href="{{ route('companies.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
                 <form id="update_form">
@@ -55,23 +55,23 @@
                     <div class="card-body">
 
                         <div class="form-group">
-                            <label for="ruc">RUC</label>
+                            <label for="ruc">{{ __('view.ruc') }}</label>
                             <input type="text" class="form-control" id="ruc" name="ruc" value="{{ $company->ruc }}" readonly>
                         </div>
                         <div class="form-group">
-                            <label for="social_reason">Social reason</label>
+                            <label for="social_reason">{{ __('view.social_reason') }}</label>
                             <input type="text" class="form-control" id="social_reason" name="social_reason"  value="{{ $company->social_reason }}">
                         </div>
                         <div class="form-group">
-                            <label for="tradename">Tradename</label>
+                            <label for="tradename">{{ __('view.tradename') }}</label>
                             <input type="text" class="form-control" id="tradename" name="tradename"  value="{{ $company->tradename }}">
                         </div>
                         <div class="form-group">
-                            <label for="address">Address</label>
+                            <label for="address">{{ __('view.address') }}</label>
                             <input type="text" class="form-control" id="address" name="address"  value="{{ $company->address }}">
                         </div>
                         <div class="form-group">
-                            <label for="special_contributor">Special contributor</label>
+                            <label for="special_contributor">{{ __('view.special_contributor') }}</label>
                             <input type="text" class="form-control" id="special_contributor" name="special_contributor"  value="{{ $company->special_contributor }}">
                         </div>
                         <div class="form-check">
@@ -80,33 +80,33 @@
                             @else
                                 <input class="form-check-input" type="checkbox" id="keep_accounting" name="keep_accounting">
                             @endif
-                            <label class="form-check-label" for="keep_accounting">Keep accounting</label>
+                            <label class="form-check-label" for="keep_accounting">{{ __('view.keep_accounting') }}</label>
                         </div>
                         <div class="form-group">
-                            <label for="phone">Phone</label>
+                            <label for="phone">{{ __('view.phone') }}</label>
                             <input type="text" class="form-control" id="phone" name="phone" value="{{ $company->phone }}">
                         </div>
                         <div class="form-group">
-                            <label for="current_logo">Current logo</label><br>
+                            <label for="current_logo">{{ __('view.current_logo') }}</label><br>
                             <img class="img-fluid img-thumbnail" src="{{ url('storage/logo/images/'.$company->logo) }}" alt="">
                             <input type="hidden" name="current_logo" value="{{ $company->logo }}">
                         </div>
                         <div class="form-group">
-                            <label for="logo">Logo</label>
+                            <label for="logo">{{ __('view.logo') }}</label>
                             <input type="file" class="form-control-file" id="logo" name="logo">
                         </div>
                         <div class="form-group">
-                            <label for="sign">Sign</label>
+                            <label for="sign">{{ __('view.sign') }}</label>
                             <input type="file" class="form-control-file" id="sign" name="sign">
                         </div>
                         <div class="form-group">
-                            <label for="password">Password</label>
+                            <label for="password">{{ __('view.password') }}</label>
                             <input type="password" class="form-control" id="password" name="password" value="">
                         </div>
                     </div>
 
                     <div class="card-footer">
-                        <button id="submit" type="button" class="btn btn-success btn-sm">Update</button>
+                        <button id="submit" type="button" class="btn btn-success btn-sm">{{ __('view.update') }}</button>
                     </div>
 
                 </form>
