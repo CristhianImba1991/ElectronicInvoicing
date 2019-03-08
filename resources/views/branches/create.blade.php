@@ -41,7 +41,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    New branch
+                    {{ __('view.new_model', ['model' => 'branch']) }}
                     <a href="{{ route('branches.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
                 </div>
 
