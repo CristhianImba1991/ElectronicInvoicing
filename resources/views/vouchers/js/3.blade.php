@@ -11,7 +11,7 @@ $(document).ready(function(){
         paging: false,
         dom: 'Bfrtip',
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowDebit();
             }
@@ -102,9 +102,9 @@ $(document).ready(function(){
                             optionsTimeUnit += '<option value="' + timeunits[i]['id'] + '">' + timeunits[i]['name'] + '</option>';
                         }
                         paymentMethodTable.row.add([
-                            '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="Select a payment method ...">' + optionsPaymentMethod + '</select>',
+                            '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="{{ __("view.select_a_payment_method") }}">' + optionsPaymentMethod + '</select>',
                             '<input class="form-control" type="text" id="paymentMethod_value[]" name="paymentMethod_value[]" value="">',
-                            '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="Select a time unit ...">' + optionsTimeUnit + '</select>',
+                            '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="{{ __("view.select_a_time_unit") }}">' + optionsTimeUnit + '</select>',
                             '<input class="form-control" type="text" id="paymentMethod_term[]" name="paymentMethod_term[]" value="0">',
                             '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
                         ]).draw(false);
@@ -154,7 +154,7 @@ $(document).ready(function(){
         dom: 'Bfrtip',
         searching: false,
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowPayment();
             }
@@ -215,7 +215,7 @@ $(document).ready(function(){
         dom: 'Bfrtip',
         searching: false,
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowAdditionalDetail();
             }

@@ -6,27 +6,27 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    View user
-                    <a href="{{ route('users.index') }}" class="btn btn-sm btn-secondary float-right">Back</a>
+                    {{ __('view.view_model', ['model' => trans_choice(__('view.user'), 0)]) }}
+                    <a href="{{ route('users.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.back') }}</a>
                 </div>
 
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="role">Role</label>
+                        <label for="role">{{ __('view.current_role') }}</label>
                         <input class="form-control" type="text" id="role" name="role" value="{{ strtoupper(implode(', ', json_decode(json_encode($user->getRoleNames()), true))) }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="name">Name</label>
+                        <label for="name">{{ __('view.name') }}</label>
                         <input class="form-control" type="text" id="name" name="name" value="{{ $user->name }}" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">{{ __('view.email') }}</label>
                         <input class="form-control" type="text" id="email" name="email" value="{{ $user->email }}" readonly>
                     </div>
                     <ul class="list-group">
-                        <label>Allowed to</label>
+                        <label>{{ __('view.allowed_to') }}</label>
                         @if($user->hasRole('admin'))
-                            <li class="list-group-item">All</li>
+                            <li class="list-group-item">{{ __('view.all') }}</li>
                         @else
                             @forelse(\ElectronicInvoicing\Http\Controllers\CompanyUser::getCompaniesAllowedToUser($user) as $company)
                                 <li class="list-group-item">{{ $company->tradename }} - {{ $company->social_reason }}
@@ -47,7 +47,7 @@
                                     </ul>
                                 </li>
                             @empty
-                                <li class="list-group-item">None</li>
+                                <li class="list-group-item">{{ __('view.none') }}</li>
                             @endforelse
                         @endif
                     </ul>

@@ -9,7 +9,7 @@
             </div>
             <div class="modal-body"><p id="modal-body"></p></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">{{ __('view.close') }}</button>
                 <form id="modal-form" action="#" method="post">
                     {{ csrf_field() }}
                     <input id="form-method" type="hidden" name="_method" value="" />

@@ -32,7 +32,7 @@ $(document).ready(function(){
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Dashboard</div>
+                <div class="card-header">{{ __('view.dashboard') }}</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -45,7 +45,7 @@ $(document).ready(function(){
                         <div class="col-sm-12">
                             <div class="card mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">Last vouchers</h5>
+                                    <h5 class="card-title">{{ __('view.last_model', ['model' => trans_choice(__('view.voucher'), 1)]) }}</h5>
                                     <table id="vouchers" class="display">
                                         <thead>
                                             <tr>

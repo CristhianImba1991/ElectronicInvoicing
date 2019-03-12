@@ -30,8 +30,8 @@ $(document).ready(function(){
                     options += '<option value="' + taxes[i]['id'] + '">' + taxes[i]['tax'] + '</option>';
                 }
                 retentionTable.row.add([
-                    '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="Select a tax ...">' + options + '</select>',
-                    '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="Select a tax description ..."></select>',
+                    '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="{{ __("view.select_a_tax") }}">' + options + '</select>',
+                    '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="{{ __("view.select_a_tax_description") }}"></select>',
                     '<input class="form-control" type="number" id="value[]" name="value[]" value="0.00" step="0.01">',
                     '<input class="form-control" type="text" id="tax_base[]" name="tax_base[]" value="0.00">',
                     '<input class="form-control" type="text" id="retained-value[]" name="retained-value[]" value="0.00" readonly>',
@@ -46,7 +46,7 @@ $(document).ready(function(){
         paging: false,
         dom: 'Bfrtip',
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowTax();
             }
@@ -149,7 +149,7 @@ $(document).ready(function(){
         dom: 'Bfrtip',
         searching: false,
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowAdditionalDetail();
             }

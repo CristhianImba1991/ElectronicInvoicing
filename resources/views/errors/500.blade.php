@@ -1,7 +1,7 @@
 @extends('layouts.error')
 
 @section('title')
-<title>Internal Server Error</title>
+<title>{{ __('view.internal_server_error') }}</title>
 @endsection
 
 @section('error_code')
@@ -12,7 +12,7 @@
 
 @section('message')
 <p class="text-grey-darker text-2xl md:text-3xl font-light mb-8 leading-normal">
-    Sorry, we are experiencing technical difficulties with our server right now.
+    {{ __('view.sorry_we_are_experiencing_technical_difficulties_with_our_server_right_now') }}
 </p>
 @endsection
 

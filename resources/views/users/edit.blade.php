@@ -86,8 +86,8 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Edit user
-                    <a href="{{ route('users.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    {{ __('view.edit_model', ['model' => trans_choice(__('view.user'), 0)]) }}
+                    <a href="{{ route('users.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
                 <form id="update_form">
@@ -97,13 +97,13 @@
                     <div class="card-body">
 
                         <div class="form-group">
-                            <label for="current_role">Current role</label>
+                            <label for="current_role">{{ __('view.current_role') }}</label>
                             <input class="form-control" type="text" id="current_role" name="current_role" value="{{ strtoupper(implode(', ', json_decode(json_encode($user->getRoleNames()), true))) }}" readonly>
                         </div>
                         @if(!$user->hasRole('customer'))
                             <div class="form-group">
-                                <label for="role">Role</label>
-                                <select class="form-control selectpicker" id="role" name="role" data-live-search="true" data-dependent="branch" title="Select one role ...">
+                                <label for="role">{{ __('view.role') }}</label>
+                                <select class="form-control selectpicker" id="role" name="role" data-live-search="true" data-dependent="branch" title="{{ __('view.select_a_role') }}">
                                     @foreach($roles as $role)
                                         <option value="{{ $role->name }}">{{ strtoupper($role->name) }}</option>
                                     @endforeach
@@ -111,11 +111,11 @@
                             </div>
                         @endif
                         <div class="form-group">
-                            <label for="name">Name</label>
+                            <label for="name">{{ __('view.name') }}</label>
                             <input class="form-control" type="text" id="name" name="name" value="{{ $user->name }}">
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">{{ __('view.email') }}</label>
                             @role('admin')
                                 <input class="form-control" type="email" id="email" name="email" value="{{ $user->email }}">
                             @else
@@ -123,9 +123,9 @@
                             @endrole
                         </div>
                         <ul class="list-group">
-                            <label>Currently allowed to</label>
+                            <label>{{ __('view.currently_allowed_to') }}</label>
                             @if($user->hasRole('admin'))
-                                <li class="list-group-item">All</li>
+                                <li class="list-group-item">{{ __('view.all') }}</li>
                             @else
                                 @forelse(\ElectronicInvoicing\Http\Controllers\CompanyUser::getCompaniesAllowedToUser($user) as $company)
                                     <li class="list-group-item">{{ $company->tradename }} - {{ $company->social_reason }}
@@ -148,28 +148,28 @@
                                         @endif
                                     </li>
                                 @empty
-                                    <li class="list-group-item">None</li>
+                                    <li class="list-group-item">{{ __('view.none') }}</li>
                                 @endforelse
                             @endif
                         </ul>
                         @if(!$user->hasRole('customer'))
                             <div class="form-group">
-                                <label for="company">Company</label>
-                                <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more companies ...">
+                                <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
+                                <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ __('view.select_one_or_more_companies') }}">
                                     @foreach($companies as $company)
                                         <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="branch">Branch</label>
-                                <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more branches ...">
+                                <label for="branch">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
+                                <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ __('view.select_one_or_more_branches') }}">
 
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="emission_point">Emission point</label>
-                                <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more emission points ...">
+                                <label for="emission_point">{{ ucfirst(trans_choice(__('view.emission_point'), 0)) }}</label>
+                                <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ __('view.select_one_or_more_emission_points') }}">
 
                                 </select>
                             </div>
@@ -178,7 +178,7 @@
                     </div>
 
                     <div class="card-footer">
-                        <button id="submit" type="button" class="btn btn-success btn-sm">Update</button>
+                        <button id="submit" type="button" class="btn btn-success btn-sm">{{ __('view.update') }}</button>
                     </div>
 
                 </form>

@@ -41,9 +41,7 @@ class BranchController extends Controller
                 'name' => 'required|max:300',
                 'address' => 'required|max:300',
                 'phone' => 'required|max:30',
-            ], array(
-                'uniquemultiple' => 'The :attribute has already been taken.'
-            ));
+            ]);
         }
         $isValid = !$validator->fails();
         if ($isValid) {

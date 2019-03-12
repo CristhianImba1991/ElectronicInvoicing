@@ -1,7 +1,7 @@
 @extends('layouts.error')
 
 @section('title')
-<title>Page Not Found</title>
+<title>{{ __('view.page_not_found') }}</title>
 @endsection
 
 @section('error_code')
@@ -12,7 +12,7 @@
 
 @section('message')
 <p class="text-grey-darker text-2xl md:text-3xl font-light mb-8 leading-normal">
-    Sorry, the page you are looking for could not be found or you do not have the necessary permissions to access the resource.
+    {{ __('view.sorry_the_page_you_are_looking_for_could_not_be_found_or_you_do_not_have') }}
 </p>
 @endsection
 

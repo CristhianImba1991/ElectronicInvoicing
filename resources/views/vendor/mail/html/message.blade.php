@@ -21,7 +21,7 @@
     {{-- Footer --}}
     @slot('footer')
         @component('mail::footer')
-            © {{ date('Y') }} TAOTECHIDEAS. @lang('All rights reserved.')
+            © {{ date('Y') }} TAOTECHIDEAS. @lang('notification.all_rights_reserved')
         @endcomponent
     @endslot
 @endcomponent

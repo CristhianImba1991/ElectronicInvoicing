@@ -63,8 +63,8 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    New emission point
-                    <a href="{{ route('emission_points.index') }}" class="btn btn-sm btn-secondary float-right">Cancel</a>
+                    {{ __('view.new_model', ['model' => trans_choice(__('view.emission_point'), 0)]) }}
+                    <a href="{{ route('emission_points.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
                 <form id="create_form">
@@ -73,28 +73,28 @@
                     <div class="card-body">
 
                         <div class="form-group">
-                            <label for="company">Company</label>
-                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="Select a company ...">
+                            <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
+                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="{{ __('view.select_a_company') }}">
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group" id="divbranch">
-                            <label for="establishment">Branch</label>
-                            <select class="form-control selectpicker input-lg" id="branch" name="branch" data-live-search="true" title="Select a branch ...">
+                            <label for="establishment">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
+                            <select class="form-control selectpicker input-lg" id="branch" name="branch" data-live-search="true" title="{{ __('view.select_a_branch') }}">
 
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="code">Code</label>
+                            <label for="code">{{ __('view.code') }}</label>
                             <input class="form-control" type="number" id="code" name="code" value="1">
                         </div>
 
                     </div>
 
                     <div class="card-footer">
-                        <button id="submit" type="button" class="btn btn-sm btn-success">Add</button>
+                        <button id="submit" type="button" class="btn btn-sm btn-success">{{ __('view.add') }}</button>
                     </div>
 
                 </form>

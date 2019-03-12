@@ -51,9 +51,7 @@ class CustomerController extends Controller
                 $customer = Customer::where('identification', '=', $request->identification)->first();
                 $rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
             }
-            $validator = Validator::make($request->all(), $rules, array(
-                'uniquecustomer' => 'The :attribute has already been taken.'
-            ));
+            $validator = Validator::make($request->all(), $rules);
         }
         $isValid = !$validator->fails();
         if ($isValid) {

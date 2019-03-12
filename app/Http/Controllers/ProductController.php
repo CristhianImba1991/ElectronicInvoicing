@@ -57,10 +57,11 @@ class ProductController extends Controller
                 'unit_price' => 'required|gt:0',
                 'stock' => 'required|gt:0',
                 'description'=> 'required|max:300',
-            ], array(
-                'uniquemultiple' => 'The :attribute has already been taken.'
-            ));
+            ]);
         }
+        /*$validator->setAttributeNames(array(
+            'main_code' => __('view.main_code'),
+        ));*/
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {

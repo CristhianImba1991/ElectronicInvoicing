@@ -41,10 +41,6 @@ class UserController extends Controller
                 'branch.*' => 'exists:branches,id',
                 'emission_point' => 'nullable|min:1',
                 'emission_point.*' => 'exists:emission_points,id',
-            ], [
-                'company.required_unless' => 'The :attribute field is required.',
-                'branch.required_unless' => 'The :attribute field is required.',
-                'emission_point.required_unless' => 'The :attribute field is required.',
             ]);
         } else {
             $validator = Validator::make($request->all(), [
@@ -58,10 +54,6 @@ class UserController extends Controller
                 'branch.*' => 'exists:branches,id',
                 'emission_point' => 'required_unless:role,admin,api,owner|min:1',
                 'emission_point.*' => 'exists:emission_points,id',
-            ], [
-                'company.required_unless' => 'The :attribute field is required.',
-                'branch.required_unless' => 'The :attribute field is required.',
-                'emission_point.required_unless' => 'The :attribute field is required.',
             ]);
         }
         $isValid = !$validator->fails();

@@ -83,7 +83,7 @@
                                                         data-form="{{ route('companies.delete', $company) }}"
                                                         data-method="DELETE"
                                                         data-class="btn btn-sm btn-warning"
-                                                        data-action="Deactivate">Deactivate</button>
+                                                        data-action="{{ __('view.deactivate') }}">{{ __('view.deactivate') }}</button>
                                                 @endif
                                             @endif
                                         </td>

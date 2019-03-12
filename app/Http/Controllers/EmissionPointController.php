@@ -37,9 +37,7 @@ class EmissionPointController extends Controller
                 'company' => 'required|exists:companies,id',
                 'branch' => 'required|exists:branches,id',
                 'code' => 'required|min:1|max:999|integer|uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code,
-            ], array(
-                'uniquemultiple' => 'The :attribute has already been taken.'
-            ));
+            ]);
         }
         $isValid = !$validator->fails();
         if ($isValid) {

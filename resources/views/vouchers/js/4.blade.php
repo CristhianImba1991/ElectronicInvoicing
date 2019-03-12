@@ -75,7 +75,7 @@ $(document).ready(function(){
                         options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
                     }
                     waybillTable.row.add([
-                        '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="Select a product ...">' + options + '</select>',
+                        '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ __("view.select_a_product") }}">' + options + '</select>',
                         '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
                         '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
                         '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
@@ -101,7 +101,7 @@ $(document).ready(function(){
         paging: false,
         dom: 'Bfrtip',
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowProduct();
             }
@@ -194,7 +194,7 @@ $(document).ready(function(){
         dom: 'Bfrtip',
         searching: false,
         buttons: [{
-            text: 'Add row',
+            text: '{{ __("view.add_row") }}',
             action: function(e, dt, node, config){
                 addRowAdditionalDetail();
             }

@@ -46,10 +46,7 @@ class CompanyController extends Controller
             if ($request->has('sign')) {
                 $rules['sign'] .= '|validsign:' . $request->password;
             }
-            $validator = Validator::make($request->all(), $rules, array(
-                'ruc.validruc' => 'The :attribute is not valid.',
-                'validsign' => 'Unable to read the cert store or the password is wrong.'
-            ));
+            $validator = Validator::make($request->all(), $rules);
         } else {
             $validator = Validator::make($request->all(), [
                 'ruc' => 'required|digits:13|unique:companies|validruc',
@@ -62,10 +59,7 @@ class CompanyController extends Controller
                 'logo' => 'mimes:jpeg,jpg,png|max:2048',
                 'sign' => 'required|mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32|validsign:' . $request->password,
                 'password' => 'required',
-            ], array(
-                'ruc.validruc' => 'The :attribute is not valid.',
-                'validsign' => 'Unable to read the cert store or the password is wrong.'
-            ));
+            ]);
         }
         $isValid = !$validator->fails();
         if ($isValid) {

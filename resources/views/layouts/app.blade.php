@@ -32,7 +32,7 @@
                 <a class="navbar-brand" href="{{ url('/home') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('view.toggle_navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -43,26 +43,26 @@
                             @if(auth()->user()->can('read_companies') || auth()->user()->can('read_branches') || auth()->user()->can('read_emission_points') || auth()->user()->can('read_customers') || auth()->user()->can('read_users') || auth()->user()->can('read_products'))
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                        Manage <span class="caret"></span>
+                                        {{ __('view.manage') }} <span class="caret"></span>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
                                         @can('read_companies')
-                                            <a href="{{ route('companies.index') }}" class="dropdown-item">Companies</a>
+                                            <a href="{{ route('companies.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.company'), 1)) }}</a>
                                         @endcan
                                         @can('read_branches')
-                                            <a href="{{ route('branches.index') }}" class="dropdown-item">Branches</a>
+                                            <a href="{{ route('branches.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.branch'), 1)) }}</a>
                                         @endcan
                                         @can('read_emission_points')
-                                            <a href="{{ route('emission_points.index') }}" class="dropdown-item">Emission points</a>
+                                            <a href="{{ route('emission_points.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.emission_point'), 1)) }}</a>
                                         @endcan
                                         @can('read_users')
-                                            <a href="{{ route('users.index') }}" class="dropdown-item">Users</a>
+                                            <a href="{{ route('users.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.user'), 1)) }}</a>
                                         @endcan
                                         @can('read_customers')
-                                            <a href="{{ route('customers.index') }}" class="dropdown-item">Customers</a>
+                                            <a href="{{ route('customers.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.customer'), 1)) }}</a>
                                         @endcan
                                         @can('read_products')
-                                            <a href="{{ route('products.index') }}" class="dropdown-item">Products</a>
+                                            <a href="{{ route('products.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.product'), 1)) }}</a>
                                         @endcan
                                     </div>
                                 </li>
@@ -70,15 +70,15 @@
                             @if(auth()->user()->can('create_vouchers') || auth()->user()->can('read_vouchers'))
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                        Vouchers <span class="caret"></span>
+                                        {{ ucfirst(trans_choice(__('view.voucher'), 1)) }} <span class="caret"></span>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
                                         @can('create_vouchers')
-                                            <a href="{{ route('vouchers.create') }}" class="dropdown-item">New voucher</a>
-                                            <a href="{{ route('vouchers.index_draft') }}" class="dropdown-item">Draft vouchers</a>
+                                            <a href="{{ route('vouchers.create') }}" class="dropdown-item">{{ __('view.new_model', ['model' => trans_choice(__('view.voucher'), 0)]) }}</a>
+                                            <a href="{{ route('vouchers.index_draft') }}" class="dropdown-item">{{ __('view.draft_model', ['model' => trans_choice(__('view.voucher'), 1)]) }}</a>
                                         @endcan
                                         @can('read_vouchers')
-                                            <a href="{{ route('vouchers.index') }}" class="dropdown-item">Reports</a>
+                                            <a href="{{ route('vouchers.index') }}" class="dropdown-item">{{ __('view.reports') }}</a>
                                         @endcan
                                     </div>
                                 </li>
@@ -91,7 +91,7 @@
                         <!-- Authentication Links -->
                         @guest
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                <a class="nav-link" href="{{ route('login') }}">{{ __('auth.login') }}</a>
                             </li>
                         @else
                             <li class="nav-item dropdown">
@@ -103,7 +103,7 @@
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
+                                        {{ __('auth.logout') }}
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
