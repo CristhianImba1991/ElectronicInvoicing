@@ -104,7 +104,7 @@ $(document).ready(function(){
                         options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
                     }
                     invoiceTable.row.add([
-                        '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ __("view.select_a_product") }}">' + options + '</select>',
+                        '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => trans_choice(__("view.product"), 0)]), 0) }}">' + options + '</select>',
                         '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
                         '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
                         '<input class="form-control" type="text" id="product_unitprice[]" name="product_unitprice[]" value="">',
@@ -327,9 +327,9 @@ $(document).ready(function(){
                             optionsTimeUnit += '<option value="' + timeunits[i]['id'] + '">' + timeunits[i]['name'] + '</option>';
                         }
                         paymentMethodTable.row.add([
-                            '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="{{ __("view.select_a_payment_method") }}">' + optionsPaymentMethod + '</select>',
+                            '<select class="form-control selectpicker" id="paymentMethod[]" name="paymentMethod[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.payment_method"))]), 0) }}">' + optionsPaymentMethod + '</select>',
                             '<input class="form-control" type="text" id="paymentMethod_value[]" name="paymentMethod_value[]" value="">',
-                            '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="{{ __("view.select_a_time_unit") }}">' + optionsTimeUnit + '</select>',
+                            '<select class="form-control selectpicker" id="paymentMethod_timeunit[]" name="paymentMethod_timeunit[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.time_unit"))]), 1) }}">' + optionsTimeUnit + '</select>',
                             '<input class="form-control" type="text" id="paymentMethod_term[]" name="paymentMethod_term[]" value="0">',
                             '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
                         ]).draw(false);

@@ -63,7 +63,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    {{ __('view.new_model', ['model' => trans_choice(__('view.emission_point'), 0)]) }}
+                    {{ trans_choice(__('view.new_model', ['model' => trans_choice(__('view.emission_point'), 0)]), 0) }}
                     <a href="{{ route('emission_points.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
@@ -74,7 +74,7 @@
 
                         <div class="form-group">
                             <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
-                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="{{ __('view.select_a_company') }}">
+                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.company'), 0)]), 1) }}">
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
@@ -82,7 +82,7 @@
                         </div>
                         <div class="form-group" id="divbranch">
                             <label for="establishment">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
-                            <select class="form-control selectpicker input-lg" id="branch" name="branch" data-live-search="true" title="{{ __('view.select_a_branch') }}">
+                            <select class="form-control selectpicker input-lg" id="branch" name="branch" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.branch'), 0)]), 1) }}">
 
                             </select>
                         </div>

@@ -86,7 +86,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    {{ __('view.new_model', ['model' => trans_choice(__('view.user'), 0)]) }}
+                    {{ trans_choice(__('view.new_model', ['model' => trans_choice(__('view.user'), 0)]), 0) }}
                     <a href="{{ route('users.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
@@ -97,7 +97,7 @@
 
                         <div class="form-group">
                             <label for="role">{{ __('view.role') }}</label>
-                            <select class="form-control selectpicker" id="role" name="role" data-live-search="true" title="{{ __('view.select_a_role') }}">
+                            <select class="form-control selectpicker" id="role" name="role" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.role'))]), 0) }}">
                                 @foreach($roles as $role)
                                     <option value="{{ $role->name }}">{{ strtoupper($role->name) }}</option>
                                 @endforeach
@@ -121,7 +121,7 @@
                         </div>
                         <div class="form-group">
                             <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
-                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ __('view.select_one_or_more_companies') }}">
+                            <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.company'), 1)]), 1) }}">
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
@@ -129,13 +129,13 @@
                         </div>
                         <div class="form-group">
                             <label for="branch">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
-                            <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ __('view.select_one_or_more_branches') }}">
+                            <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.branch'), 1)]), 1) }}">
 
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="emission_point">{{ ucfirst(trans_choice(__('view.emission_point'), 0)) }}</label>
-                            <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ __('view.select_one_or_more_emission_points') }}">
+                            <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.emission_point'), 1)]), 0) }}">
 
                             </select>
                         </div>

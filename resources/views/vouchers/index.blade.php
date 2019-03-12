@@ -69,17 +69,17 @@ jQuery(document).ready(function($) {
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Vouchers
+                    {{ ucfirst(trans_choice(__('view.voucher'), 1)) }}
                 </div>
 
                 <div class="card-body">
-                    <p><button class="btn btn-sm btn-light" type="button" data-toggle="collapse" data-target="#filterForm" aria-expanded="false" aria-controls="filterForm">Filter</button></p>
+                    <p><button class="btn btn-sm btn-light" type="button" data-toggle="collapse" data-target="#filterForm" aria-expanded="false" aria-controls="filterForm">{{ __('view.filter') }}</button></p>
                     <div class="collapse" id="filterForm">
                         <div class="card">
                             <form class="" action="index.html" method="post">
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="company">Company</label>
+                                        <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
                                         <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more companies ...">
                                             @foreach($companies as $company)
                                                 <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
@@ -87,20 +87,20 @@ jQuery(document).ready(function($) {
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="branch">Branch</label>
+                                        <label for="branch">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
                                         <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more branches ...">
 
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="emission_point">Emission point</label>
+                                        <label for="emission_point">{{ ucfirst(trans_choice(__('view.emission_point'), 0)) }}</label>
                                         <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more emission points ...">
 
                                         </select>
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <button type="button" id="draft" class="btn btn-sm btn-primary">Filter</button>
+                                    <button type="button" id="draft" class="btn btn-sm btn-primary">{{ __('view.filter') }}</button>
                                 </div>
                             </form>
                         </div>
@@ -109,13 +109,13 @@ jQuery(document).ready(function($) {
                     <table id="vouchers-table" class="display">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Type</th>
-                                <th>State</th>
-                                <th>Voucher</th>
-                                <th>Customer</th>
-                                <th>Issue date</th>
-                                <th>View</th>
+                                <th>{{ __('view.id') }}</th>
+                                <th>{{ __('view.type') }}</th>
+                                <th>{{ __('view.state') }}</th>
+                                <th>{{ ucfirst(trans_choice(__('view.voucher'), 0)) }}</th>
+                                <th>{{ ucfirst(trans_choice(__('view.customer'), 0)) }}</th>
+                                <th>{{ __('view.issue_date') }}</th>
+                                <th>{{ __('view.view') }}</th>
                                 @unlessrole('customer')
                                     <th></th>
                                 @endunlessrole
@@ -155,7 +155,7 @@ jQuery(document).ready(function($) {
                                             @default
                                                 <span class="badge">
                                         @endswitch
-                                        {{ \ElectronicInvoicing\VoucherState::find($voucher->voucher_state_id)->name }}</span>
+                                        {{ __(\ElectronicInvoicing\VoucherState::find($voucher->voucher_state_id)->name) }}</span>
                                     </td>
                                     <td>{{ str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) }}-{{ str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) }}-{{ str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) }}</td>
                                     <td>{{ $voucher->customer->social_reason }}</td>

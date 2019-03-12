@@ -74,7 +74,7 @@
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
                                         @can('create_vouchers')
-                                            <a href="{{ route('vouchers.create') }}" class="dropdown-item">{{ __('view.new_model', ['model' => trans_choice(__('view.voucher'), 0)]) }}</a>
+                                            <a href="{{ route('vouchers.create') }}" class="dropdown-item">{{ trans_choice(__('view.new_model', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}</a>
                                             <a href="{{ route('vouchers.index_draft') }}" class="dropdown-item">{{ __('view.draft_model', ['model' => trans_choice(__('view.voucher'), 1)]) }}</a>
                                         @endcan
                                         @can('read_vouchers')

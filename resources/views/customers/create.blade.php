@@ -41,7 +41,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    {{ __('view.new_model', ['model' => trans_choice(__('view.customer'), 0)]) }}
+                    {{ trans_choice(__('view.new_model', ['model' => trans_choice(__('view.customer'), 0)]), 0) }}
                     <a href="{{ route('customers.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
@@ -52,7 +52,7 @@
 
                         <div class="form-group">
                             <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
-                            <select class="form-control selectpicker" id="company" name="company" data-live-search="true" title="{{ __('view.select_a_company') }}">
+                            <select class="form-control selectpicker" id="company" name="company" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.company'), 0)]), 1) }}">
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
                                 @endforeach
@@ -60,7 +60,7 @@
                         </div>
                         <div class="form-group">
                             <label for="identification_type">{{ __('view.identification_type') }}</label>
-                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="{{ __('view.select_a_identification_type') }}">
+                            <select class="form-control selectpicker" id="identification_type" name="identification_type" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.identification_type'))]), 0) }}">
                                 @foreach($identificationTypes as $identificationType)
                                     <option value="{{ $identificationType->id }}">{{ $identificationType->name }}</option>
                                 @endforeach

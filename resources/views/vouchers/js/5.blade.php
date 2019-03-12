@@ -30,8 +30,8 @@ $(document).ready(function(){
                     options += '<option value="' + taxes[i]['id'] + '">' + taxes[i]['tax'] + '</option>';
                 }
                 retentionTable.row.add([
-                    '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="{{ __("view.select_a_tax") }}">' + options + '</select>',
-                    '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="{{ __("view.select_a_tax_description") }}"></select>',
+                    '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.tax"))]), 0) }}">' + options + '</select>',
+                    '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.tax_description"))]), 1) }}"></select>',
                     '<input class="form-control" type="number" id="value[]" name="value[]" value="0.00" step="0.01">',
                     '<input class="form-control" type="text" id="tax_base[]" name="tax_base[]" value="0.00">',
                     '<input class="form-control" type="text" id="retained-value[]" name="retained-value[]" value="0.00" readonly>',
