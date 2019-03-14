@@ -15,13 +15,13 @@ class MailController extends Controller
     {
         Mail::to($user->email)
             ->queue(new NewUserCreated(array(
-                'subject' => 'YOUR USER HAS BEEN CREATED',
-                'greeting' => 'Hello ' . $user->name . '!',
+                'subject' => __('notification.your_user_has_been_created'),
+                'greeting' => __('notification.hello_name', ['name' => $user->name]),
                 'level' => 'primary',
-                'introLines' => ['Your user has been created and you can use the following credentials to login.', '        E-Mail Address: ' . $user->email . "\n" . '        Password: ' . $password],
-                'actionText' => 'ElectronicInvoicing',
+                'introLines' => [__('notification.your_user_has_been_created_and_you_can_use_the_following_credentials_to_login'), __('notification.email_address_password', ['email' => $user->email, 'password' => $password])],
+                'actionText' => config('app.name', 'Laravel'),
                 'actionUrl' => route('login'),
-                'outroLines' => ['For your service, questions and information write an email to info@taotechideas.com.']))
+                'outroLines' => [__('notification.for_your_service_questions_and_information_write_an_email_to_infotaotechideascom')]))
             );
         return true;
     }
@@ -34,16 +34,16 @@ class MailController extends Controller
             ->cc(explode(',', $voucher->customer->email))
             ->bcc($voucher->user->email)
             ->queue(new NewVoucherIssued(array(
-                'subject' => 'NEW VOUCHER FROM ' . strtoupper($voucher->emissionPoint->branch->company->social_reason) . ' TO ' . strtoupper($voucher->customer->social_reason),
-                'greeting' => 'Hello ' . $voucher->customer->social_reason . '!',
+                'subject' => __('notification.new_voucher_from_company_to_customer', ['company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]),
+                'greeting' => __('notification.hello_name', ['name' => $voucher->customer->social_reason]),
                 'level' => 'primary',
-                'introLines' => ['You can find the voucher files in the attachments of this email, or you can view or download them from our system by clicking the following link.'],
-                'actionText' => 'ElectronicInvoicing',
+                'introLines' => [__('notification.you_can_find_the_voucher_files_in_the_attachments_of_this_email')],
+                'actionText' => config('app.name', 'Laravel'),
                 'actionUrl' => route('login'),
-                'outroLines' => ['For your service, questions and information write an email to info@taotechideas.com.'],
+                'outroLines' => [__('notification.for_your_service_questions_and_information_write_an_email_to_infotaotechideascom')],
                 'voucher' => $voucher))
             );
-        File::delete(public_path($voucher->accessKey() . '.pdf'));
+        File::delete($voucher->accessKey() . '.pdf');
         return true;
     }
 }

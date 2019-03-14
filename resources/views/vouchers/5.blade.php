@@ -4,15 +4,15 @@
 <div class="col-sm-12">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">5. Retention</h5>
+            <h5 class="card-title">5. {{ __('view.retention') }}</h5>
             <table id="retention-table" class="display">
                 <thead>
                     <tr>
-                        <th>Tax</th>
-                        <th>Description</th>
-                        <th>Rate</th>
-                        <th>Tax base</th>
-                        <th>Retained value</th>
+                        <th>{{ __('view.tax') }}</th>
+                        <th>{{ __('view.description') }}</th>
+                        <th>{{ __('view.rate') }}</th>
+                        <th>{{ __('view.tax_base') }}</th>
+                        <th>{{ __('view.retained_value') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -23,24 +23,24 @@
 <div class="col-sm-6">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">6. Additional information</h5>
+            <h5 class="card-title">6. {{ __('view.additional_information') }}</h5>
             <table id="additionaldetail-table" class="display">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Value</th>
+                        <th>{{ __('view.name') }}</th>
+                        <th>{{ __('view.value') }}</th>
                         <th></th>
                     </tr>
                 </thead>
             </table>
             <div class="form-group">
-                <label for="fiscal_period">Fiscal period</label>
+                <label for="fiscal_period">{{ __('view.fiscal_period') }}</label>
                 <input class="form-control" id="fiscal_period" name="fiscal_period" readonly>
             </div>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Extra detail</th>
+                        <th>{{ __('view.extra_detail') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,10 +55,10 @@
 <div class="col-sm-6">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">7. Support document</h5>
+            <h5 class="card-title">7. {{ __('view.support_document') }}</h5>
             <div class="form-group">
-                <label for="voucher_type_support_document">Voucher type of the support document</label>
-                <select class="form-control selectpicker" id="voucher_type_support_document" name="voucher_type_support_document" data-live-search="true" data-dependent="branch" title="Select a voucher type ...">
+                <label for="voucher_type_support_document">{{ __('view.voucher_type_of_the_support_document') }}</label>
+                <select class="form-control selectpicker" id="voucher_type_support_document" name="voucher_type_support_document" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(__('view.voucher_type'))]), 0) }}">
                     @foreach($voucherTypes as $voucherType)
                         <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
                     @endforeach
@@ -67,7 +67,7 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Voucher number</th>
+                        <th>{{ __('view.support_document') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -89,7 +89,7 @@
                 </tbody>
             </table>
             <div class="form-group">
-                <label for="issue_date_support_document">Issue date of the support document</label>
+                <label for="issue_date_support_document">{{ __('view.issue_date_of_the_support_document') }}</label>
                 <input class="form-control" id="issue_date_support_document" name="issue_date_support_document" readonly>
             </div>
         </div>

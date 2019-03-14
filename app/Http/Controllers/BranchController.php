@@ -47,10 +47,10 @@ class BranchController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $branch);
-                $request->session()->flash('status', 'Branch updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.branch'), 0)]), 1));
             } else {
                 $this->store($request);
-                $request->session()->flash('status', 'Branch added successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.branch'), 0)]), 1));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
@@ -199,7 +199,7 @@ class BranchController extends Controller
             return abort('404');
         }
         $branch->delete();
-        return redirect()->route('branches.index')->with(['status' => 'Branch deactivated successfully.']);
+        return redirect()->route('branches.index')->with(['status' => trans_choice(__('message.model_deactivated_successfully', ['model' => trans_choice(__('view.branch'), 0)]), 1)]);
     }
 
     /**
@@ -211,7 +211,7 @@ class BranchController extends Controller
     public function restore($branch)
     {
         Branch::withTrashed()->where('id', $branch)->restore();
-        return redirect()->route('branches.index')->with(['status' => 'Branch activated successfully.']);
+        return redirect()->route('branches.index')->with(['status' => trans_choice(__('message.model_activated_successfully', ['model' => trans_choice(__('view.branch'), 0)]), 1)]);
     }
 
     /**
@@ -224,7 +224,7 @@ class BranchController extends Controller
     {
         $branchOld = Branch::withTrashed()->where('id', $branch)->first();
         $branchOld->forceDelete();
-        return redirect()->route('branches.index')->with(['status' => 'Branch deleted successfully.']);
+        return redirect()->route('branches.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.branch'), 0)]), 1)]);
     }
 
     /**

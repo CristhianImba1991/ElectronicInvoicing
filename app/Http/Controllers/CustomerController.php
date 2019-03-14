@@ -57,10 +57,10 @@ class CustomerController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $customer);
-                $request->session()->flash('status', 'Customer updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0));
             } else {
                 $this->store($request);
-                $request->session()->flash('status', 'Customer added successfully. Remember that for the login, the customer must enter the first email provided and the identification as password.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
@@ -170,7 +170,7 @@ class CustomerController extends Controller
     private function update(Request $request, Customer $customer)
     {
         $customer->fill($request->except(['ruc', 'company', 'identification_type_name', 'identification_type', 'identification']))->save();
-        return redirect()->route('customers.index')->with(['status' => 'Customer updated successfully.']);
+        return redirect()->route('customers.index')->with(['status' => trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)]);
     }
 
     /**
@@ -182,7 +182,7 @@ class CustomerController extends Controller
     public function delete(Customer $customer)
     {
         $customer->delete();
-        return redirect()->route('customers.index')->with(['status' => 'Customer deactivated successfully.']);
+        return redirect()->route('customers.index')->with(['status' => trans_choice(__('message.model_deactivated_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)]);
     }
 
     /**
@@ -194,7 +194,7 @@ class CustomerController extends Controller
     public function restore($customer)
     {
         Customer::withTrashed()->where('id', $customer)->restore();
-        return redirect()->route('customers.index')->with(['status' => 'Customer activated successfully.']);
+        return redirect()->route('customers.index')->with(['status' => trans_choice(__('message.model_activated_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)]);
     }
 
     /**
@@ -207,7 +207,7 @@ class CustomerController extends Controller
     {
         $customerOld = Customer::withTrashed()->where('id', $customer)->first();
         $customerOld->forceDelete();
-        return redirect()->route('customers.index')->with(['status' => 'Customer deleted successfully.']);
+        return redirect()->route('customers.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)]);
     }
 
     /**

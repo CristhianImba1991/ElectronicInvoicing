@@ -17,7 +17,7 @@ class CreateWaybillsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('voucher_id');
             $table->unsignedInteger('identification_type_id');
-            $table->string('carrier_ruc', 300);
+            $table->string('carrier_ruc', 20);
             $table->string('carrier_social_reason', 300);
             $table->string('starting_address', 300);
             $table->date('start_date_transport');

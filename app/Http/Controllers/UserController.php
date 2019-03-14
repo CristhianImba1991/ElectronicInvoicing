@@ -60,10 +60,10 @@ class UserController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $user);
-                $request->session()->flash('status', 'User updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.user'), 0)]), 0));
             } else {
                 $this->store($request);
-                $request->session()->flash('status', 'User added successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.user'), 0)]), 0));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
@@ -274,7 +274,7 @@ class UserController extends Controller
             }
         }
         $user->delete();
-        return redirect()->route('users.index')->with(['status' => 'User deactivated successfully.']);
+        return redirect()->route('users.index')->with(['status' => trans_choice(__('message.model_deactivated_successfully', ['model' => trans_choice(__('view.user'), 0)]), 0)]);
     }
 
     /**
@@ -286,7 +286,7 @@ class UserController extends Controller
     public function restore($user)
     {
         User::withTrashed()->where('id', $user)->restore();
-        return redirect()->route('users.index')->with(['status' => 'User activated successfully.']);
+        return redirect()->route('users.index')->with(['status' => trans_choice(__('message.model_activated_successfully', ['model' => trans_choice(__('view.user'), 0)]), 0)]);
     }
 
     /**
@@ -300,6 +300,6 @@ class UserController extends Controller
         $userOld = User::withTrashed()->where('id', $user)->first();
         DraftJson::getInstance()->removeUser($userOld);
         $userOld->forceDelete();
-        return redirect()->route('users.index')->with(['status' => 'User deleted successfully.']);
+        return redirect()->route('users.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.user'), 0)]), 0)]);
     }
 }

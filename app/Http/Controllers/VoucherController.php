@@ -209,10 +209,10 @@ class VoucherController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $state, $voucher);
-                $request->session()->flash('status', 'Voucher updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0));
             } else {
                 $this->store($request, $state);
-                $request->session()->flash('status', 'Voucher added successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));

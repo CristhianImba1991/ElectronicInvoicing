@@ -43,10 +43,10 @@ class EmissionPointController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $emissionPoint);
-                $request->session()->flash('status', 'Emission point updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.emission_point'), 0)]), 0));
             } else {
                 $this->store($request);
-                $request->session()->flash('status', 'Emission point added successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.emission_point'), 0)]), 0));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
@@ -214,7 +214,7 @@ class EmissionPointController extends Controller
             return abort('404');
         }
         $emissionPoint->delete();
-        return redirect()->route('emission_points.index')->with(['status' => 'Emission point deactivated successfully.']);
+        return redirect()->route('emission_points.index')->with(['status' => trans_choice(__('message.model_deactivated_successfully', ['model' => trans_choice(__('view.emission_point'), 0)]), 0)]);
     }
 
     /**
@@ -226,7 +226,7 @@ class EmissionPointController extends Controller
     public function restore($emissionPoint)
     {
         EmissionPoint::withTrashed()->where('id', $emissionPoint)->restore();
-        return redirect()->route('emission_points.index')->with(['status' => 'Emission point activated successfully.']);
+        return redirect()->route('emission_points.index')->with(['status' => trans_choice(__('message.model_activated_successfully', ['model' => trans_choice(__('view.emission_point'), 0)]), 0)]);
     }
 
     /**
@@ -239,6 +239,6 @@ class EmissionPointController extends Controller
     {
         $emissionPointOld = EmissionPoint::withTrashed()->where('id', $emissionPoint)->first();
         $emissionPointOld->forceDelete();
-        return redirect()->route('emission_points.index')->with(['status' => 'Emission point deleted successfully.']);
+        return redirect()->route('emission_points.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.emission_point'), 0)]), 0)]);
     }
 }

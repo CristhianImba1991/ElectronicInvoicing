@@ -66,10 +66,10 @@ class ProductController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $product);
-                $request->session()->flash('status', 'Product updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0));
             } else {
                 $this->store($request);
-                $request->session()->flash('status', 'Product added successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
@@ -182,7 +182,7 @@ class ProductController extends Controller
     public function delete(Product $product)
     {
         $product->delete();
-        return redirect()->route('products.index')->with(['status' => 'Product deactivated successfully.']);
+        return redirect()->route('products.index')->with(['status' => trans_choice(__('message.model_deactivated_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)]);
     }
 
     /**

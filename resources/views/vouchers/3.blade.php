@@ -4,12 +4,12 @@
 <div class="col-sm-12">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">5. Debit note</h5>
+            <h5 class="card-title">5. {{ __('view.debit_note') }}</h5>
             <table id="debitNote-table" class="display">
                 <thead>
                     <tr>
-                        <th>Reason</th>
-                        <th>Value</th>
+                        <th>{{ __('view.reason') }}</th>
+                        <th>{{ __('view.value') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -20,14 +20,14 @@
 <div class="col-sm-12">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">6. Payment method</h5>
+            <h5 class="card-title">6. {{ __('view.payment_method') }}</h5>
             <table id="paymentmethod-table" class="display">
                 <thead>
                     <tr>
-                        <th>Method</th>
-                        <th>Value</th>
-                        <th>Time</th>
-                        <th>Term</th>
+                        <th>{{ __('view.method') }}</th>
+                        <th>{{ __('view.value') }}</th>
+                        <th>{{ __('view.time_unit') }}</th>
+                        <th>{{ __('view.term') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -38,15 +38,15 @@
 <div class="col-sm-6">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">7. Support document</h5>
+            <h5 class="card-title">7. {{ __('view.support_document') }}</h5>
             <div class="form-group">
-                <label for="voucher_type_support_document">Voucher type of the support document</label>
-                <input class="form-control" id="voucher_type_support_document" name="voucher_type_support_document" value="FACTURA" readonly>
+                <label for="voucher_type_support_document">{{ __('view.voucher_type_of_the_support_document') }}</label>
+                <input class="form-control" id="voucher_type_support_document" name="voucher_type_support_document" value="{{ strtoupper(__('view.invoice')) }}" readonly>
             </div>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Voucher number</th>
+                        <th>{{ __('view.support_document') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,19 +68,19 @@
                 </tbody>
             </table>
             <div class="form-group">
-                <label for="issue_date_support_document">Issue date of the support document</label>
+                <label for="issue_date_support_document">{{ __('view.issue_date_of_the_support_document') }}</label>
                 <input class="form-control" id="issue_date_support_document" name="issue_date_support_document" readonly>
             </div>
         </div>
     </div>
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">8. Additional information</h5>
+            <h5 class="card-title">8. {{ __('view.additional_information') }}</h5>
             <table id="additionaldetail-table" class="display">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Value</th>
+                        <th>{{ __('view.name') }}</th>
+                        <th>{{ __('view.value') }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -88,7 +88,7 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Extra detail</th>
+                        <th>{{ __('view.extra_detail') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,10 +103,10 @@
 <div class="col-sm-6">
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">9. Total</h5>
+            <h5 class="card-title">9. {{ __('view.total') }}</h5>
             <div class="form-group">
-                <label for="iva_tax">Iva taxes</label>
-                <select class="form-control selectpicker" id="iva_tax" name="iva_tax" data-live-search="true"  title="Select an IVA tax ...">
+                <label for="iva_tax">{{ __('view.iva_tax') }}</label>
+                <select class="form-control selectpicker" id="iva_tax" name="iva_tax" data-live-search="true"  title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(__('view.iva_tax'))]), 0) }}">
                     @foreach($iva_taxes as $iva_tax)
                         <option value="{{ $iva_tax->id }}">{{ $iva_tax->auxiliary_code }} - {{ $iva_tax->description }}</option>
                     @endforeach
@@ -115,39 +115,43 @@
             <table class="table table-striped">
                 <tbody>
                     <tr>
-                        <td>IVA 12% subtotal</td>
+                        <td>{{ __('view.iva_12_subtotal') }}</td>
                         <td><input class="form-control" type="text" id="ivasubtotal" name="ivasubtotal" value="" readonly></td>
                     </tr>
                     <tr>
-                        <td>IVA 0% subtotal</td>
+                        <td>{{ __('view.iva_0_subtotal') }}</td>
                         <td><input class="form-control" type="text" id="iva0subtotal" name="iva0subtotal" value="" readonly></td>
                     </tr>
                     <tr>
-                        <td>Not subject to IVA subtotal</td>
+                        <td>{{ __('view.not_subject_to_iva_subtotal') }}</td>
                         <td><input class="form-control" type="text" id="notsubjectivasubtotal" name="notsubjectivasubtotal" value="" readonly></td>
                     </tr>
                     <tr>
-                        <td>Exempt from IVA subtotal</td>
+                        <td>{{ __('view.exempt_from_iva_subtotal') }}</td>
                         <td><input class="form-control" type="text" id="exemptivasubtotal" name="exemptivasubtotal" value="" readonly></td>
                     </tr>
                     <tr>
-                        <td>Subtotal</td>
+                        <td>{{ __('view.subtotal') }}</td>
                         <td><input class="form-control" type="text" id="subtotal" name="subtotal" value="" readonly></td>
                     </tr>
+                    <tr>
+                        <td>{{ __('view.total_discount') }}</td>
+                        <td><input class="form-control" type="text" id="totaldiscount" name="totaldiscount" value="" readonly></td>
+                    </tr>
                     <!--<tr>
-                        <td>ICE value</td>
+                        <td>{{ __('view.ice_value') }}</td>
                         <td><input class="form-control" type="text" id="icevalue" name="icevalue" value="" readonly></td>
                     </tr>
                     <tr>
-                        <td>IRBPNR value</td>
+                        <td>{{ __('view.irbpnr_value') }}</td>
                         <td><input class="form-control" type="text" id="irbpnrvalue" name="irbpnrvalue" value="" readonly></td>
                     </tr>-->
                     <tr>
-                        <td>IVA 12% value</td>
+                        <td>{{ __('view.iva_12_value') }}</td>
                         <td><input class="form-control" type="text" id="ivavalue" name="ivavalue" value="" readonly></td>
                     </tr>
                     <tr>
-                        <td>Total</td>
+                        <td>{{ __('view.total') }}</td>
                         <td><input class="form-control" type="text" id="total" name="total" value="" readonly></td>
                     </tr>
                 </tbody>

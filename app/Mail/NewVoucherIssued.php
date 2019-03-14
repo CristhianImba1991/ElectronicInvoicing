@@ -40,7 +40,7 @@ class NewVoucherIssued extends Mailable
                         'actionUrl' => $this->data['actionUrl'],
                         'outroLines' => $this->data['outroLines']
                     ])
-                    ->attach(public_path($this->data['voucher']->accessKey() . '.pdf'))
+                    ->attach($this->data['voucher']->accessKey() . '.pdf')
                     ->attach(storage_path('app/' . $this->data['voucher']['xml']));
     }
 }

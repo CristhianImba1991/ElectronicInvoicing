@@ -65,10 +65,10 @@ class CompanyController extends Controller
         if ($isValid) {
             if ($request->method() === 'PUT') {
                 $this->update($request, $company);
-                $request->session()->flash('status', 'Company updated successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.company'), 0)]), 1));
             } else {
                 $this->store($request);
-                $request->session()->flash('status', 'Company added successfully.');
+                $request->session()->flash('status', trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.company'), 0)]), 1));
             }
         }
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
@@ -253,7 +253,7 @@ class CompanyController extends Controller
             return abort('404');
         }
         $company->delete();
-        return redirect()->route('companies.index')->with(['status' => 'Company deactivated successfully.']);
+        return redirect()->route('companies.index')->with(['status' => trans_choice(__('message.model_deactivated_successfully', ['model' => trans_choice(__('view.company'), 0)]), 1)]);
     }
 
     /**
@@ -265,7 +265,7 @@ class CompanyController extends Controller
     public function restore($company)
     {
         Company::withTrashed()->where('id', $company)->restore();
-        return redirect()->route('companies.index')->with(['status' => 'Company activated successfully.']);
+        return redirect()->route('companies.index')->with(['status' => trans_choice(__('message.model_activated_successfully', ['model' => trans_choice(__('view.company'), 0)]), 1)]);
     }
 
     /**
@@ -282,7 +282,7 @@ class CompanyController extends Controller
         Storage::delete('signs/' . $companyOld->ruc . '_cert.pem');
         Storage::delete('signs/' . $companyOld->ruc . '_pkey.pem');
         $companyOld->forceDelete();
-        return redirect()->route('companies.index')->with(['status' => 'Company deleted successfully.']);
+        return redirect()->route('companies.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.company'), 0)]), 1)]);
     }
 
     /**
