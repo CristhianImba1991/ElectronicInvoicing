@@ -50,7 +50,7 @@
 @isset($actionText)
 @component('mail::subcopy')
 @lang(
-    'if_youre_having_trouble_clicking_the_button_copy_and_paste_the_URL_below',
+    'notification.if_youre_having_trouble_clicking_the_button_copy_and_paste_the_URL_below',
     [
         'actionText' => $actionText,
         'actionURL' => $actionUrl

@@ -29,7 +29,7 @@ class NewVoucherIssued extends Mailable
      */
     public function build()
     {
-        return $this->from('edgar.salguero@taotechideas.com')
+        return $this->from(config('mail.from.address'))
                     ->subject($this->data['subject'])
                     ->markdown('vendor.notifications.email')
                     ->with([

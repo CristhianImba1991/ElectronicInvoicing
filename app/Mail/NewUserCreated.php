@@ -29,13 +29,15 @@ class NewUserCreated extends Mailable
      */
     public function build()
     {
-        return $this->from('edgar.salguero@taotechideas.com')
+        return $this->from(config('mail.from.address'))
                     ->subject($this->data['subject'])
                     ->markdown('vendor.notifications.email')
                     ->with([
                         'greeting' => $this->data['greeting'],
                         'level' => $this->data['level'],
                         'introLines' => $this->data['introLines'],
+                        'actionText' => $this->data['actionText'],
+                        'actionUrl' => $this->data['actionUrl'],
                         'outroLines' => $this->data['outroLines'],
                     ]);
     }

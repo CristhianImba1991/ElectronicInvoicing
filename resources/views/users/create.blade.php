@@ -99,7 +99,7 @@
                             <label for="role">{{ __('view.role') }}</label>
                             <select class="form-control selectpicker" id="role" name="role" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.role'))]), 0) }}">
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->name }}">{{ strtoupper($role->name) }}</option>
+                                    <option value="{{ $role->name }}">{{ strtoupper(__($role->name)) }}</option>
                                 @endforeach
                             </select>
                         </div>

@@ -53,7 +53,7 @@
                                             @endif
                                         @endif
                                     </td>
-                                    <td>{{ strtoupper(implode(', ', json_decode(json_encode($user->getRoleNames()), true))) }}</td>
+                                    <td>{{  strtoupper(__(implode(', ', json_decode(json_encode($user->getRoleNames()), true)))) }}</td>
                                     <td>
                                         @if(\Auth::user()->id !== $user->id)
                                             @if($user->deleted_at !== NULL)
@@ -76,16 +76,16 @@
                                             @else
                                                 @if(auth()->user()->can('delete_hard_users'))
                                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
-                                                        data-title="{{ __('view.are_you_sure_you_want_to_deactivate_the_model', ['model' => trans_choice(__('view.user'), 0), 'name' => $user->name]) }}"
-                                                        data-body="{{ __('view.the_data_of_the_model_will_remain_in_the_application', ['model' => trans_choice(__('view.user'), 0)]) }}"
+                                                        data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_deactivate_the_model', ['model' => trans_choice(__('view.user'), 0), 'name' => $user->name]), 0) }}"
+                                                        data-body="{{ trans_choice(__('view.the_data_of_the_model_will_remain_in_the_application', ['model' => trans_choice(__('view.user'), 0)]), 0) }}"
                                                         data-form="{{ route('users.delete', $user) }}"
                                                         data-method="DELETE"
                                                         data-class="btn btn-sm btn-warning"
                                                         data-action="{{ __('view.deactivate') }}">{{ __('view.deactivate') }}</button>
                                                 @else
                                                     <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#confirmation"
-                                                        data-title="{{ __('view.are_you_sure_you_want_to_deactivate_the_model', ['model' => trans_choice(__('view.user'), 0), 'name' => $user->name]) }}"
-                                                        data-body="{{ __('view.the_data_of_the_model_will_remain_in_the_application', ['model' => trans_choice(__('view.user'), 0)]) }}"
+                                                        data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_deactivate_the_model', ['model' => trans_choice(__('view.user'), 0), 'name' => $user->name]), 0) }}"
+                                                        data-body="{{ trans_choice(__('view.the_data_of_the_model_will_remain_in_the_application', ['model' => trans_choice(__('view.user'), 0)]), 0) }}"
                                                         data-form="{{ route('users.delete', $user) }}"
                                                         data-method="DELETE"
                                                         data-class="btn btn-sm btn-warning"

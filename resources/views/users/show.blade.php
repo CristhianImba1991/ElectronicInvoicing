@@ -13,7 +13,7 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label for="role">{{ __('view.current_role') }}</label>
-                        <input class="form-control" type="text" id="role" name="role" value="{{ strtoupper(implode(', ', json_decode(json_encode($user->getRoleNames()), true))) }}" readonly>
+                        <input class="form-control" type="text" id="role" name="role" value="{{ strtoupper(__(implode(', ', json_decode(json_encode($user->getRoleNames()), true)))) }}" readonly>
                     </div>
                     <div class="form-group">
                         <label for="name">{{ __('view.name') }}</label>

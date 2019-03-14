@@ -9,5 +9,12 @@
     "AUTHORIZED" : "AUTORIZADO",
     "IN_PROCESS" : "EN PROCESO",
     "UNAUTHORIZED" : "NO AUTORIZADO",
-    "CANCELED" : "ANULADO"
+    "CANCELED" : "ANULADO",
+
+    "admin" : "administrador",
+    "api" : "api",
+    "owner" : "propietario",
+    "supervisor" : "supervisor",
+    "employee" : "empleado",
+    "customer" : "cliente"
 }

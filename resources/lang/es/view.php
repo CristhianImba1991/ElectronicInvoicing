@@ -42,7 +42,7 @@ return [
     'confirm_password' => 'Confirmar contraseña',
     'identification_type' => 'Tipo de identificación',
     'identification' => 'Identificación',
-    'email' => 'Correo electronico',
+    'email' => 'Correo electrónico',
     'code' => 'Código',
     'reports' => 'Reportes',
     'main_code' => 'Código principal',

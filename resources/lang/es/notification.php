@@ -12,7 +12,7 @@ return [
     'whoops' => '¡Vaya!',
     'hello' => '¡Hola!',
     'regards' => 'Saludos',
-    'if_youre_having_trouble_clicking_the_button_copy_and_paste_the_URL_below' => 'Si tiene problemas para hacer clic en el botón "actionText", copie y pegue el siguiente enalce en su navegador web: [:actionURL](:actionURL)',
+    'if_youre_having_trouble_clicking_the_button_copy_and_paste_the_URL_below' => 'Si tiene problemas para hacer clic en el botón ":actionText", copie y pegue el siguiente enalce en su navegador web: [:actionURL](:actionURL)',
 
     'your_user_has_been_created' => 'SU USUARIO HA SIDO CREADO',
     'hello_name' => 'Hola :name!',

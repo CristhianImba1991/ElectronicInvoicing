@@ -98,7 +98,7 @@
 
                         <div class="form-group">
                             <label for="current_role">{{ __('view.current_role') }}</label>
-                            <input class="form-control" type="text" id="current_role" name="current_role" value="{{ strtoupper(implode(', ', json_decode(json_encode($user->getRoleNames()), true))) }}" readonly>
+                            <input class="form-control" type="text" id="current_role" name="current_role" value="{{ strtoupper(__(implode(', ', json_decode(json_encode($user->getRoleNames()), true)))) }}" readonly>
                         </div>
                         @if(!$user->hasRole('customer'))
                             <div class="form-group">
