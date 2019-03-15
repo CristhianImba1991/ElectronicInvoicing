@@ -3,6 +3,7 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Branch, Company, EmissionPoint};
+use ElectronicInvoicing\StaticClasses\ValidationRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -26,19 +27,7 @@ class EmissionPointController extends Controller
      */
     public function validateRequest(Request $request, EmissionPoint $emissionPoint = NULL)
     {
-        if ($request->method() === 'PUT') {
-            $validator = Validator::make($request->all(), [
-                'company' => 'required|exists:companies,id',
-                'branch' => 'required|exists:branches,id',
-                'code' => 'required|min:1|max:999|integer',
-            ]);
-        } else {
-            $validator = Validator::make($request->all(), [
-                'company' => 'required|exists:companies,id',
-                'branch' => 'required|exists:branches,id',
-                'code' => 'required|min:1|max:999|integer|uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code,
-            ]);
-        }
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('emission_point', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use ElectronicInvoicing\{Company, Branch, IvaTax, IceTax, IrbpnrTax, ProductTax};
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
+use ElectronicInvoicing\StaticClasses\ValidationRule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Image;
@@ -37,31 +38,7 @@ class ProductController extends Controller
      */
     public function validateRequest(Request $request, Product $product = NULL)
     {
-        if ($request->method() === 'PUT') {
-            $validator = Validator::make($request->all(), [
-                'main_code' => 'required|max:25',
-                'auxiliary_code' => 'required|max:25',
-                //'company' => 'required|exists:companies,id',
-                //'branch' => 'required|exists:branches,id',
-                'unit_price' => 'required|gt:0',
-                'stock' => 'required|gt:0',
-                'description'=> 'required|max:300',
-                //'iva_tax'=> 'required'
-            ]);
-        } else {
-            $validator = Validator::make($request->all(), [
-                'main_code' => 'required|max:25|uniquemultiple:products,branch_id,' . $request->branch . ',main_code,' . $request->main_code,
-                'auxiliary_code' => 'required|max:25',
-                'company' => 'required|exists:companies,id',
-                'branch' => 'required|exists:branches,id',
-                'unit_price' => 'required|gt:0',
-                'stock' => 'required|gt:0',
-                'description'=> 'required|max:300',
-            ]);
-        }
-        /*$validator->setAttributeNames(array(
-            'main_code' => __('view.main_code'),
-        ));*/
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('product', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {

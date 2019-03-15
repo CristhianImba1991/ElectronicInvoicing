@@ -129,6 +129,7 @@ return [
     'cancel' => 'Cancelar',
     'back' => 'Atras',
     'go_back' => 'Regresar',
+    'go_home' => 'Ir al Inicio',
     'close' => 'Cerrar',
     'activate' => 'Activar',
     'delete' => 'Eliminar',
@@ -137,6 +138,7 @@ return [
     'all_draft_vouchers' => 'Todos los borradores',
     'draft' => 'Borrador',
     'save' => 'Guardar',
+    'send' => 'Enviar',
     'save_and_accept' => 'Guardar y aceptar',
     'save_accept_and_send' => 'Guardar, aceptar y enviar',
 
@@ -156,10 +158,12 @@ return [
     'manage' => 'Administrar',
     'dashboard' => 'Dashboard',
 
-    'page_not_found' => 'Página no encontrada',
-    'internal_server_error' => 'Error interno del servidor',
+    'page_not_found' => 'Página no Encontrada',
+    'internal_server_error' => 'Error Interno del Servidor',
+    'page_expired' => 'Página Caducada',
     'sorry_the_page_you_are_looking_for_could_not_be_found_or_you_do_not_have' => 'Lo sentimos, no se pudo encontrar la página que está buscando o no tiene los permisos necesarios para acceder al recurso.',
     'sorry_we_are_experiencing_technical_difficulties_with_our_server_right_now' => 'Lo sentimos, estamos experimentando dificultades técnicas con nuestro servidor en este momento.',
+    'sorry_your_session_has_expired_please_refresh_and_try_again' => 'Lo sentimos, su sesión ha caducado. Por favor, actualice y pruebe de nuevo.',
 
     'powered_by_taotechideas' => 'POWERED BY TAOTECHIDEAS',
 

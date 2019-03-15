@@ -80,7 +80,7 @@
                             </select>
                         </div>
                         <div class="form-group" id="divbranch">
-                            <label for="establishment">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
+                            <label for="branch">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
                             <select class="form-control selectpicker input-lg" id="branch" name="branch" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.branch'), 0)]), 1) }}">
 
                             </select>
@@ -90,23 +90,23 @@
                             <input type="text" class="form-control" id="main_code" name="main_code" value="">
                         </div>
                         <div class="form-group">
-                            <label for="social_reason">{{ __('view.auxiliary_code') }}</label>
+                            <label for="auxiliary_code">{{ __('view.auxiliary_code') }}</label>
                             <input type="text" class="form-control" id="auxiliary_code" name="auxiliary_code"  value="">
                         </div>
                         <div class="form-group">
-                            <label for="tradename">{{ __('view.unit_price') }}</label>
-                            <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price"  value="">
+                            <label for="unit_price">{{ __('view.unit_price') }}</label>
+                            <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price"  value="" lang="en">
                         </div>
                         <div class="form-group">
-                            <label for="address">{{ __('view.description') }}</label>
+                            <label for="description">{{ __('view.description') }}</label>
                             <input type="text" class="form-control" id="description" name="description"  value="">
                         </div>
                         <div class="form-group">
-                            <label for="special_contributor">{{ __('view.stock') }}</label>
+                            <label for="stock">{{ __('view.stock') }}</label>
                             <input type="number" class="form-control" id="stock" name="stock"  value="">
                         </div>
                         <div class="form-group">
-                            <label for="iva_taxes">{{ __('view.iva_tax') }}</label>
+                            <label for="iva_tax">{{ __('view.iva_tax') }}</label>
                             <select class="form-control selectpicker input-lg dynamic" id="iva_tax" name="iva_tax" data-live-search="true"  title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(__('view.iva_tax'))]), 0) }}">
                                 @foreach($iva_taxes as $iva_tax)
                                     <option value="{{ $iva_tax->id }}">{{ $iva_tax->auxiliary_code }} - {{ $iva_tax->description }}</option>
@@ -114,7 +114,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="ice_taxes">{{ __('view.ice_tax') }}</label>
+                            <label for="ice_tax">{{ __('view.ice_tax') }}</label>
                             <select class="form-control selectpicker input-lg dynamic" id="ice_tax" name="ice_tax" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(__('view.ice_tax'))]), 0) }}">
                                 @foreach($ice_taxes as $ice_tax)
                                     <option value="{{ $ice_tax->id }}">{{ $ice_tax->auxiliary_code }} - {{ $ice_tax->description }}</option>
@@ -122,7 +122,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="irbpnr_taxes">{{ __('view.irbpnr_tax') }}</label>
+                            <label for="irbpnr_tax">{{ __('view.irbpnr_tax') }}</label>
                             <select class="form-control selectpicker input-lg dynamic" id="irbpnr_tax" name="irbpnr_tax" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(__('view.irbpnr_tax'))]), 0) }}">
                                 @foreach($irbpnr_taxes as $irbpnr_tax)
                                     <option value="{{ $irbpnr_tax->id }}">{{ $irbpnr_tax->auxiliary_code }} - {{ $irbpnr_tax->description }}</option>

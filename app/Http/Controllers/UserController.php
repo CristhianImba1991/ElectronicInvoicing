@@ -4,6 +4,7 @@ namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Branch, Company, EmissionPoint, User};
 use ElectronicInvoicing\Http\Logic\DraftJson;
+use ElectronicInvoicing\StaticClasses\ValidationRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -29,33 +30,7 @@ class UserController extends Controller
      */
     public function validateRequest(Request $request, User $user = NULL)
     {
-        if ($request->method() === 'PUT') {
-            $validator = Validator::make($request->all(), [
-                'role' => 'nullable|exists:roles,name|string',
-                'name' => 'required|max:255',
-                'email' => 'required|email|max:255',
-                //'password' => 'required|min:6|confirmed',
-                'company' => 'nullable|min:1',
-                'company.*' => 'exists:companies,id',
-                'branch' => 'nullable|min:1',
-                'branch.*' => 'exists:branches,id',
-                'emission_point' => 'nullable|min:1',
-                'emission_point.*' => 'exists:emission_points,id',
-            ]);
-        } else {
-            $validator = Validator::make($request->all(), [
-                'role' => 'required|exists:roles,name|string',
-                'name' => 'required|max:255',
-                'email' => 'required|email|max:255|unique:users',
-                'password' => 'required|min:6|confirmed',
-                'company' => 'required_unless:role,api,admin|min:1',
-                'company.*' => 'exists:companies,id',
-                'branch' => 'required_unless:role,admin,api,owner|min:1',
-                'branch.*' => 'exists:branches,id',
-                'emission_point' => 'required_unless:role,admin,api,owner|min:1',
-                'emission_point.*' => 'exists:emission_points,id',
-            ]);
-        }
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('user', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {

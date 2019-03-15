@@ -83,7 +83,7 @@
                             <input class="form-control" type="text" id="phone" name="phone" value="">
                         </div>
                         <div class="form-group">
-                            <label for="email">{{ __('view.identification_type') }}</label>
+                            <label for="email">{{ __('view.email') }}</label>
                             <input class="form-control" type="email" id="email" name="email" value="" multiple>
                         </div>
 

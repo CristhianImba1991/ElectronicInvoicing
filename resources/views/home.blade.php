@@ -117,22 +117,22 @@ $(document).ready(function(){
                                                         <td>
                                                             @switch($voucher->voucher_state_id)
                                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
-                                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
+                                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">{{ __('view.edit') }}</a>
                                                                     @break
                                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                                     @can('send_vouchers')
                                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
                                                                             {{ csrf_field() }}
-                                                                            <button type="submit" class="btn btn-sm btn-light">Send</button>
+                                                                            <button type="submit" class="btn btn-sm btn-light">{{ __('view.send') }}</button>
                                                                         </form>
                                                                     @endcan
                                                                     @break
                                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
-                                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
+                                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">{{ __('view.edit') }}</a>
                                                                     @can('send_vouchers')
                                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
                                                                             {{ csrf_field() }}
-                                                                            <button type="submit" class="btn btn-sm btn-light">Send</button>
+                                                                            <button type="submit" class="btn btn-sm btn-light">{{ __('view.send') }}</button>
                                                                         </form>
                                                                     @endcan
                                                                     @break
@@ -192,8 +192,8 @@ $(document).ready(function(){
                                                         <td>
                                                             <a href="{{ route('vouchers.edit_draft', $draftVoucher['id']) }}" class="btn btn-sm btn-info">{{ __('view.edit') }}</a>
                                                             <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
-                                                                data-title="{{ __('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $draftVoucher['id']]) }}"
-                                                                data-body="{{ __('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]) }}"
+                                                                data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $draftVoucher['id']]), 0) }}"
+                                                                data-body="{{ trans_choice(__('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}"
                                                                 data-form="{{ route('vouchers.destroy_draft', $draftVoucher['id']) }}"
                                                                 data-method="DELETE"
                                                                 data-class="btn btn-sm btn-danger"

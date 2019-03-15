@@ -179,22 +179,22 @@ jQuery(document).ready(function($) {
                                         <td>
                                             @switch($voucher->voucher_state_id)
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
-                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
+                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">{{ __('view.edit') }}</a>
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                     @can('send_vouchers')
                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
                                                             {{ csrf_field() }}
-                                                            <button type="submit" class="btn btn-sm btn-light">Send</button>
+                                                            <button type="submit" class="btn btn-sm btn-light">{{ __('view.send') }}</button>
                                                         </form>
                                                     @endcan
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
-                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">Edit</a>
+                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">{{ __('view.edit') }}</a>
                                                     @can('send_vouchers')
                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
                                                             {{ csrf_field() }}
-                                                            <button type="submit" class="btn btn-sm btn-light">Send</button>
+                                                            <button type="submit" class="btn btn-sm btn-light">{{ __('view.send') }}</button>
                                                         </form>
                                                     @endcan
                                                     @break

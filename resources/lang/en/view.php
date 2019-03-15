@@ -129,6 +129,7 @@ return [
     'cancel' => 'Cancel',
     'back' => 'Back',
     'go_back' => 'Go Back',
+    'go_home' => 'Go Home',
     'close' => 'Close',
     'activate' => 'Activate',
     'delete' => 'Delete',
@@ -137,6 +138,7 @@ return [
     'all_draft_vouchers' => 'All draft vouchers',
     'draft' => 'Draft',
     'save' => 'Save',
+    'send' => 'Send',
     'save_and_accept' => 'Save and accept',
     'save_accept_and_send' => 'Save, accept and send',
 
@@ -158,8 +160,10 @@ return [
 
     'page_not_found' => 'Page Not Found',
     'internal_server_error' => 'Internal Server Error',
+    'page_expired' => 'Page Expired',
     'sorry_the_page_you_are_looking_for_could_not_be_found_or_you_do_not_have' => 'Sorry, the page you are looking for could not be found or you do not have the necessary permissions to access the resource.',
     'sorry_we_are_experiencing_technical_difficulties_with_our_server_right_now' => 'Sorry, we are experiencing technical difficulties with our server right now.',
+    'sorry_your_session_has_expired_please_refresh_and_try_again' => 'Sorry, your session has expired. Please refresh and try again.',
 
     'powered_by_taotechideas' => 'POWERED BY TAOTECHIDEAS',
 

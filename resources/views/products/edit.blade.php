@@ -63,19 +63,19 @@
                             <input type="text" class="form-control" id="main_code" name="main_code" value="{{ $product->main_code }}">
                         </div>
                         <div class="form-group">
-                            <label for="social_reason">{{ __('view.auxiliary_code') }}</label>
+                            <label for="auxiliary_code">{{ __('view.auxiliary_code') }}</label>
                             <input type="text" class="form-control" id="auxiliary_code" name="auxiliary_code"  value="{{ $product->auxiliary_code }}">
                         </div>
                         <div class="form-group">
-                            <label for="tradename">{{ __('view.unit_price') }}</label>
+                            <label for="unit_price">{{ __('view.unit_price') }}</label>
                             <input type="number" step="0.01" class="form-control" id="unit_price" name="unit_price"  value="{{ $product->unit_price }}">
                         </div>
                         <div class="form-group">
-                            <label for="address">{{ __('view.description') }}</label>
+                            <label for="description">{{ __('view.description') }}</label>
                             <input type="text" class="form-control" id="description" name="description"  value="{{ $product->description }}">
                         </div>
                         <div class="form-group">
-                            <label for="special_contributor">{{ __('view.stock') }}</label>
+                            <label for="stock">{{ __('view.stock') }}</label>
                             <input type="number" class="form-control" id="stock" name="stock"  value="{{ $product->stock }}">
                         </div>
                     </div>

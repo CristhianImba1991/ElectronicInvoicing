@@ -3,6 +3,7 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Company, Customer, IdentificationType, User};
+use ElectronicInvoicing\StaticClasses\ValidationRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -27,32 +28,7 @@ class CustomerController extends Controller
      */
     public function validateRequest(Request $request, Customer $customer = NULL)
     {
-        if ($request->method() === 'PUT') {
-            $validator = Validator::make($request->all(), [
-                'company' => 'required|exists:companies,id',
-                'identification_type' => 'required|exists:identification_types,id',
-                'identification' => 'required|exists:customers,identification|max:20',
-                'social_reason' => 'required|max:300',
-                'address' => 'required|max:300',
-                'phone' => 'max:30',
-                'email' => 'required|max:300',
-            ]);
-        } else {
-            $rules = [
-                'company' => 'required|exists:companies,id',
-                'identification_type' => 'required|exists:identification_types,id',
-                'identification' => 'required|max:20',
-                'social_reason' => 'required|max:300',
-                'address' => 'required|max:300',
-                'phone' => 'max:30',
-                'email' => 'required|max:300',
-            ];
-            if (Customer::where('identification', '=', $request->identification)->exists()) {
-                $customer = Customer::where('identification', '=', $request->identification)->first();
-                $rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
-            }
-            $validator = Validator::make($request->all(), $rules);
-        }
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('customer', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {

@@ -4,6 +4,7 @@ namespace ElectronicInvoicing\Http\Controllers;
 
 use ElectronicInvoicing\{Company, Customer, Branch};
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
+use ElectronicInvoicing\StaticClasses\ValidationRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -30,37 +31,7 @@ class CompanyController extends Controller
      */
     public function validateRequest(Request $request, Company $company = NULL)
     {
-        if ($request->method() === 'PUT') {
-            $rules = [
-                'ruc' => 'required|digits:13|validruc',
-                'social_reason' => 'required|max:300',
-                'tradename' => 'required|max:300',
-                'address' => 'required|max:300',
-                'special_contributor' => 'max:13',
-                //'keep_accounting',
-                'phone' => 'required|max:30',
-                'logo' => 'mimes:jpeg,jpg,png|max:2048',
-                'sign' => 'mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32',
-                'password' => 'required_with:sign',
-            ];
-            if ($request->has('sign')) {
-                $rules['sign'] .= '|validsign:' . $request->password;
-            }
-            $validator = Validator::make($request->all(), $rules);
-        } else {
-            $validator = Validator::make($request->all(), [
-                'ruc' => 'required|digits:13|unique:companies|validruc',
-                'social_reason' => 'required|max:300',
-                'tradename' => 'required|max:300',
-                'address' => 'required|max:300',
-                'special_contributor' => 'max:13',
-                //'keep_accounting',
-                'phone' => 'required|max:30',
-                'logo' => 'mimes:jpeg,jpg,png|max:2048',
-                'sign' => 'required|mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32|validsign:' . $request->password,
-                'password' => 'required',
-            ]);
-        }
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('company', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {

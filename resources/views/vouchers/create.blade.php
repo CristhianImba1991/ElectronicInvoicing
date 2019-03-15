@@ -20,7 +20,7 @@
             <div class="card">
                 <div class="card-header">
                     {{ trans_choice(__('view.new_model', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}
-                    <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
+                    <a href="{{ redirect()->getUrlGenerator()->previous() }}" class="btn btn-sm btn-secondary float-right">{{ __('view.cancel') }}</a>
                 </div>
 
                 <form id="voucher-form" method="post">

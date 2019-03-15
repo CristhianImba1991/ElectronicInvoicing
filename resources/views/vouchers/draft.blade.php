@@ -24,8 +24,8 @@ $(document).ready(function(){
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    Draft vouchers
-                    <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">Back</a>
+                    {{ __('view.draft_model', ['model' => trans_choice(__('view.voucher'), 1)]) }}
+                    <a href="{{ route('home') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.back') }}</a>
                 </div>
 
                 <div class="card-body">
@@ -37,11 +37,11 @@ $(document).ready(function(){
                     <table id="draft-vouchers" class="display">
                         <thead>
                             <tr>
-                                <th>Company</th>
-                                <th>Environment</th>
-                                <th>Voucher type</th>
-                                <th>Created at</th>
-                                <th>Updated at</th>
+                                <th>{{ ucfirst(trans_choice(__('view.company'), 0)) }}</th>
+                                <th>{{ __('view.environment') }}</th>
+                                <th>{{ __('view.voucher_type') }}</th>
+                                <th>{{ __('view.created_at') }}</th>
+                                <th>{{ __('view.updated_at') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -54,14 +54,14 @@ $(document).ready(function(){
                                     <td>{{ \DateTime::createFromFormat('Y-m-d H:i:s.u', $draftVoucher['created_at']['date'])->format('Y-m-d H:i:s') }}</td>
                                     <td>{{ \DateTime::createFromFormat('Y-m-d H:i:s.u', $draftVoucher['updated_at']['date'])->format('Y-m-d H:i:s') }}</td>
                                     <td>
-                                        <a href="{{ route('vouchers.edit_draft', $draftVoucher['id']) }}" class="btn btn-sm btn-info">Edit</a>
+                                        <a href="{{ route('vouchers.edit_draft', $draftVoucher['id']) }}" class="btn btn-sm btn-info">{{ __('view.edit') }}</a>
                                         <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#confirmation"
-                                            data-title="Are you sure you want to delete the draft voucher {{ $draftVoucher['id'] }}?"
-                                            data-body="WARNING: All voucher data will be deleted. This action can not be undone."
+                                            data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $draftVoucher['id']]), 0) }}"
+                                            data-body="{{ trans_choice(__('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}"
                                             data-form="{{ route('vouchers.destroy_draft', $draftVoucher['id']) }}"
                                             data-method="DELETE"
                                             data-class="btn btn-sm btn-danger"
-                                            data-action="Delete">Delete</button>
+                                            data-action="{{ __('view.delete') }}">{{ __('view.delete') }}</button>
                                     </td>
                                 </tr>
                             @endforeach

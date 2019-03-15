@@ -190,6 +190,30 @@ return [
         'unit_price' => 'Precio unitario',
         'stock' => 'Existencias',
         'description'=> 'Descripción',
+        'customer'=> 'Cliente',
+        'currency' => 'Moneda',
+        'issue_date' => 'Fecha emisión',
+        'environment' => 'Ambiente',
+        'voucher_type' => 'Tipo de comprobante',
+
+        'product' => 'Producto',
+        'product_quantity' => 'Cantidad',
+        'product_unitprice' => 'Precio unitario',
+        'product_discount' => 'Descuento',
+        'paymentMethod' => 'Método de pago',
+        'paymentMethod_value' => 'Valor del método de pago',
+        'paymentMethod_timeunit' => 'Unidad de tiempo',
+        'paymentMethod_term' => 'Plazo',
+
+        /*$rules['additionaldetail_name'] = 'array|max:3';
+        $rules['additionaldetail_value'] = 'array|max:3';
+        $rules['waybill_establishment'] = 'required_with:waybill_emissionpoint,waybill_sequential|nullable|integer|min:1|max:999';
+        $rules['waybill_emissionpoint'] = 'required_with:waybill_establishment,waybill_sequential|nullable|integer|min:1|max:999';
+        $rules['waybill_sequential'] = 'required_with:waybill_establishment,waybill_emissionpoint|nullable|integer|min:1|max:999999999';
+        $rules['extra_detail'] = 'nullable|string';
+        $rules['ivaRetentionValue'] = 'nullable|numeric|min:0';
+        $rules['rentRetentionValue'] = 'nullable|numeric|min:0';
+        $rules['tip'] = 'required|numeric|min:0';*/
     ],
 
 ];
