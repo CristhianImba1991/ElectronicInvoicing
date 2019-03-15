@@ -25,9 +25,9 @@
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     @yield('styles')
 </head>
-<body style="padding-top: 32px;">
+<body style="padding-top: 50px">
     <div id="app">
-        <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white">
+        <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white border-bottom">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/home') }}">
                     {{ config('app.name', 'Laravel') }}

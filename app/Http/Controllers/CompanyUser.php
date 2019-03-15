@@ -13,7 +13,7 @@ class CompanyUser extends Controller
         $branches = self::getBranchesAllowedToUser($user);
         $companies = array();
         foreach ($branches as $branch) {
-            if(!in_array($branch->company, $companies)) {
+            if(!self::inArray($branch->company, $companies)) {
                 if ($branch->company === null && $user->hasPermissionTo('delete_hard_companies')) {
                     if ($withDeactivatedCompanies) {
                         array_push($companies, Company::withTrashed()->where('id', '=', $branch->company_id)->first());
@@ -33,7 +33,7 @@ class CompanyUser extends Controller
         $emissionPoints = $user->emissionPoints()->withTrashed()->get();
         $branches = array();
         foreach ($emissionPoints as $emissionPoint) {
-            if(!in_array($emissionPoint->branch, $branches)){
+            if(!self::inArray($emissionPoint->branch, $branches)){
                 if ($emissionPoint->branch === null && $user->hasPermissionTo('delete_hard_branches')) {
                     if ($withDeactivatedBranches) {
                         $branch = Branch::withTrashed()->where('id', '=', $emissionPoint->branch_id)->first();
@@ -60,7 +60,9 @@ class CompanyUser extends Controller
         $branches = Branch::withTrashed()->where('company_id', '=', $company->id)->get();
         $emissionPoints = array();
         foreach ($branches as $branch) {
-            array_push($emissionPoints, EmissionPoint::withTrashed()->where('branch_id', '=', $branch->id)->first());
+            foreach (EmissionPoint::withTrashed()->where('branch_id', '=', $branch->id)->get() as $emissionPoint) {
+                array_push($emissionPoints, $emissionPoint);
+            }
         }
         if (Auth::user()->hasPermissionTo('delete_hard_users')) {
             $allUsers = User::withTrashed()->get();
@@ -71,7 +73,7 @@ class CompanyUser extends Controller
         foreach ($allUsers as $user) {
             if (!$user->hasRole('admin')) {
                 foreach ($user->emissionPoints()->withTrashed()->get() as $emissionPoint) {
-                    if (in_array($emissionPoint->id, collect($emissionPoints)->pluck('id')->toArray(), true) && !in_array($user, $users, true)) {
+                    if (in_array($emissionPoint->id, collect($emissionPoints)->pluck('id')->toArray(), true) && !self::inArray($user, $users)) {
                         if ($role === null) {
                             array_push($users, $user);
                             break;
@@ -84,5 +86,15 @@ class CompanyUser extends Controller
             }
         }
         return collect($users);
+    }
+
+    private static function inArray($model, $array)
+    {
+        foreach ($array as $value) {
+            if ($value->id === $model->id) {
+                return true;
+            }
+        }
+        return false;
     }
 }

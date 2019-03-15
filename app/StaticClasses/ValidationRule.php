@@ -24,7 +24,8 @@ class ValidationRule
                 } else {
                     $rules = [
                         'company' => 'required|exists:companies,id',
-                        'establishment' => 'required|min:1|max:999|integer|uniquemultiple:branches,company_id,' . $request->company . ',establishment,' . $request->establishment,
+                        //'establishment' => 'required|min:1|max:999|integer|uniquemultiple:branches,company_id,' . $request->company . ',establishment,' . $request->establishment,
+                        'establishment' => ['required', 'min:1', 'max:999', 'integer', 'uniquemultiple:branches,company_id,"' . $request->company . '",establishment,"' . $request->establishment . '"'],
                         'name' => 'required|max:300',
                         'address' => 'required|max:300',
                         'phone' => 'required|max:30',
@@ -46,7 +47,8 @@ class ValidationRule
                         'password' => 'required_with:sign',
                     ];
                     if ($request->has('sign')) {
-                        $rules['sign'] .= '|validsign:' . $request->password;
+                        //$rules['sign'] .= '|validsign:' . $request->password;
+                        $rules['sign'] = ['mimetypes:application/x-pkcs12,application/octet-stream', 'mimes:p12,bin', 'max:32', 'validsign:"' . $request->password . '"'];
                     }
                 } else {
                     $rules = [
@@ -58,7 +60,8 @@ class ValidationRule
                         //'keep_accounting',
                         'phone' => 'required|max:30',
                         'logo' => 'mimes:jpeg,jpg,png|max:2048',
-                        'sign' => 'required|mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32|validsign:' . $request->password,
+                        //'sign' => 'required|mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32|validsign:' . $request->password,
+                        'sign' => ['required', 'mimetypes:application/x-pkcs12,application/octet-stream', 'mimes:p12,bin', 'max:32', 'validsign:"' . $request->password . '"'],
                         'password' => 'required',
                     ];
                 }
@@ -86,7 +89,8 @@ class ValidationRule
                     ];
                     if (Customer::where('identification', '=', $request->identification)->exists()) {
                         $customer = Customer::where('identification', '=', $request->identification)->first();
-                        $rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
+                        //$rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
+                        $rules['identification'] = ['required', 'max:20', 'uniquecustomer:company_customers,company_id,"' . $request->company . '",customer_id,"' . $customer->id . '"'];
                     }
                 }
                 break;
@@ -101,7 +105,8 @@ class ValidationRule
                     $rules = [
                         'company' => 'required|exists:companies,id',
                         'branch' => 'required|exists:branches,id',
-                        'code' => 'required|min:1|max:999|integer|uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code,
+                        //'code' => 'required|min:1|max:999|integer|uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code,
+                        'code' => ['required', 'min:1', 'max:999', 'integer', 'uniquemultiple:emission_points,branch_id,"' . $request->branch . '",code,"' . $request->code. '"'],
                     ];
                 }
                 break;
@@ -167,7 +172,8 @@ class ValidationRule
                     'emission_point' => 'required|numeric|exists:emission_points,id',
                     'customer' => 'required|numeric|exists:customers,id',
                     'currency' => 'required|numeric|exists:currencies,id',
-                    'issue_date' => 'required|date|before_or_equal:' . $date->format('Y/m/d'),
+                    //'issue_date' => 'required|date|before_or_equal:' . $date->format('Y/m/d'),
+                    'issue_date' => ['required', 'date', 'before_or_equal:"' . $date->format('Y/m/d') . '"'],
                     'environment' => 'required|numeric|exists:environments,id',
                     'voucher_type' => 'required|numeric|exists:voucher_types,id'
                 ];
@@ -288,7 +294,8 @@ class ValidationRule
                             $rules['supportdocument_establishment'] = 'required|nullable|integer|min:1|max:999';
                             $rules['supportdocument_emissionpoint'] = 'required|nullable|integer|min:1|max:999';
                             $rules['supportdocument_sequential'] = 'required|nullable|integer|min:1|max:999999999';
-                            $rules['issue_date_support_document'] = 'required|date|before_or_equal:' . $date->format('Y/m/d');
+                            //$rules['issue_date_support_document'] = 'required|date|before_or_equal:' . $date->format('Y/m/d');
+                            $rules['issue_date_support_document'] = ['required', 'date|before_or_equal:"' . $date->format('Y/m/d') . '"'];
                             break;
                     }
                 }
