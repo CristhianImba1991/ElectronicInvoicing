@@ -106,6 +106,9 @@ $(document).ready(function(){
                     invoiceTable.row.add([
                         '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => trans_choice(__("view.product"), 0)]), 0) }}">' + options + '</select>',
                         '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
+                        '<input class="form-control" type="text" id="product_detail1[]" name="product_detail1[]" value="">',
+                        '<input class="form-control" type="text" id="product_detail2[]" name="product_detail2[]" value="">',
+                        '<input class="form-control" type="text" id="product_detail3[]" name="product_detail3[]" value="">',
                         '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
                         '<input class="form-control" type="text" id="product_unitprice[]" name="product_unitprice[]" value="">',
                         '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
@@ -132,6 +135,7 @@ $(document).ready(function(){
     }
     var invoiceTable = $('#invoice-table').DataTable({
         paging: false,
+        //responsive: true,
         dom: 'Bfrtip',
         buttons: [{
             text: '{{ __("view.add_row") }}',

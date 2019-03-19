@@ -24,9 +24,9 @@ class Detail extends Model
         return $this->belongsTo('ElectronicInvoicing\Product');
     }
 
-    public function aditionalDetails()
+    public function additionalDetails()
     {
-        return $this->hasMany('ElectronicInvoicing\AditionalDetail');
+        return $this->hasMany('ElectronicInvoicing\AdditionalDetail');
     }
 
     public function taxDetails()

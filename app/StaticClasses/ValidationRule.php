@@ -182,6 +182,12 @@ class ValidationRule
                         case 1:
                             $rules['product'] = 'required|array|min:1';
                             $rules['product.*'] = 'distinct|exists:products,id';
+                            $rules['product_detail1'] = 'array';
+                            $rules['product_detail1.*'] = 'nullable|string|max:300';
+                            $rules['product_detail2'] = 'array';
+                            $rules['product_detail2.*'] = 'nullable|string|max:300';
+                            $rules['product_detail3'] = 'array';
+                            $rules['product_detail3.*'] = 'nullable|string|max:300';
                             $rules['product_quantity'] = 'required|array|min:1';
                             $rules['product_quantity.*'] = 'required|numeric|gte:0';
                             $rules['product_unitprice'] = 'required|array|min:1';

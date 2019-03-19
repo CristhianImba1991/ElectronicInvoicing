@@ -5,6 +5,7 @@ namespace ElectronicInvoicing\Http\Controllers;
 use DateTime;
 use DateTimeZone;
 use ElectronicInvoicing\{
+    AdditionalDetail,
     AdditionalField,
     Addressee,
     Branch,
@@ -595,6 +596,9 @@ class VoucherController extends Controller
                 $voucher->support_document_date = NULL;
                 $voucher->save();
                 $products = $request->product;
+                $additionalDetail1 = $request->product_detail1;
+                $additionalDetail2 = $request->product_detail2;
+                $additionalDetail3 = $request->product_detail3;
                 $quantities = $request->product_quantity;
                 $unitPrices = $request->product_unitprice;
                 $discounts = $request->product_discount;
@@ -624,6 +628,27 @@ class VoucherController extends Controller
                     $taxDetail->tax_base = $detail->quantity * $detail->unit_price - $detail->discount;
                     $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
                     $taxDetail->save();
+                    if ($additionalDetail1[$i] !== NULL) {
+                        $additionalDetail = new AdditionalDetail;
+                        $additionalDetail->detail_id = $detail->id;
+                        $additionalDetail->name = "Detalle adicional";
+                        $additionalDetail->value = $additionalDetail1[$i];
+                        $additionalDetail->save();
+                    }
+                    if ($additionalDetail2[$i] !== NULL) {
+                        $additionalDetail = new AdditionalDetail;
+                        $additionalDetail->detail_id = $detail->id;
+                        $additionalDetail->name = "Detalle adicional";
+                        $additionalDetail->value = $additionalDetail2[$i];
+                        $additionalDetail->save();
+                    }
+                    if ($additionalDetail3[$i] !== NULL) {
+                        $additionalDetail = new AdditionalDetail;
+                        $additionalDetail->detail_id = $detail->id;
+                        $additionalDetail->name = "Detalle adicional";
+                        $additionalDetail->value = $additionalDetail3[$i];
+                        $additionalDetail->save();
+                    }
                 }
                 foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
                     $payment->delete();
@@ -941,20 +966,36 @@ class VoucherController extends Controller
                             )
                         );
                     }
-                    array_push($voucherDetails,
-                        array(
-                            'codigoPrincipal'           => $detail->product->main_code,
-                            'codigoAuxiliar'            => $detail->product->auxiliary_code,
-                            'descripcion'               => $detail->product->description,
-                            'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
-                            'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
-                            'descuento'                 => number_format($detail->discount, 2, '.', ''),
-                            'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
-                            'impuestos'                 => [
-                                'impuesto' => $detailTaxes,
-                            ]
-                        )
+                    $additionalDetails = array();
+                    foreach ($detail->additionalDetails as $additionalDetail) {
+                        if (!array_key_exists('detAdicional', $additionalDetails)) {
+                            $additionalDetails['detAdicional'] = array();
+                        }
+                        array_push($additionalDetails['detAdicional'],
+                            array(
+                                '_attributes' => ['nombre' => $additionalDetail->name, 'valor' => $additionalDetail->value]
+                            )
+                        );
+                    }
+                    $voucherDetail = array(
+                        'codigoPrincipal'           => $detail->product->main_code,
+                        'codigoAuxiliar'            => $detail->product->auxiliary_code,
+                        'descripcion'               => $detail->product->description,
+                        'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
+                        'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
+                        'descuento'                 => number_format($detail->discount, 2, '.', ''),
+                        'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
+                        'detallesAdicionales'       => NULL,
+                        'impuestos'                 => [
+                            'impuesto' => $detailTaxes,
+                        ]
                     );
+                    if (count($additionalDetails) === 0) {
+                        unset($voucherDetail['detallesAdicionales']);
+                    } else {
+                        $voucherDetail['detallesAdicionales'] = $additionalDetails;
+                    }
+                    array_push($voucherDetails, $voucherDetail);
                 }
                 $xml['detalles'] = [
                     'detalle' => $voucherDetails,
@@ -1020,20 +1061,36 @@ class VoucherController extends Controller
                             )
                         );
                     }
-                    array_push($voucherDetails,
-                        array(
-                            'codigoInterno'             => $detail->product->main_code,
-                            'codigoAdicional'           => $detail->product->auxiliary_code,
-                            'descripcion'               => $detail->product->description,
-                            'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
-                            'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
-                            'descuento'                 => number_format($detail->discount, 2, '.', ''),
-                            'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
-                            'impuestos'                 => [
-                                'impuesto' => $detailTaxes,
-                            ]
-                        )
+                    $additionalDetails = array();
+                    foreach ($detail->additionalDetails as $additionalDetail) {
+                        if (!array_key_exists('detAdicional', $additionalDetails)) {
+                            $additionalDetails['detAdicional'] = array();
+                        }
+                        array_push($additionalDetails['detAdicional'],
+                            array(
+                                '_attributes' => ['nombre' => $additionalDetail->name, 'valor' => $additionalDetail->value]
+                            )
+                        );
+                    }
+                    $voucherDetail = array(
+                        'codigoInterno'             => $detail->product->main_code,
+                        'codigoAdicional'           => $detail->product->auxiliary_code,
+                        'descripcion'               => $detail->product->description,
+                        'cantidad'                  => $version === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity,
+                        'precioUnitario'            => $version === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price,
+                        'descuento'                 => number_format($detail->discount, 2, '.', ''),
+                        'precioTotalSinImpuesto'    => number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', ''),
+                        'detallesAdicionales'       => NULL,
+                        'impuestos'                 => [
+                            'impuesto' => $detailTaxes,
+                        ]
                     );
+                    if (count($additionalDetails) === 0) {
+                        unset($voucherDetail['detallesAdicionales']);
+                    } else {
+                        $voucherDetail['detallesAdicionales'] = $additionalDetails;
+                    }
+                    array_push($voucherDetails, $voucherDetail);
                 }
                 $xml['detalles'] = [
                     'detalle' => $voucherDetails,

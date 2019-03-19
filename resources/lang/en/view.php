@@ -50,6 +50,7 @@ return [
     'unit_price' => 'Unit price',
     'quantity' => 'Quantity',
     'description' => 'Description',
+    'additional_detail' => 'Additional detail',
     'stock' => 'Stock',
     'iva_tax' => 'IVA tax',
     'ice_tax' => 'ICE tax',

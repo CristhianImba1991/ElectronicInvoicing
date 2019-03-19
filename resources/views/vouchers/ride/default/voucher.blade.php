@@ -17,8 +17,8 @@
         <table class="table table-borderless">
             <tbody>
                 <tr>
-                    <td class="align-bottom">@include('vouchers.ride.company')</td>
-                    <td class="align-bottom">@include('vouchers.ride.information')</td>
+                    <td class="align-bottom">@include('vouchers.ride.default.company')</td>
+                    <td class="align-bottom">@include('vouchers.ride.default.information')</td>
                 </tr>
                 <tr>
                     <td colspan="2">@yield('body')</td>

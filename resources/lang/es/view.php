@@ -50,6 +50,7 @@ return [
     'unit_price' => 'Precio unitario',
     'quantity' => 'Cantidad',
     'description' => 'Descripción',
+    'additional_detail' => 'Detalle adicional',
     'stock' => 'Existencias',
     'iva_tax' => 'Impuesto de IVA',
     'ice_tax' => 'Impuesto de ICE',
