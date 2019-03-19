@@ -45,7 +45,10 @@ $(document).ready(function(){
                         <div class="col-sm-12">
                             <div class="card mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ __('view.last_model', ['model' => trans_choice(__('view.voucher'), 1)]) }}</h5>
+                                    <h5 class="card-title">
+                                        {{ __('view.last_model', ['model' => trans_choice(__('view.voucher'), 1)]) }}
+                                        <a href="{{ route('vouchers.index') }}" class="btn btn-sm btn-secondary float-right">{{ __('view.all_vouchers') }}</a>
+                                    </h5>
                                     <table id="vouchers" class="display">
                                         <thead>
                                             <tr>

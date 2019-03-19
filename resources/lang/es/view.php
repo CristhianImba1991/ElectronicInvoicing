@@ -136,6 +136,7 @@ return [
     'deactivate' => 'Desactivar',
     'filter' => 'Filtrar',
     'all_draft_vouchers' => 'Todos los borradores',
+    'all_vouchers' => 'Todos los comprobantes',
     'draft' => 'Borrador',
     'save' => 'Guardar',
     'send' => 'Enviar',

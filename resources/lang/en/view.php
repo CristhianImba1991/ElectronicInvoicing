@@ -136,6 +136,7 @@ return [
     'deactivate' => 'Deactivate',
     'filter' => 'Filter',
     'all_draft_vouchers' => 'All draft vouchers',
+    'all_vouchers' => 'All vouchers',
     'draft' => 'Draft',
     'save' => 'Save',
     'send' => 'Send',

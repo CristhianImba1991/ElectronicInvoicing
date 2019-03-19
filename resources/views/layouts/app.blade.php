@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     @yield('styles')
 </head>
-<body style="padding-top: 50px">
+<body style="padding-top: 50px; padding-bottom: 34px">
     <div id="app">
         <nav class="navbar navbar-expand-md fixed-top navbar-light bg-white border-bottom">
             <div class="container">
@@ -120,6 +120,14 @@
         <main class="py-4">
             @yield('content')
         </main>
+
+        <nav class="navbar navbar-expand-md fixed-bottom navbar-light bg-white border-top">
+            <div class="container">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><span class="badge badge-ligth">Made by TaoTechIDEAS</span></li>
+                </ul>
+            </div>
+        </nav>
     </div>
 </body>
 </html>
