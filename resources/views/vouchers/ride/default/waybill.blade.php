@@ -1,4 +1,4 @@
-@extends('vouchers.ride.voucher')
+@extends('vouchers.ride.default.voucher')
 
 @section('body')
 <div class="card border-dark mb-3">
@@ -112,7 +112,7 @@
 <table class="table table-borderless">
     <tbody>
         <tr>
-            <td>@include('vouchers.ride.additionalinformation')</td>
+            <td>@include('vouchers.ride.default.additionalinformation')</td>
         </tr>
     </tbody>
 </table>

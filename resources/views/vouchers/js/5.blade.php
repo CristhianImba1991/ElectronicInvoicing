@@ -32,13 +32,14 @@ $(document).ready(function(){
                 retentionTable.row.add([
                     '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.tax"))]), 0) }}">' + options + '</select>',
                     '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.tax_description"))]), 1) }}"></select>',
-                    '<input class="form-control" type="number" id="value[]" name="value[]" value="0.00" step="0.01">',
+                    '<input class="form-control" type="number" id="value[]" name="value[]" min="0.00" max="100.00" value="0.00" step="0.01">',
                     '<input class="form-control" type="text" id="tax_base[]" name="tax_base[]" value="0.00">',
                     '<input class="form-control" type="text" id="retained-value[]" name="retained-value[]" value="0.00" readonly>',
                     '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
                 ]).draw(false);
                 $('select[id *= tax]').selectpicker();
                 $('select[id *= description]').selectpicker();
+                updateTotal();
             }
         });
     }
@@ -71,6 +72,32 @@ $(document).ready(function(){
                         options += '<option value="' + taxDescriptions[i]['id'] + '">' + taxDescriptions[i]['code'] + ' - ' + taxDescriptions[i]['description'] + '</option>';
                     }
                     reference.closest('tr').find('select[id *= description]').html(options).selectpicker('refresh');
+                    updateTotal();
+                }
+            });
+        }
+    });
+    $('#retention-table tbody').on('changed.bs.select', 'select[id *= description]', function(){
+        var _token = $('input[name = "_token"]').val();
+        var reference = $(this);
+        var id = reference.closest('tr').find('select[id *= description]').val();
+        if (id != '') {
+            $.ajax({
+                url: "{{ route('retentionTaxDescriptions.taxDescription') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var options = '';
+                    var taxDescription = JSON.parse(result);
+                    reference.closest('tr').find('input[id *= value]').attr({
+                        "min" : taxDescription[0]['min_rate'],
+                        "max" : taxDescription[0]['max_rate'],
+                        "value" : taxDescription[0]['rate']
+                    });
+                    updateRetainedValue(reference);
                 }
             });
         }
@@ -84,6 +111,16 @@ $(document).ready(function(){
         reference.closest('tr').find('input[id *= value]').val(value.toFixed(2));
         reference.closest('tr').find('input[id *= tax_base]').val(taxBase.toFixed(2));
         reference.closest('tr').find('input[id *= retained-value]').val(retainedValue.toFixed(2));
+        updateTotal();
+    }
+    function updateTotal() {
+        var retained_values = $.map($('input[id *= retained-value]'), function(option) {
+            return Number(option.value);
+        });
+        var total_retained = retained_values.reduce(function(a, b) {
+            return a + b;
+        }, 0.0);
+        $('#retention_total').val(total_retained.toFixed(2));
     }
     $('#retention-table tbody').on('change', 'input[id *= value]', function(){
         updateRetainedValue($(this));
@@ -96,6 +133,7 @@ $(document).ready(function(){
             .row($(this).parents('tr'))
             .remove()
             .draw();
+        updateTotal();
     });
     $('#issue_date').change(function() {
         var issueDate = new Date($('#issue_date').val());

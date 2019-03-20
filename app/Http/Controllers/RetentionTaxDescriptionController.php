@@ -82,4 +82,17 @@ class RetentionTaxDescriptionController extends Controller
     {
         //
     }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function taxDescription(Request $request){
+        if (is_array($request->id)) {
+            $retentionTaxDescription = RetentionTaxDescription::whereIn('id', $request->id)->get();
+            return $retentionTaxDescription->toJson();
+        } else if (is_string($request->id)) {
+            $retentionTaxDescription = RetentionTaxDescription::where('id', $request->id)->get();
+            return $retentionTaxDescription->toJson();
+        }
+    }
 }

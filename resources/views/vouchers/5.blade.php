@@ -17,6 +17,10 @@
                     </tr>
                 </thead>
             </table>
+            <div class="form-group">
+                <label for="retention_total">{{ __('view.total_retained') }}</label>
+                <input class="form-control" id="retention_total" name="retention_total" readonly>
+            </div>
         </div>
     </div>
 </div>

@@ -39,6 +39,7 @@ Route::group(['prefix' => 'resource'], function () {
     Route::post('/branch/products', 'BranchController@products')->name('branches.products');
     Route::post('/retention_taxes/taxes', 'RetentionTaxController@retentionTaxes')->name('retentionTaxes.taxes');
     Route::post('/retention_taxes/tax_descriptions', 'RetentionTaxController@retentionTaxDescriptions')->name('retentionTaxes.taxDescriptions');
+    Route::post('/retention_tax_descriptions/tax_description', 'RetentionTaxDescriptionController@taxDescription')->name('retentionTaxDescriptions.taxDescription');
     Route::group(['middleware' => ['permission:read_products']], function () {
         Route::post('/product/taxes', 'ProductController@taxes')->name('products.taxes');
     });

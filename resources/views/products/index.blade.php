@@ -32,9 +32,9 @@
                             <tr>
                                 <th>{{ __('view.main_code') }}</th>
                                 <th>{{ __('view.auxiliary_code') }}</th>
+                                <th>{{ __('view.description') }}</th>
+                                <th>{{ __('view.unit_price') }}</th>
                                 <th>{{ __('view.stock') }}</th>
-                                <th>{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</th>
-                                <th>{{ ucfirst(trans_choice(__('view.company'), 0)) }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -55,9 +55,9 @@
                                         @endif
                                     </td>
                                     <td>{{ $product->auxiliary_code }}</td>
+                                    <td>{{ $product->description }}</td>
+                                    <td>{{ $product->unit_price }}</td>
                                     <td>{{ $product->stock }}</td>
-                                    <td>{{ $product->branch->name }}</td>
-                                    <td>{{ $product->branch->company->tradename }}</td>
                                     <td>
                                         @if($product->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_products'))

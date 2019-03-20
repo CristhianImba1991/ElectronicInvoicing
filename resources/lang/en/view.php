@@ -111,6 +111,7 @@ return [
     'rate' => 'Rate',
     'tax_base' => 'Tax base',
     'retained_value' => 'Retained value',
+    'total_retained' => 'Total retained',
     'fiscal_period' => 'Fiscal period',
 
     'new_model' => 'New :model',

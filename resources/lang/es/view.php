@@ -111,6 +111,7 @@ return [
     'rate' => 'Tasa',
     'tax_base' => 'Base imponible',
     'retained_value' => 'Valor retenido',
+    'total_retained' => 'Total retenido',
     'fiscal_period' => 'Período fiscal',
 
     'new_model' => '{0} Nuevo :model|{1} Nueva :model',
