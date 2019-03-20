@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
     libxml2-dev \
+    libfontconfig1 \
+    libxrender1 \
     locales \
     zip \
     jpegoptim optipng pngquant gifsicle \
