@@ -110,6 +110,7 @@ jQuery(document).ready(function($) {
                         <thead>
                             <tr>
                                 <th>{{ __('view.id') }}</th>
+                                <th>{{ ucfirst(trans_choice(__('view.company'), 0)) }}</th>
                                 <th>{{ __('view.type') }}</th>
                                 <th>{{ __('view.state') }}</th>
                                 <th>{{ ucfirst(trans_choice(__('view.voucher'), 0)) }}</th>
@@ -125,6 +126,7 @@ jQuery(document).ready(function($) {
                             @foreach($vouchers as $voucher)
                                 <tr>
                                     <td>{{ $voucher->id }}</td>
+                                    <td>{{ $voucher->emissionPoint->branch->company->tradename }}</td>
                                     <td>{{ \ElectronicInvoicing\VoucherType::find($voucher->voucher_type_id)->name }}</td>
                                     <td>
                                         @switch($voucher->voucher_state_id)
