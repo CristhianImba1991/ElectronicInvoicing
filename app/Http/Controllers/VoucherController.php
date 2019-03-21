@@ -1242,7 +1242,7 @@ class VoucherController extends Controller
                             'codigo'                    => RetentionTax::find(RetentionTaxDescription::find($detail->retention_tax_description_id)->retention_tax_id)->code,
                             'codigoRetencion'           => RetentionTaxDescription::find($detail->retention_tax_description_id)->code,
                             'baseImponible'             => number_format($detail->tax_base, 2, '.', ''),
-                            'porcentajeRetener'         => number_format($detail->value, 2, '.', ''),
+                            'porcentajeRetener'         => number_format($detail->rate, 2, '.', ''),
                             'valorRetenido'             => number_format($detail->tax_base * $detail->rate / 100.0, 2, '.', ''),
                             'codDocSustento'            => substr($detail->support_doc_code, 8, 2),
                             'numDocSustento'            => substr($detail->support_doc_code, 10),
