@@ -1575,7 +1575,7 @@ class VoucherController extends Controller
                 $voucher->xml = $xmlPath;
                 $voucher->save();
                 if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED) {
-                    //MailController::sendMailNewVoucher($voucher);
+                    MailController::sendMailNewVoucher($voucher);
                 }
             } catch (\Exception $e) {
                 info('#### ERROR IN AUTORIZARCOMPROBANTE WS #######################');
