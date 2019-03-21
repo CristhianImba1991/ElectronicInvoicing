@@ -236,12 +236,10 @@ $(document).ready(function(){
                 },
                 success: function(result) {
                     const arrayToObject = (array) => array.reduce((object, item) => {
-                        object[item.id] = item
+                        object[item.product_id] = item
                         return object
                     }, {});
                     var products = arrayToObject(JSON.parse(result));
-                    console.log(result);
-                    console.log(products);
                     var ivaSubtotal = 0.0;
                     var iva0Subtotal = 0.0;
                     var notSubjectIvaSubtotal = 0.0;
