@@ -40,8 +40,8 @@
                 <td class="text-center align-middle">{{ \DateTime::createFromFormat('Y-m-d', $voucher->retentions->first()->fiscal_period)->format('m/Y') }}</td>
                 <td class="text-center align-middle">{{ number_format($detail->tax_base, 2, '.', '') }}</td>
                 <td class="text-center align-middle">{{ \ElectronicInvoicing\RetentionTax::find(\ElectronicInvoicing\RetentionTaxDescription::find($detail->retention_tax_description_id)->retention_tax_id)->tax }}</td>
-                <td class="text-center align-middle">{{ number_format($detail->value, 2, '.', '') }}</td>
-                <td class="text-right align-middle">{{ number_format($detail->tax_base * $detail->value / 100.0, 2, '.', '') }}</td>
+                <td class="text-center align-middle">{{ number_format($detail->rate, 2, '.', '') }}</td>
+                <td class="text-right align-middle">{{ number_format($detail->tax_base * $detail->rate / 100.0, 2, '.', '') }}</td>
               </tr>
           @endforeach
       </tbody>

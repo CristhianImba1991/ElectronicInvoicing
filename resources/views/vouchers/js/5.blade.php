@@ -4,6 +4,8 @@ $(document).ready(function(){
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
         var voucher = {
+            "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
+            "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
             "tax": @json($voucher->retentions()->get())
         };
         @if($voucher->iva_retention !== NULL)
