@@ -240,6 +240,8 @@ $(document).ready(function(){
                         return object
                     }, {});
                     var products = arrayToObject(JSON.parse(result));
+                    console.log(result);
+                    console.log(products);
                     var ivaSubtotal = 0.0;
                     var iva0Subtotal = 0.0;
                     var notSubjectIvaSubtotal = 0.0;
