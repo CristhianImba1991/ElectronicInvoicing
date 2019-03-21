@@ -1,4 +1,4 @@
-<div class="card border-dark">
+<div style="padding: 2px 2px 0px 2px" class="card border-dark">
     <table class="table table-sm">
       <tbody>
         <tr>

@@ -1,4 +1,4 @@
-<div class="card border-dark mb-3">
+<div style="padding: 2px 2px 0px 2px" class="card border-dark mb-3">
     <table class="table table-sm">
         <thead>
             <th class="align-middle">FORMA DE PAGO</th>
