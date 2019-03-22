@@ -6,16 +6,8 @@ $(document).ready(function(){
         var voucher = {
             "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
             "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
-            "tax": @json($voucher->retentions()->get())
+            "tax": @json(\ElectronicInvoicing\RetentionDetail::where('retention_id', '=', $voucher->retentions()->first()->id)->get()->pluck('retention_tax_description_id'))
         };
-        @if($voucher->iva_retention !== NULL)
-            voucher['ivaRetention'] = null;
-            voucher['ivaRetentionValue'] = @json($voucher->iva_retention);
-        @endif
-        @if($voucher->rent_retention !== NULL)
-            voucher['rentRetention'] = null;
-            voucher['rentRetentionValue'] = @json($voucher->rent_retention);
-        @endif
     @endif
     function addRowTax() {
         var _token = $('input[name = "_token"]').val();
