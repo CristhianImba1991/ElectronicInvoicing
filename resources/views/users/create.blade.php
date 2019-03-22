@@ -83,7 +83,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     {{ trans_choice(__('view.new_model', ['model' => trans_choice(__('view.user'), 0)]), 0) }}

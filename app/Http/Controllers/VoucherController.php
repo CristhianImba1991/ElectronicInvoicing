@@ -794,6 +794,12 @@ class VoucherController extends Controller
                     str_pad(strval($request->supportdocument_sequential), 9, '0', STR_PAD_LEFT);
                 $voucher->support_document_date = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('Y-m-d');
                 $voucher->save();
+                foreach (Retention::where('voucher_id', '=', $voucher->id)->get() as $retention) {
+                    foreach ($retention->details as $detail) {
+                        $detail->delete();
+                    }
+                    $retention->delete();
+                }
                 $retention = new Retention;
                 $retention->voucher_id = $voucher->id;
                 $retention->fiscal_period = DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y-m\-\0\1');
@@ -817,7 +823,7 @@ class VoucherController extends Controller
                 }
                 break;
         }
-        foreach ($voucher->additionalFields() as $additionalField) {
+        foreach ($voucher->additionalFields()->get() as $additionalField) {
             $additionalField->delete();
         }
         $names = $request->additionaldetail_name;

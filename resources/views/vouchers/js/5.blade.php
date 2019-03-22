@@ -6,7 +6,8 @@ $(document).ready(function(){
         var voucher = {
             "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
             "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
-            "tax": @json(\ElectronicInvoicing\RetentionDetail::where('retention_id', '=', $voucher->retentions()->first()->id)->get()->pluck('retention_tax_description_id'))
+            "tax": @json(\ElectronicInvoicing\RetentionTaxDescription::where('id', $voucher->retentions()->first()->details()->pluck('retention_tax_description_id'))->get()->pluck('retention_tax_id')),
+            "description": @json(\ElectronicInvoicing\RetentionTaxDescription::where('id', $voucher->retentions()->first()->details()->pluck('retention_tax_description_id'))->get()),
         };
     @endif
     function addRowTax() {
