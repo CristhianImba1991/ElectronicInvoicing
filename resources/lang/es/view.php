@@ -157,6 +157,9 @@ return [
 
     'the_following_errors_were_found' => 'Se encontraron los siguientes errores:',
 
+    'processing_voucher' => 'Procesando comprobante...',
+    'please_wait_while_your_voucher_is_processed' => 'Por favor espere mientras se procesa su comprobante.',
+
     'toggle_navigation' => 'Activar la navegación',
     'manage' => 'Administrar',
     'dashboard' => 'Dashboard',

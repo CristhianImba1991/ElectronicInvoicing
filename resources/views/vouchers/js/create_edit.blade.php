@@ -259,7 +259,13 @@ $(document).ready(function(){
                     url: url,
                     method: "POST",
                     data: $('#voucher-form').serialize(),
+                    beforeSend: function(jqXHR, settings) {
+                        $('#loadingModal').modal('show');
+                    },
                     success: function(result) {
+                        $('#loadingModal').on('shown.bs.modal', function (e) {
+                            $("#loadingModal").modal('hide');
+                        });
                         var validator = JSON.parse(result);
                         if (validator['status']) {
                             window.location.href = "{{ route('home') }}";

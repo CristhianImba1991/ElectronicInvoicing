@@ -157,6 +157,9 @@ return [
 
     'the_following_errors_were_found' => 'The following errors were found:',
 
+    'processing_voucher' => 'Processing voucher...',
+    'please_wait_while_your_voucher_is_processed' => 'Please wait while your voucher is processed.',
+
     'toggle_navigation' => 'Toggle navigation',
     'manage' => 'Manage',
     'dashboard' => 'Dashboard',

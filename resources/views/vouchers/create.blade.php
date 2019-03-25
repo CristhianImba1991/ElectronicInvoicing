@@ -251,10 +251,10 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <strong>Processing voucher...</strong>
+                    <strong>{{ __('view.processing_voucher') }}</strong>
                 </div>
                 <div class="modal-body">
-                    <p>Please wait while your voucher is processed.</p>
+                    <p>{{ __('view.please_wait_while_your_voucher_is_processed') }}</p>
                 </div>
             </div>
         </div>
