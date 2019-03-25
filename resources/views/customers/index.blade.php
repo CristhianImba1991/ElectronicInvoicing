@@ -53,7 +53,15 @@
                                             @endif
                                         @endif
                                     </td>
-                                    <td>{{ $customer->email }}</td>
+                                    <td>
+                                        @for($i = 0; $i < count($email = explode(',', $customer->email)); $i++)
+                                            @if($i === 0)
+                                                (P) {{ $email[$i] }}
+                                            @else
+                                                , {{ $email[$i] }}
+                                            @endif
+                                        @endfor
+                                    </td>
                                     <td>
                                         @if($customer->deleted_at !== NULL)
                                             @if(auth()->user()->can('delete_hard_customers'))

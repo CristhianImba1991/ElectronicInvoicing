@@ -117,6 +117,10 @@
                                             <label for="customer_address">{{ __('view.address') }}</label>
                                             <input class="form-control" type="text" id="customer_address" name="customer_address" value="" readonly>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="customer_email">{{ __('view.email') }}</label>
+                                            <input class="form-control" type="text" id="customer_email" name="customer_email" value="" readonly>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

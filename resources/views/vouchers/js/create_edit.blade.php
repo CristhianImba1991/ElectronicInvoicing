@@ -199,6 +199,7 @@ $(document).ready(function(){
                     var customer = JSON.parse(result);
                     $("#customer_identification").val(customer[0]['identification_type']['name'] + ": " + customer[0]['identification']);
                     $("#customer_address").val(customer[0]['address']);
+                    $("#customer_email").val(customer[0]['email']);
                 }
             })
         }
