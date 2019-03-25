@@ -199,7 +199,12 @@ $(document).ready(function(){
                     var customer = JSON.parse(result);
                     $("#customer_identification").val(customer[0]['identification_type']['name'] + ": " + customer[0]['identification']);
                     $("#customer_address").val(customer[0]['address']);
-                    $("#customer_email").val(customer[0]['email']);
+                    var emails = customer[0]['email'].split(',');
+                    var emailsString = '';
+                    for (var i = 0; i < emails.length; i++) {
+                        emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
+                    }
+                    $("#customer_email").val(emailsString);
                 }
             })
         }
