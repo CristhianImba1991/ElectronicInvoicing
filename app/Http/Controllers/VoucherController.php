@@ -706,6 +706,9 @@ class VoucherController extends Controller
                     $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
                     $taxDetail->save();
                 }
+                foreach (CreditNote::where('voucher_id', '=', $voucher->id)->get() as $creditNote) {
+                    $creditNote->delete();
+                }
                 $creditNote = new CreditNote;
                 $creditNote->voucher_id = $voucher->id;
                 $creditNote->reason = $request->reason;

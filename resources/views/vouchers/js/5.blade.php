@@ -4,10 +4,18 @@ $(document).ready(function(){
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
         var voucher = {
+            "tax": @json(\ElectronicInvoicing\RetentionTaxDescription::whereIn('id', $voucher->retentions()->first()->details()->pluck('retention_tax_description_id'))->get()->pluck('retention_tax_id')),
+            "description": @json($voucher->retentions()->first()->details()->pluck('retention_tax_description_id')),
+            "value": @json($voucher->retentions()->first()->details()->pluck('rate')),
+            "tax_base": @json($voucher->retentions()->first()->details()->pluck('tax_base')),
             "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
             "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
-            "tax": @json(\ElectronicInvoicing\RetentionTaxDescription::where('id', $voucher->retentions()->first()->details()->pluck('retention_tax_description_id'))->get()->pluck('retention_tax_id')),
-            "description": @json(\ElectronicInvoicing\RetentionTaxDescription::where('id', $voucher->retentions()->first()->details()->pluck('retention_tax_description_id'))->get()),
+            "extra_detail": @json($voucher->extra_detail),
+            "voucher_type_support_document": @json(\ElectronicInvoicing\VoucherType::where('code', $voucher->support_document[8] . $voucher->support_document[9])->first()->id),
+            "supportdocument_establishment": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 10, 3) : ''),
+            "supportdocument_emissionpoint": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 13, 3) : ''),
+            "supportdocument_sequential": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 16, 9) : ''),
+            "issue_date_support_document": @json(substr($voucher->support_document, 4, 4)) + '/' + @json(substr($voucher->support_document, 2, 2)) + '/' + @json(substr($voucher->support_document, 0, 2))
         };
     @endif
     function addRowTax() {
@@ -32,8 +40,20 @@ $(document).ready(function(){
                     '<input class="form-control" type="text" id="retained-value[]" name="retained-value[]" value="0.00" readonly>',
                     '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
                 ]).draw(false);
-                $('select[id *= tax]').selectpicker();
-                $('select[id *= description]').selectpicker();
+                @if($action === 'create')
+                    $('select[id *= tax]').selectpicker();
+                    $('select[id *= description]').selectpicker();
+                @elseif($action === 'edit' || $action === 'draft')
+                    $("select[id ~= 'tax[]']").selectpicker();
+                    if ('tax' in voucher) {
+                        if ($("select[id ~= 'tax[]']").length == voucher['tax'].length && voucher['tax'].length > 0) {
+                            $("select[id ~= 'tax[]']").each(function() {
+                                $(this).selectpicker('val', voucher['tax'][0]);
+                                voucher['tax'].shift();
+                            });
+                        }
+                    }
+                @endif
                 updateTotal();
             }
         });
@@ -67,6 +87,15 @@ $(document).ready(function(){
                         options += '<option value="' + taxDescriptions[i]['id'] + '">' + taxDescriptions[i]['code'] + ' - ' + taxDescriptions[i]['description'] + '</option>';
                     }
                     reference.closest('tr').find('select[id *= description]').html(options).selectpicker('refresh');
+                    $("select[id ~= 'description[]']").selectpicker();
+                    @if($action === 'edit' || $action === 'draft')
+                        if ('description' in voucher) {
+                            if (voucher['description'].length > 0) {
+                                reference.closest('tr').find('select[id *= description]').selectpicker('val', voucher['description'][0]);
+                                voucher['description'].shift();
+                            }
+                        }
+                    @endif
                     updateTotal();
                 }
             });
@@ -92,6 +121,12 @@ $(document).ready(function(){
                         "max" : taxDescription[0]['max_rate'],
                         "value" : taxDescription[0]['rate']
                     });
+                    @if($action === 'edit' || $action === 'draft')
+                        reference.closest('tr').find('input[id *= value]').val(voucher['value'][0]);
+                        reference.closest('tr').find('input[id *= tax_base]').val(voucher['tax_base'][0]);
+                        voucher['value'].shift();
+                        voucher['tax_base'].shift();
+                    @endif
                     updateRetainedValue(reference);
                 }
             });
@@ -130,6 +165,13 @@ $(document).ready(function(){
             .draw();
         updateTotal();
     });
+    @if($action === 'edit' || $action === 'draft')
+        if ('tax' in voucher) {
+            for (var i = 0; i < voucher['tax'].length; i++) {
+                addRowTax();
+            }
+        }
+    @endif
     $('#issue_date').change(function() {
         var issueDate = new Date($('#issue_date').val());
         if (!isNaN(issueDate.getTime())) {
@@ -195,6 +237,21 @@ $(document).ready(function(){
             .draw();
         additionalDetailCount--;
     });
+    @if($action === 'edit' || $action === 'draft')
+        if ('additionaldetail_name' in voucher) {
+            for (var i = 0; i < voucher['additionaldetail_name'].length; i++) {
+                addRowAdditionalDetail();
+            }
+        }
+        $('#extra_detail').val(voucher['extra_detail']);
+    @endif
     $('#voucher_type_support_document').selectpicker();
+    @if($action === 'edit' || $action === 'draft')
+        $('#voucher_type_support_document').selectpicker('val', voucher['voucher_type_support_document']);
+        $('#supportdocument_establishment').val(Number(voucher['supportdocument_establishment']));
+        $('#supportdocument_emissionpoint').val(Number(voucher['supportdocument_emissionpoint']));
+        $('#supportdocument_sequential').val(Number(voucher['supportdocument_sequential']));
+        $('#issue_date_support_document').datepicker('update', voucher['issue_date_support_document']);
+    @endif
 });
 </script>
