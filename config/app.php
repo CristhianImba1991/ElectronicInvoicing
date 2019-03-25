@@ -157,6 +157,7 @@ return [
 
         ElectronicInvoicing\Providers\UniqueCustomerServiceProvider::class,
         ElectronicInvoicing\Providers\UniqueMultipleServiceProvider::class,
+        ElectronicInvoicing\Providers\ValidEmailMultipleServiceProvider::class,
         ElectronicInvoicing\Providers\ValidRUCServiceProvider::class,
         ElectronicInvoicing\Providers\ValidSignServiceProvider::class,
 

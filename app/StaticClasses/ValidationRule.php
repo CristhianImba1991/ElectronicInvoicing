@@ -75,7 +75,7 @@ class ValidationRule
                         'social_reason' => 'required|max:300',
                         'address' => 'required|max:300',
                         'phone' => 'max:30',
-                        'email' => 'required|max:300',
+                        'email' => 'required|max:300|validemailmultiple',
                     ];
                 } else {
                     $rules = [
@@ -85,7 +85,7 @@ class ValidationRule
                         'social_reason' => 'required|max:300',
                         'address' => 'required|max:300',
                         'phone' => 'max:30',
-                        'email' => 'required|max:300',
+                        'email' => 'required|max:300|validemailmultiple',
                     ];
                     if (Customer::where('identification', '=', $request->identification)->exists()) {
                         $customer = Customer::where('identification', '=', $request->identification)->first();

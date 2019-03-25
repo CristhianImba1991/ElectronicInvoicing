@@ -132,26 +132,29 @@ return [
             'validsign' => 'Unable to read the cert store or the password is wrong.',
         ],
         'establishment' => [
-            'uniquemultiple' => 'The :attribute has already been taken.',
+            'uniquemultiple' => 'The :ATTRIBUTE has already been taken.',
         ],
         'code' => [
-            'uniquemultiple' => 'The :attribute has already been taken.',
+            'uniquemultiple' => 'The :ATTRIBUTE has already been taken.',
         ],
         'main_code' => [
-            'uniquemultiple' => 'The :attribute has already been taken.',
+            'uniquemultiple' => 'The :ATTRIBUTE has already been taken.',
         ],
         'company' => [
-            'required_unless' => 'The :attribute field is required.',
+            'required_unless' => 'The :ATTRIBUTE field is required.',
         ],
         'branch' => [
-            'required_unless' => 'The :attribute field is required.',
+            'required_unless' => 'The :ATTRIBUTE field is required.',
         ],
         'emission_point' => [
-            'required_unless' => 'The :attribute field is required.',
+            'required_unless' => 'The :ATTRIBUTE field is required.',
         ],
         'identification' => [
-            'uniquecustomer' => 'The :attribute has already been taken.',
+            'uniquecustomer' => 'The :ATTRIBUTE has already been taken.',
         ],
+        'email' => [
+            'validemailmultiple' => 'The :ATTRIBUTE must be a valid email address.',
+        ]
     ],
 
     /*

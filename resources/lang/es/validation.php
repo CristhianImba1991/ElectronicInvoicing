@@ -152,6 +152,9 @@ return [
         'identification' => [
             'uniquecustomer' => 'El campo :ATTRIBUTE ya ha sido tomado.',
         ],
+        'email' => [
+            'validemailmultiple' => 'El campo :ATTRIBUTE debe ser una dirección válida de correo electrónico.',
+        ]
     ],
 
     /*
