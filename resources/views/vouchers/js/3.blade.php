@@ -1,11 +1,47 @@
 <script type="text/javascript">
 $(document).ready(function(){
+    @if($action === 'draft')
+        var voucher = @json($draftVoucher);
+    @elseif($action === 'edit')
+        var voucher = {
+            "debit_reason": @json(\ElectronicInvoicing\DebitNoteTax::where('voucher_id', $voucher->id)->first()->debitNotes()->get()->pluck('reason')),
+            "debit_value": @json(\ElectronicInvoicing\DebitNoteTax::where('voucher_id', $voucher->id)->first()->debitNotes()->get()->pluck('value')),
+            "paymentMethod": @json($voucher->payments()->get()->pluck('payment_method_id')),
+            "paymentMethod_value": @json($voucher->payments()->get()->pluck('total')),
+            "paymentMethod_timeunit": @json($voucher->payments()->get()->pluck('time_unit_id')),
+            "paymentMethod_term": @json($voucher->payments()->get()->pluck('term')),
+            "supportdocument_establishment": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 10, 3) : ''),
+            "supportdocument_emissionpoint": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 13, 3) : ''),
+            "supportdocument_sequential": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 16, 9) : ''),
+            "issue_date_support_document": @json(substr($voucher->support_document, 4, 4)) + '/' + @json(substr($voucher->support_document, 2, 2)) + '/' + @json(substr($voucher->support_document, 0, 2)),
+            "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
+            "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
+            "extra_detail": @json($voucher->extra_detail),
+            "iva_tax": @json(\ElectronicInvoicing\DebitNoteTax::where('voucher_id', $voucher->id)->first()->percentage_code),
+        };
+    @endif
     function addRowDebit() {
         debitNoteTable.row.add([
             '<input class="form-control" type="text" id="debit_reason[]" name="debit_reason[]" value="">',
-            '<input class="form-control" type="text" id="debit_value[]" name="debit_value[]" value="0">',
+            '<input class="form-control" type="text" id="debit_value[]" name="debit_value[]" value="0.00">',
             '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
         ]).draw(false);
+        @if($action === 'edit' || $action === 'draft')
+            if ('debit_reason' in voucher) {
+                if ($("input[id ~= 'debit_reason[]']").length == voucher['debit_reason'].length && voucher['debit_reason'].length > 0) {
+                    $("input[id ~= 'debit_reason[]']").each(function() {
+                        $(this).val(voucher['debit_reason'][0]);
+                        voucher['debit_reason'].shift();
+                    });
+                }
+                if ($("input[id ~= 'debit_value[]']").length == voucher['debit_value'].length && voucher['debit_value'].length > 0) {
+                    $("input[id ~= 'debit_value[]']").each(function() {
+                        $(this).val(voucher['debit_value'][0]);
+                        voucher['debit_value'].shift();
+                    });
+                }
+            }
+        @endif
     }
     var debitNoteTable = $('#debitNote-table').DataTable({
         paging: false,
@@ -70,7 +106,9 @@ $(document).ready(function(){
     }
     $('#debitNote-table tbody').on('change', 'input[id *= debit_value]', function(){
         $('input[id *= debit_value]').each(function() {
-            $(this).val(Number($(this).val()).toFixed(2));
+            var value = Number($(this).val());
+            value = isNaN(value) ? 0.00 : value;
+            $(this).val(value.toFixed(2));
         });
         updateTotal();
     });
@@ -81,6 +119,13 @@ $(document).ready(function(){
             .draw();
         updateTotal();
     });
+    @if($action === 'edit' || $action === 'draft')
+        if ('debit_reason' in voucher) {
+            for (var i = 0; i < voucher['debit_reason'].length; i++) {
+                addRowDebit();
+            }
+        }
+    @endif
     function addRowPayment() {
         var _token = $('input[name = "_token"]').val();
         $.ajax({
@@ -236,9 +281,19 @@ $(document).ready(function(){
         }
         $('#extra_detail').val(voucher['extra_detail']);
     @endif
+    @if($action === 'edit' || $action === 'draft')
+        $('#supportdocument_establishment').val(Number(voucher['supportdocument_establishment']));
+        $('#supportdocument_emissionpoint').val(Number(voucher['supportdocument_emissionpoint']));
+        $('#supportdocument_sequential').val(Number(voucher['supportdocument_sequential']));
+        $('#issue_date_support_document').datepicker('update', voucher['issue_date_support_document']);
+        $('#reason').val(voucher['reason']);
+    @endif
     $("#iva_tax").selectpicker('render');
     $('#iva_tax').change(function() {
         updateTotal();
     });
+    @if($action === 'edit' || $action === 'draft')
+        $('#iva_tax').selectpicker('val', voucher['iva_tax']);
+    @endif
 });
 </script>

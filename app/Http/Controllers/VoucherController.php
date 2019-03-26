@@ -496,7 +496,7 @@ class VoucherController extends Controller
                 break;
             case 3:
                 $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
-                $data = ['action', 'iva_taxes'];
+                $data = ['action', 'draftVoucher', 'iva_taxes'];
                 break;
             case 4:
                 $identificationTypes = IdentificationType::where('code', '!=', 7)->get();
@@ -504,7 +504,7 @@ class VoucherController extends Controller
                 $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
                 $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);
                 $irbpnr_taxes = IrbpnrTax::all()->sortBy(['auxiliary_code']);
-                $data = ['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes'];
+                $data = ['action', 'draftVoucher', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes'];
                 break;
             case 5:
                 $voucherTypes = VoucherType::all();
@@ -762,6 +762,12 @@ class VoucherController extends Controller
                     $payment->total = $values[$i];
                     $payment->term = $terms[$i];
                     $payment->save();
+                }
+                foreach (DebitNoteTax::where('voucher_id', '=', $voucher->id)->get() as $debitNoteTax) {
+                    foreach ($debitNoteTax->debitNotes as $debitNote) {
+                        $debitNote->delete();
+                    }
+                    $debitNoteTax->delete();
                 }
                 $debitReasons = $request->debit_reason;
                 $debitValues = $request->debit_value;

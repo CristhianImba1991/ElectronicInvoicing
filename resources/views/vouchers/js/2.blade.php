@@ -17,14 +17,6 @@ $(document).ready(function(){
             "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
             "extra_detail": @json($voucher->extra_detail)
         };
-        @if($voucher->iva_retention !== NULL)
-            voucher['ivaRetention'] = null;
-            voucher['ivaRetentionValue'] = @json($voucher->iva_retention);
-        @endif
-        @if($voucher->rent_retention !== NULL)
-            voucher['rentRetention'] = null;
-            voucher['rentRetentionValue'] = @json($voucher->rent_retention);
-        @endif
     @endif
     @if(auth()->user()->can('create_products'))
         $("#product_company").selectpicker('render');
