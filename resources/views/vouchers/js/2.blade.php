@@ -1,5 +1,31 @@
 <script type="text/javascript">
 $(document).ready(function(){
+    @if($action === 'draft')
+        var voucher = @json($draftVoucher);
+    @elseif($action === 'edit')
+        var voucher = {
+            "product": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('product_id')),
+            "product_quantity": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('quantity')),
+            "product_unitprice": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('unit_price')),
+            "product_discount": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('discount')),
+            "supportdocument_establishment": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 10, 3) : ''),
+            "supportdocument_emissionpoint": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 13, 3) : ''),
+            "supportdocument_sequential": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 16, 9) : ''),
+            "issue_date_support_document": @json(substr($voucher->support_document, 4, 4)) + '/' + @json(substr($voucher->support_document, 2, 2)) + '/' + @json(substr($voucher->support_document, 0, 2)),
+            "reason": @json($voucher->creditNotes()->first()->reason),
+            "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
+            "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
+            "extra_detail": @json($voucher->extra_detail)
+        };
+        @if($voucher->iva_retention !== NULL)
+            voucher['ivaRetention'] = null;
+            voucher['ivaRetentionValue'] = @json($voucher->iva_retention);
+        @endif
+        @if($voucher->rent_retention !== NULL)
+            voucher['rentRetention'] = null;
+            voucher['rentRetentionValue'] = @json($voucher->rent_retention);
+        @endif
+    @endif
     @if(auth()->user()->can('create_products'))
         $("#product_company").selectpicker('render');
         $("#product_branch").selectpicker('render');
@@ -77,6 +103,9 @@ $(document).ready(function(){
                     creditNoteTable.row.add([
                         '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => trans_choice(__("view.product"), 0)]), 0) }}">' + options + '</select>',
                         '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
+                        '<input class="form-control" type="text" id="product_detail1[]" name="product_detail1[]" value="">',
+                        '<input class="form-control" type="text" id="product_detail2[]" name="product_detail2[]" value="">',
+                        '<input class="form-control" type="text" id="product_detail3[]" name="product_detail3[]" value="">',
                         '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
                         '<input class="form-control" type="text" id="product_unitprice[]" name="product_unitprice[]" value="">',
                         '<input class="form-control" type="text" id="product-iva[]" name="product-iva[]" value="" readonly>',
@@ -340,6 +369,13 @@ $(document).ready(function(){
             }
         }
         $('#extra_detail').val(voucher['extra_detail']);
+    @endif
+    @if($action === 'edit' || $action === 'draft')
+        $('#supportdocument_establishment').val(Number(voucher['supportdocument_establishment']));
+        $('#supportdocument_emissionpoint').val(Number(voucher['supportdocument_emissionpoint']));
+        $('#supportdocument_sequential').val(Number(voucher['supportdocument_sequential']));
+        $('#issue_date_support_document').datepicker('update', voucher['issue_date_support_document']);
+        $('#reason').val(voucher['reason']);
     @endif
 });
 </script>

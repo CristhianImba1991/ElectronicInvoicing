@@ -677,6 +677,9 @@ class VoucherController extends Controller
                 $voucher->support_document_date = $issueDateSupportDocument->format('Y-m-d');
                 $voucher->save();
                 $products = $request->product;
+                $additionalDetail1 = $request->product_detail1;
+                $additionalDetail2 = $request->product_detail2;
+                $additionalDetail3 = $request->product_detail3;
                 $quantities = $request->product_quantity;
                 $unitPrices = $request->product_unitprice;
                 $discounts = $request->product_discount;
@@ -706,6 +709,27 @@ class VoucherController extends Controller
                     $taxDetail->tax_base = $detail->quantity * $detail->unit_price - $detail->discount;
                     $taxDetail->value = ($detail->quantity * $detail->unit_price - $detail->discount) * $ivaTax->rate / 100.0;
                     $taxDetail->save();
+                    if ($additionalDetail1[$i] !== NULL) {
+                        $additionalDetail = new AdditionalDetail;
+                        $additionalDetail->detail_id = $detail->id;
+                        $additionalDetail->name = "Detalle adicional";
+                        $additionalDetail->value = $additionalDetail1[$i];
+                        $additionalDetail->save();
+                    }
+                    if ($additionalDetail2[$i] !== NULL) {
+                        $additionalDetail = new AdditionalDetail;
+                        $additionalDetail->detail_id = $detail->id;
+                        $additionalDetail->name = "Detalle adicional";
+                        $additionalDetail->value = $additionalDetail2[$i];
+                        $additionalDetail->save();
+                    }
+                    if ($additionalDetail3[$i] !== NULL) {
+                        $additionalDetail = new AdditionalDetail;
+                        $additionalDetail->detail_id = $detail->id;
+                        $additionalDetail->name = "Detalle adicional";
+                        $additionalDetail->value = $additionalDetail3[$i];
+                        $additionalDetail->save();
+                    }
                 }
                 foreach (CreditNote::where('voucher_id', '=', $voucher->id)->get() as $creditNote) {
                     $creditNote->delete();
