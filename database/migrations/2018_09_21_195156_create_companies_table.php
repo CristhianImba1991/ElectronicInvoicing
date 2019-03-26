@@ -23,6 +23,8 @@ class CreateCompaniesTable extends Migration
             $table->boolean('keep_accounting');
             $table->string('phone', 30);
             $table->string('logo', 300);
+            $table->dateTimeTz('sign_valid_from');
+            $table->dateTimeTz('sign_valid_to');
             $table->timestamps();
             $table->softDeletes();
         });

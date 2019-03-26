@@ -17,7 +17,9 @@ class Company extends Model
         'special_contributor',
         'keep_accounting',
         'phone',
-        'logo'
+        'logo',
+        'sign_valid_from',
+        'sign_valid_to'
     ];
 
     protected $dates = ['deleted_at'];

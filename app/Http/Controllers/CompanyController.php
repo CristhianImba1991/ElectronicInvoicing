@@ -107,6 +107,11 @@ class CompanyController extends Controller
 		openssl_x509_export($cert, $certout);
         Storage::put('signs/' . $request->ruc . '_cert.pem', $certout);
         Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
+        $data = openssl_x509_parse($certout);
+        $validFrom = \DateTime::createFromFormat('U', strval($data['validFrom_time_t']));
+        $input['sign_valid_from'] = $validFrom->format('Y/m/d H:i:s');
+        $validTo = \DateTime::createFromFormat('U', strval($data['validTo_time_t']));
+        $input['sign_valid_to'] = $validTo->format('Y/m/d H:i:s');
         Company::create($input);
         return true;
     }
@@ -201,6 +206,14 @@ class CompanyController extends Controller
     		openssl_x509_export($cert, $certout);
             Storage::put('signs/' . $request->ruc . '_cert.pem', $certout);
             Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
+
+            $data = openssl_x509_parse($certout);
+            $validFrom = \DateTime::createFromFormat('U', strval($data['validFrom_time_t']));
+            $validFrom->setTimeZone(new \DateTimeZone('America/Guayaquil'));
+            $input['sign_valid_from'] = $validFrom->format('Y/m/d H:i:s');
+            $validTo = \DateTime::createFromFormat('U', strval($data['validTo_time_t']));
+            $validTo->setTimeZone(new \DateTimeZone('America/Guayaquil'));
+            $input['sign_valid_to'] = $validTo->format('Y/m/d H:i:s');
         }
         $company->fill($input)->save();
         return true;
