@@ -156,6 +156,8 @@ return [
     'select_one_or_more_model' => 'Select one or more :model ...',
 
     'the_following_errors_were_found' => 'The following errors were found:',
+    'the_sign_of_tradename_has_expired_or_is_not_within_the_validity_period_signvalidfrom_signvalidto' => 'The sign of ":tradename" has expired or is not within the validity period (:sign_valid_from to :sign_valid_to). Please update it.',
+    'the_sign_of_tradename_has_less_than_three_weeks_validity_it_will_expire_on_signvalidto' => 'The sign of ":tradename" has less than three weeks validity (it will expire on :sign_valid_to). Please consider updating.',
 
     'processing_voucher' => 'Processing voucher...',
     'please_wait_while_your_voucher_is_processed' => 'Please wait while your voucher is processed.',

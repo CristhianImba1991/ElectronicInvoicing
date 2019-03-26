@@ -142,6 +142,7 @@ return [
         ],
         'company' => [
             'required_unless' => 'The :ATTRIBUTE field is required.',
+            'sign_not_expired' => 'The sign has expired. Unable to send the voucher.',
         ],
         'branch' => [
             'required_unless' => 'The :ATTRIBUTE field is required.',

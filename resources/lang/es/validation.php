@@ -142,6 +142,7 @@ return [
         ],
         'company' => [
             'required_unless' => 'El campo :ATTRIBUTE es requerido.',
+            'sign_not_expired' => 'La firma ha caducado. No se puede enviar el comprobante.',
         ],
         'branch' => [
             'required_unless' => 'El campo :ATTRIBUTE es requerido.',

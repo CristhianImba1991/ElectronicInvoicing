@@ -59,9 +59,10 @@ class VoucherController extends Controller
         $this->middleware('auth');
     }
 
-    private static function isValidRequest(Request $request)
+    private static function isValidRequest(Request $request, $state)
     {
-        return Validator::make($request->all(), ValidationRule::makeRule('voucher', $request));
+
+        return Validator::make($request->all(), ValidationRule::makeRule('voucher', $request, $state));
     }
 
     /**
@@ -73,7 +74,7 @@ class VoucherController extends Controller
      */
     public function validateRequest(Request $request, $state, $voucher = NULL)
     {
-        $validator = self::isValidRequest($request);
+        $validator = self::isValidRequest($request, $state);
         $isValid = !$validator->fails();
         if ($isValid) {
             if ($request->method() === 'PUT') {
@@ -303,7 +304,7 @@ class VoucherController extends Controller
                 $request->session()->flash('status', 'Draft voucher updated successfully.');
                 break;
             case VoucherStates::SAVED:
-                $validator = self::isValidRequest($request);
+                $validator = self::isValidRequest($request, $state);
                 $isValid = !$validator->fails();
                 if ($isValid) {
                     DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
@@ -313,7 +314,7 @@ class VoucherController extends Controller
                 $messages = $validator->messages()->messages();
                 break;
             case VoucherStates::ACCEPTED:
-                $validator = self::isValidRequest($request);
+                $validator = self::isValidRequest($request, $state);
                 $isValid = !$validator->fails();
                 if ($isValid) {
                     DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);
@@ -324,7 +325,7 @@ class VoucherController extends Controller
                 $messages = $validator->messages()->messages();
                 break;
             case VoucherStates::SENDED:
-                $validator = self::isValidRequest($request);
+                $validator = self::isValidRequest($request, $state);
                 $isValid = !$validator->fails();
                 if ($isValid) {
                     DraftJson::getInstance()->deleteDraftVoucher($user, $voucherId);

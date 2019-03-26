@@ -156,6 +156,8 @@ return [
     'select_one_or_more_model' => '{0} Seleccione uno o más :model ...|{1} Seleccione una o más :model ...',
 
     'the_following_errors_were_found' => 'Se encontraron los siguientes errores:',
+    'the_sign_of_tradename_has_expired_or_is_not_within_the_validity_period_signvalidfrom_signvalidto' => 'La firma de ":tradename" ha expirado o no está dentro del período de validez (:sign_valid_from a :sign_valid_to). Por favor, actualízela.',
+    'the_sign_of_tradename_has_less_than_three_weeks_validity_it_will_expire_on_signvalidto' => 'La firma de ":tradename" tiene menos de tres semanas de validez (expirará el :sign_valid_to). Por favor, considere actualizarla.',
 
     'processing_voucher' => 'Procesando comprobante...',
     'please_wait_while_your_voucher_is_processed' => 'Por favor espere mientras se procesa su comprobante.',

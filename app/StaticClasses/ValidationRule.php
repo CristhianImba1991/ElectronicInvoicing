@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class ValidationRule
 {
-    public static function makeRule($model, Request $request)
+    public static function makeRule($model, Request $request, $state = NULL)
     {
         switch ($model) {
             case 'branch':
@@ -177,6 +177,11 @@ class ValidationRule
                     'environment' => 'required|numeric|exists:environments,id',
                     'voucher_type' => 'required|numeric|exists:voucher_types,id'
                 ];
+                if ($state !== NULL) {
+                    if ($state >= VoucherStates::SENDED) {
+                        $rules['company'] .= '|sign_not_expired';
+                    }
+                }
                 if ($request->voucher_type !== NULL) {
                     switch ($request->voucher_type) {
                         case 1:

@@ -155,6 +155,7 @@ return [
         Milon\Barcode\BarcodeServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
 
+        ElectronicInvoicing\Providers\SignatureNotExpiredServiceProvider::class,
         ElectronicInvoicing\Providers\UniqueCustomerServiceProvider::class,
         ElectronicInvoicing\Providers\UniqueMultipleServiceProvider::class,
         ElectronicInvoicing\Providers\ValidEmailMultipleServiceProvider::class,

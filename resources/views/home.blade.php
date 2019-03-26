@@ -41,6 +41,14 @@ $(document).ready(function(){
                         </div>
                     @endif
 
+                    @if (count($notification) > 0)
+                        @foreach($notification as $alert)
+                            <div class="alert alert-{{ $alert['status'] }}" role="alert">
+                                {{ $alert['message'] }}
+                            </div>
+                        @endforeach
+                    @endif
+
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="card mb-3">
