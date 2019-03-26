@@ -4,6 +4,7 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap-tokenfield.min.js') }}"></script>
 @include('vouchers.js.create_edit', ['action' => $action])
 @endsection
 
@@ -11,6 +12,8 @@
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/jquery.dataTables.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/bootstrap-datepicker3.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/bootstrap-tokenfield.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/tokenfield-typeahead.min.css') }}">
 @endsection
 
 @section('content')
