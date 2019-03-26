@@ -101,7 +101,7 @@ $(document).ready(function(){
                     var options = '';
                     var products = JSON.parse(result);
                     for (var i = 0; i < products.length; i++) {
-                        options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + ' - ' + products[i]['description'] + '</option>';
+                        options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + ' (' + products[i]['auxiliary_code'] + ') - ' + products[i]['description'] + '</option>';
                     }
                     invoiceTable.row.add([
                         '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => trans_choice(__("view.product"), 0)]), 0) }}">' + options + '</select>',
