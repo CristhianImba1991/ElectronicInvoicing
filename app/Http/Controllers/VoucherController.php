@@ -1657,7 +1657,7 @@ class VoucherController extends Controller
                 Storage::delete($voucher->xml);
                 $voucher->xml = $xmlPath;
                 $voucher->save();
-                if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED) {
+                if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED && $voucher->environment->code === 2) {
                     MailController::sendMailNewVoucher($voucher);
                 }
             } catch (\Exception $e) {

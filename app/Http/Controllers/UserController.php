@@ -2,6 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
+use Carbon\Carbon;
 use ElectronicInvoicing\{Branch, Company, EmissionPoint, User};
 use ElectronicInvoicing\Http\Logic\DraftJson;
 use ElectronicInvoicing\StaticClasses\ValidationRule;
@@ -98,7 +99,12 @@ class UserController extends Controller
         $input['password'] = Hash::make($input['password']);
         $user = User::create($input);
         $user->assignRole($request->role);
-        if (!$user->hasRole('admin') && !$user->hasRole('api')) {
+        if ($user->hasRole('api')) {
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->token;
+            $token->expires_at = Carbon::now()->addWeeks(1);
+            $token->save();
+        } else if (!$user->hasRole('admin') && !$user->hasRole('api')) {
             if ($user->hasRole('owner')) {
                 $branches = Branch::withTrashed()->whereIn('company_id', $request->company)->get();
                 $emissionPointsGroup = collect();
@@ -197,7 +203,7 @@ class UserController extends Controller
             $user->syncRoles($request->role);
         }
         $user->fill($request->only(['name', 'email']))->save();
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasRole('admin') && !$user->hasRole('api')) {
             if ($request->company !== null) {
                 if ($user->hasRole('owner')) {
                     $branches = Branch::withTrashed()->whereIn('company_id', $request->company)->get();
