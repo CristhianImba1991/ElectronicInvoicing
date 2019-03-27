@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 });*/
 
 Route::group(['prefix' => 'auth'], function () {
+    Route::get('greeting', 'ApiController@greeting');
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('login', 'ApiController@login');
     });

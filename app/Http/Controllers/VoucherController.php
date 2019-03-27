@@ -572,6 +572,7 @@ class VoucherController extends Controller
             $voucher = new Voucher;
             $voucher->voucher_state_id = $voucherState->id;
             $voucher->sequential = $sequential;
+            $voucher->user_id = Auth::user()->id;
         }
 
         $voucher->emission_point_id = $emissionPoint->id;
@@ -583,7 +584,6 @@ class VoucherController extends Controller
         $voucher->currency_id = $currency->id;
         $voucher->tip = NULL;
         $voucher->extra_detail = $request->extra_detail;
-        $voucher->user_id = Auth::user()->id;
 
 
 
