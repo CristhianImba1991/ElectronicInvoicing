@@ -5,6 +5,7 @@ $(document).ready(function(){
     @elseif($action === 'edit')
         var voucher = {
             "product": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('product_id')),
+            "product_additionalDetails": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->with('additionalDetails')->get()),
             "product_quantity": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('quantity')),
             "product_unitprice": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('unit_price')),
             "product_discount": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('discount')),
@@ -155,6 +156,19 @@ $(document).ready(function(){
                     var productDiscount = elementChanged == '' ? 0.0 : (elementChanged == 'productDiscount' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product_discount]').val()));
                     productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
+                    @if($action === 'edit')
+                        for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
+                            reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                        }
+                        voucher['product_additionalDetails'].shift();
+                    @elseif($action === 'draft')
+                        reference.closest('tr').find('input[id *= product_detail1]').val(voucher['product_detail1'][0]);
+                        reference.closest('tr').find('input[id *= product_detail2]').val(voucher['product_detail2'][0]);
+                        reference.closest('tr').find('input[id *= product_detail3]').val(voucher['product_detail3'][0]);
+                        voucher['product_detail1'].shift();
+                        voucher['product_detail2'].shift();
+                        voucher['product_detail3'].shift();
+                    @endif
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_quantity' in voucher) {

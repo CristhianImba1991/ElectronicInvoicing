@@ -1,5 +1,30 @@
 <script type="text/javascript">
 $(document).ready(function(){
+    @if($action === 'draft')
+        var voucher = @json($draftVoucher);
+    @elseif($action === 'edit')
+        var voucher = {
+            "product": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('product_id')),
+            "product_additionalDetails": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->with('additionalDetails')->get()),
+            "product_quantity": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('quantity')),
+            "identification_type": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->identification_type_id),
+            "carrier_ruc": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->carrier_ruc),
+            "carrier_social_reason": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->carrier_social_reason),
+            "licence_plate": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->licence_plate),
+            "starting_address": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->starting_address),
+            "start_date_transport": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->start_date_transport),
+            "end_date_transport": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->end_date_transport),
+            "additionaldetail_name": @json($voucher->additionalFields()->get()->pluck('name')),
+            "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
+            "extra_detail": @json($voucher->extra_detail),
+            "authorization_number": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->support_doc_code),
+            "single_customs_doc": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->single_customs_doc),
+            "address": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->address),
+            "transfer_reason": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->transfer_reason),
+            "destination_establishment_code": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->destination_establishment_code),
+            "route": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->route),
+        };
+    @endif
     @if(auth()->user()->can('create_products'))
         $("#product_company").selectpicker('render');
         $("#product_branch").selectpicker('render');
@@ -72,11 +97,14 @@ $(document).ready(function(){
                     var options = '';
                     var products = JSON.parse(result);
                     for (var i = 0; i < products.length; i++) {
-                        options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + '</option>';
+                        options += '<option value="' + products[i]['id'] + '">' + products[i]['main_code'] + ' (' + products[i]['auxiliary_code'] + ') - ' + products[i]['description'] + '</option>';
                     }
                     waybillTable.row.add([
                         '<select class="form-control selectpicker" id="product[]" name="product[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => trans_choice(__("view.product"), 0)]), 0) }}">' + options + '</select>',
                         '<input class="form-control" type="text" id="product-description[]" name="product-description[]" value="" readonly>',
+                        '<input class="form-control" type="text" id="product_detail1[]" name="product_detail1[]" value="">',
+                        '<input class="form-control" type="text" id="product_detail2[]" name="product_detail2[]" value="">',
+                        '<input class="form-control" type="text" id="product_detail3[]" name="product_detail3[]" value="">',
                         '<input class="form-control" type="text" id="product_quantity[]" name="product_quantity[]" value="">',
                         '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
                     ]).draw(false);
@@ -123,6 +151,19 @@ $(document).ready(function(){
                     var productQuantity = elementChanged == '' ? 1.0 : (elementChanged == 'productQuantity' ? Number(reference.val()) : Number(reference.closest('tr').find('input[id *= product_quantity]').val()));
                     productQuantity = isNaN(productQuantity) ? 1.0 : productQuantity;
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
+                    @if($action === 'edit')
+                        for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
+                            reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                        }
+                        voucher['product_additionalDetails'].shift();
+                    @elseif($action === 'draft')
+                        reference.closest('tr').find('input[id *= product_detail1]').val(voucher['product_detail1'][0]);
+                        reference.closest('tr').find('input[id *= product_detail2]').val(voucher['product_detail2'][0]);
+                        reference.closest('tr').find('input[id *= product_detail3]').val(voucher['product_detail3'][0]);
+                        voucher['product_detail1'].shift();
+                        voucher['product_detail2'].shift();
+                        voucher['product_detail3'].shift();
+                    @endif
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_quantity' in voucher) {
@@ -145,7 +186,21 @@ $(document).ready(function(){
     $('#waybill-table tbody').on('change', 'input[id *= product_quantity]', function(){
         loadProductData($(this), 'productQuantity');
     });
+    @if($action === 'edit' || $action === 'draft')
+        if ('product' in voucher) {
+            for (var i = 0; i < voucher['product'].length; i++) {
+                addRowProduct();
+            }
+        }
+    @endif
     $("#identification_type").selectpicker();
+    @if($action === 'edit' || $action === 'draft')
+        $("#identification_type").selectpicker('val', voucher['identification_type']);
+        $("#carrier_ruc").val(voucher['carrier_ruc']);
+        $("#carrier_social_reason").val(voucher['carrier_social_reason']);
+        $("#licence_plate").val(voucher['licence_plate']);
+        $("#starting_address").val(voucher['starting_address']);
+    @endif
     $('#start_date_transport').datepicker({
         autoclose: true,
         todayBtn: 'linked',
@@ -160,6 +215,10 @@ $(document).ready(function(){
         format: 'yyyy/mm/dd',
         daysOfWeekHighlighted: "0,6"
     });
+    @if($action === 'edit' || $action === 'draft')
+        $('#start_date_transport').datepicker('update', voucher['start_date_transport']);
+        $('#end_date_transport').datepicker('update', voucher['end_date_transport']);
+    @endif
     var additionalDetailCount = 0;
     function addRowAdditionalDetail() {
         if (additionalDetailCount < 3) {
@@ -214,6 +273,12 @@ $(document).ready(function(){
             }
         }
         $('#extra_detail').val(voucher['extra_detail']);
+        $('#authorization_number').val(voucher['authorization_number']);
+        $('#single_customs_doc').val(voucher['single_customs_doc']);
+        $('#address').val(voucher['address']);
+        $('#transfer_reason').val(voucher['transfer_reason']);
+        $('#destination_establishment_code').val(voucher['destination_establishment_code']);
+        $('#route').val(voucher['route']);
     @endif
 });
 </script>

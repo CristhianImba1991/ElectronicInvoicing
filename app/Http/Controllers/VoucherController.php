@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use ElectronicInvoicing\{
     AdditionalDetail,
+    AdditionalDetailAddressee,
     AdditionalField,
     Addressee,
     Branch,
@@ -607,6 +608,9 @@ class VoucherController extends Controller
                     foreach ($detail->taxDetails as $taxDetail) {
                         $taxDetail->delete();
                     }
+                    foreach ($detail->additionalDetails as $additionalDetail) {
+                        $additionalDetail->delete();
+                    }
                     $detail->delete();
                 }
                 for ($i = 0; $i < count($products); $i++) {
@@ -686,6 +690,9 @@ class VoucherController extends Controller
                 foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
                     foreach ($detail->taxDetails as $taxDetail) {
                         $taxDetail->delete();
+                    }
+                    foreach ($detail->additionalDetails as $additionalDetail) {
+                        $additionalDetail->delete();
                     }
                     $detail->delete();
                 }
@@ -790,6 +797,18 @@ class VoucherController extends Controller
                 break;
             case 4:
                 $voucher->save();
+                foreach (Waybill::where('voucher_id', '=', $voucher->id)->get() as $waybill) {
+                    foreach ($waybill->addressees as $addressee) {
+                        foreach ($addressee->details as $detail) {
+                            foreach ($detail->additionalDetails as $additionalDetail) {
+                                $additionalDetail->delete();
+                            }
+                            $detail->delete();
+                        }
+                        $addressee->delete();
+                    }
+                    $waybill->delete();
+                }
                 $waybill = new Waybill;
                 $waybill->voucher_id = $voucher->id;
                 $waybill->identification_type_id = $request->identification_type;
@@ -811,6 +830,9 @@ class VoucherController extends Controller
                 $addressee->support_doc_code = $request->authorization_number;
                 $addressee->save();
                 $products = $request->product;
+                $additionalDetail1 = $request->product_detail1;
+                $additionalDetail2 = $request->product_detail2;
+                $additionalDetail3 = $request->product_detail3;
                 $quantities = $request->product_quantity;
                 for ($i = 0; $i < count($products); $i++) {
                     $detailAddressee = new DetailAddressee;
@@ -818,6 +840,27 @@ class VoucherController extends Controller
                     $detailAddressee->product_id = Product::find($products[$i])->id;
                     $detailAddressee->quantity = $quantities[$i];
                     $detailAddressee->save();
+                    if ($additionalDetail1[$i] !== NULL) {
+                        $additionalDetailAddressee = new AdditionalDetailAddressee;
+                        $additionalDetailAddressee->detail_addressee_id = $detailAddressee->id;
+                        $additionalDetailAddressee->name = "Detalle adicional";
+                        $additionalDetailAddressee->value = $additionalDetail1[$i];
+                        $additionalDetailAddressee->save();
+                    }
+                    if ($additionalDetail2[$i] !== NULL) {
+                        $additionalDetailAddressee = new AdditionalDetailAddressee;
+                        $additionalDetailAddressee->detail_addressee_id = $detailAddressee->id;
+                        $additionalDetailAddressee->name = "Detalle adicional";
+                        $additionalDetailAddressee->value = $additionalDetail2[$i];
+                        $additionalDetailAddressee->save();
+                    }
+                    if ($additionalDetail3[$i] !== NULL) {
+                        $additionalDetailAddressee = new AdditionalDetailAddressee;
+                        $additionalDetailAddressee->detail_addressee_id = $detailAddressee->id;
+                        $additionalDetailAddressee->name = "Detalle adicional";
+                        $additionalDetailAddressee->value = $additionalDetail3[$i];
+                        $additionalDetailAddressee->save();
+                    }
                 }
                 break;
             case 5:

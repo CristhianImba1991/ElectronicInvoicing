@@ -15,6 +15,9 @@
                     <tr>
                         <th>{{ ucfirst(trans_choice(__('view.product'), 0)) }}</th>
                         <th>{{ __('view.description') }}</th>
+                        <th>{{ __('view.additional_detail') }}</th>
+                        <th>{{ __('view.additional_detail') }}</th>
+                        <th>{{ __('view.additional_detail') }}</th>
                         <th>{{ __('view.quantity') }}</th>
                         <th></th>
                     </tr>
