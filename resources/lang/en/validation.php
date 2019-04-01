@@ -152,6 +152,8 @@ return [
         ],
         'identification' => [
             'uniquecustomer' => 'The :ATTRIBUTE has already been taken.',
+            'validruc' => 'The :ATTRIBUTE is not a valid RUC.',
+            'validcedula' => 'The :ATTRIBUTE is not a valid cédula.',
         ],
         'email' => [
             'validemailmultiple' => 'The :ATTRIBUTE must be a valid email address.',

@@ -514,7 +514,7 @@ class VoucherController extends Controller
         return view('vouchers.' . $id, compact($data));
     }
 
-    private static function generateRandomNumericCode()
+    public static function generateRandomNumericCode()
     {
         for ($i = 0; $i < 8; $i++) {
             $numericCode[$i] = rand(0, 9);
@@ -899,7 +899,7 @@ class VoucherController extends Controller
                 }
                 break;
         }
-        foreach ($voucher->additionalFields()->get() as $additionalField) {
+        foreach (AdditionalField::where('voucher_id', '=', $voucher->id)->get() as $additionalField) {
             $additionalField->delete();
         }
         if ($customer->email !== NULL) {

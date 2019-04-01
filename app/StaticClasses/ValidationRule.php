@@ -77,6 +77,9 @@ class ValidationRule
                         'phone' => 'max:30',
                         'email' => 'required|max:300|validemailmultiple',
                     ];
+                    if ($request->has('identification_type')) {
+                        $rules['identification'] .= $request['identification_type'] == 1 ? '|validruc' : ($request['identification_type'] == 2 ? '|validcedula' : '');
+                    }
                 } else {
                     $rules = [
                         'company' => 'required|exists:companies,id',
@@ -87,6 +90,9 @@ class ValidationRule
                         'phone' => 'max:30',
                         'email' => 'required|max:300|validemailmultiple',
                     ];
+                    if ($request->has('identification_type')) {
+                        $rules['identification'] .= $request['identification_type'] == 1 ? '|validruc' : ($request['identification_type'] == 2 ? '|validcedula' : '');
+                    }
                     if (Customer::where('identification', '=', $request->identification)->exists()) {
                         $customer = Customer::where('identification', '=', $request->identification)->first();
                         //$rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;

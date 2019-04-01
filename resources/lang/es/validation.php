@@ -152,6 +152,8 @@ return [
         ],
         'identification' => [
             'uniquecustomer' => 'El campo :ATTRIBUTE ya ha sido tomado.',
+            'validruc' => 'El campo :ATTRIBUTE no es un RUC válido.',
+            'validcedula' => 'El campo :ATTRIBUTE no es una cédula válida.',
         ],
         'email' => [
             'validemailmultiple' => 'El campo :ATTRIBUTE debe ser una dirección válida de correo electrónico.',

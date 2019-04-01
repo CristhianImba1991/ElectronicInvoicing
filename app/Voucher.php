@@ -240,7 +240,7 @@ class Voucher extends Model
         return $voucherType;
     }
 
-    private static function getCheckDigit($accessKey)
+    public static function getCheckDigit($accessKey)
     {
         $summation = 0;
         $factor = 7;
