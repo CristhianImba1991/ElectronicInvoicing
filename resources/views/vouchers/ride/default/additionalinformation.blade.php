@@ -8,7 +8,7 @@
             @foreach ($voucher->additionalFields as $additionalField)
                 <tr>
                   <th class="align-middle">{{ $additionalField->name }}</th>
-                  <td class="align-middle">{{ $additionalField->value }}</td>
+                  <td class="align-middle">{{ $additionalField->name === 'Email' ? str_replace(',', ', ', $additionalField->value) : $additionalField->value }}</td>
                 </tr>
             @endforeach
           </tbody>
