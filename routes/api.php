@@ -18,8 +18,11 @@ use Illuminate\Http\Request;
 });*/
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::get('greeting', 'ApiController@greeting');
+    Route::group(['middleware' => 'apithrottle:5,1'], function() {
+        Route::post('login', 'ApiController@login');
+    });
     Route::group(['middleware' => 'auth:api'], function() {
-        Route::get('login', 'ApiController@login');
+        Route::get('logout', 'ApiController@logout');
+        Route::post('send_voucher', 'ApiController@sendVoucher');
     });
 });

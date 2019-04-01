@@ -4,6 +4,7 @@ namespace ElectronicInvoicing\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Str;
 
 class Handler extends ExceptionHandler
 {
@@ -34,6 +35,9 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
+        if ($exception instanceof \League\OAuth2\Server\Exception\OAuthServerException && $exception->getCode() == 9) {
+            return;
+        }
         parent::report($exception);
     }
 
@@ -46,6 +50,16 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if (($request->wantsJson() || $request->expectsJson()) && Str::startsWith($request->decodedPath(), 'api/auth')) {
+            return response()->json([
+                'code' => 419,
+                'message' => 'Token is missing or expired.',
+                'errors' => [
+                    'error' => 'Page Expired',
+                    'info' => 'Use your credentials to generate a new token and retry.'
+                ]
+            ], 419);
+        }
         /*if($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException){
             //return abort('404');
         } elseif ($exception instanceof \BadMethodCallException) {

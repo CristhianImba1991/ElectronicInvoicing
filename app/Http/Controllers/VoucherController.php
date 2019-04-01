@@ -60,9 +60,8 @@ class VoucherController extends Controller
         $this->middleware('auth');
     }
 
-    private static function isValidRequest(Request $request, $state)
+    public static function isValidRequest(Request $request, $state)
     {
-
         return Validator::make($request->all(), ValidationRule::makeRule('voucher', $request, $state));
     }
 

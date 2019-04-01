@@ -2,18 +2,98 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
+use Carbon\Carbon;
+use ElectronicInvoicing\StaticClasses\VoucherStates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Validator;
 
 class ApiController extends Controller
 {
-    public function greeting(Request $request)
-    {
-        return response()->json(['message' => 'GREETING: HELLO WORLD!!']);
-    }
-
     public function login(Request $request)
     {
-        return response()->json(['message' => 'QWE']);
+        $validator = Validator::make($request->only('email', 'password'), [
+            'email' => 'required|string|email',
+            'password' => 'required|string'
+        ]);
+        $isValid = !$validator->fails();
+        if (!$isValid) {
+            return response()->json([
+                'code' => 422,
+                'message' => 'The request was well-formed but was unable to be followed due to semantic errors.',
+                'errors' => [
+                    'error' => 'Unprocessable Entity',
+                    'info' => $validator->messages()->messages()
+                ]
+            ], 422);
+        }
+
+        $credentials = request(['email', 'password']);
+        $attemptLogin = Auth::attempt($credentials);
+        $user = $request->user();
+        if (!$attemptLogin || !$user->hasRole('api')) {
+            return response()->json([
+                'code' => 401,
+                'message' => 'Authentication is required but it has failed or has not yet been provided. The user does not have the necessary credentials.',
+                'errors' => [
+                    'error' => 'Unauthorized',
+                    'info' => 'These credentials do not match our records.'
+                ]
+            ], 401);
+        }
+
+        $personalAccessToken = $user->createToken('Personal Access Token');
+        $accessToken = $personalAccessToken->token;
+        $accessToken->expires_at = Carbon::now()->addWeeks(1);
+        $accessToken->save();
+
+        return response()->json([
+            'code' => 200,
+            'message' => 'Successful login.',
+            'token' => [
+                'tokenType' => 'Bearer',
+                'expireDate' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
+                'accessToken' => $personalAccessToken->accessToken
+            ]
+        ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->token()->revoke();
+        return response()->json([
+            'code' => 200,
+            'message' => 'Successful logout.'
+        ], 200);
+    }
+
+    public function sendVoucher(Request $request)
+    {
+        $validator = VoucherController::isValidRequest($request, VoucherStates::SENDED);
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            $voucher = VoucherController::saveVoucher($request, VoucherStates::SENDED);
+            VoucherController::acceptVoucher($voucher);
+            VoucherController::sendVoucher($voucher);
+            return response()->json([
+                'code' => 200,
+                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0),
+                'voucher' => [
+                    'accessKey' => $voucher->accessKey(),
+                    'state' => __(VoucherState::find($voucher->voucher_state_id)->name),
+                    'authorizationDate' => $voucher->authorization_date,
+                    'extraDetail' => $voucher->extra_detail,
+                ]
+            ], 200);
+        } else {
+            return response()->json([
+                'code' => 422,
+                'message' => 'The request was well-formed but was unable to be followed due to semantic errors.',
+                'errors' => [
+                    'error' => 'Unprocessable Entity',
+                    'info' => $validator->messages()->messages()
+                ]
+            ], 422);
+        }
     }
 }
