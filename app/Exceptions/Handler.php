@@ -51,6 +51,16 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         if (($request->wantsJson() || $request->expectsJson()) && Str::startsWith($request->decodedPath(), 'api/auth')) {
+            if($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException){
+                return response()->json([
+                    'code' => 405,
+                    'message' => 'Request method is not supported for the requested resource.',
+                    'errors' => [
+                        'error' => 'Method Not Allowed',
+                        'info' => 'Check your request method.'
+                    ]
+                ], 405);
+            }
             return response()->json([
                 'code' => 419,
                 'message' => 'Token is missing or expired.',

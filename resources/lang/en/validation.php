@@ -169,6 +169,26 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'company.*' => 'Company',
+        'branch.*' => 'Branch',
+        'emission_point.*' => 'Emission point',
+        'product.*' => 'Product',
+        'product_detail1.*' => 'Additional detail 1 of the product',
+        'product_detail2.*' => 'Additional detail 2 of the product',
+        'product_detail3.*' => 'Additional detail 3 of the product',
+        'product_quantity.*' => 'Product quantity',
+        'product_unitprice.*' => 'Unit price of the product',
+        'product_discount.*' => 'Product discount',
+        'paymentMethod.*' => 'Payment method',
+        'paymentMethod_value.*' => 'Value of the payment method',
+        'paymentMethod_timeunit.*' => 'Unit time of payment',
+        'paymentMethod_term.*' => 'Payment term',
+        'additionaldetail_name.*' => 'Name of the additional information',
+        'additionaldetail_value.*' => 'Value of the additional information',
+        'tax.*' => 'Retention tax',
+        'value.*' => 'Retention rate',
+        'tax_base.*' => 'Tax base of the retention',
+    ],
 
 ];
