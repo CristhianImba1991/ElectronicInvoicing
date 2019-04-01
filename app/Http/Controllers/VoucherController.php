@@ -548,7 +548,7 @@ class VoucherController extends Controller
         $voucher->save();
     }
 
-    private static function saveVoucher($request, $state, $isUpdate = false, $id = null)
+    public static function saveVoucher($request, $state, $isUpdate = false, $id = null)
     {
         $company = Company::find($request->company);
         $branch = Branch::find($request->branch);
@@ -902,13 +902,6 @@ class VoucherController extends Controller
         foreach (AdditionalField::where('voucher_id', '=', $voucher->id)->get() as $additionalField) {
             $additionalField->delete();
         }
-        if ($customer->email !== NULL) {
-            $additionalFields = new AdditionalField;
-            $additionalFields->voucher_id = $voucher->id;
-            $additionalFields->name = "Email";
-            $additionalFields->value = $customer->email;
-            $additionalFields->save();
-        }
         $names = $request->additionaldetail_name;
         $values = $request->additionaldetail_value;
         if ($names !== NULL) {
@@ -923,7 +916,7 @@ class VoucherController extends Controller
         return $voucher;
     }
 
-    private static function acceptVoucher($voucher)
+    public static function acceptVoucher($voucher)
     {
         $voucher->voucher_state_id = VoucherStates::ACCEPTED;
         $voucher->save();
@@ -1550,7 +1543,7 @@ class VoucherController extends Controller
         }
     }
 
-    private static function sendVoucher($voucher)
+    public static function sendVoucher($voucher)
     {
         $voucher->voucher_state_id = VoucherStates::SENDED;
         $sequential = Voucher::where([
@@ -1642,13 +1635,22 @@ class VoucherController extends Controller
                     case 'AUTORIZADO':
                         $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
                         $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
+                        $voucher->extra_detail = NULL;
                         break;
                     case 'NO AUTORIZADO':
                         unset($xmlReponse['numeroAutorizacion']);
+                        $message = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['tipo'] . ' ' .
+                            $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['identificador'] . ': ' .
+                            $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['mensaje'];
+                        if (array_key_exists('informacionAdicional', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje'])) {
+                            $message .= '. ' . $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['informacionAdicional'];
+                        }
                         $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
+                        $voucher->extra_detail = $message;
                         break;
                     default:
                         $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
+                        $voucher->extra_detail = NULL;
                         break;
                 }
                 $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);

@@ -3,6 +3,7 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use Carbon\Carbon;
+use ElectronicInvoicing\VoucherState;
 use ElectronicInvoicing\StaticClasses\VoucherStates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -74,7 +75,7 @@ class ApiController extends Controller
         if ($isValid) {
             $voucher = VoucherController::saveVoucher($request, VoucherStates::SENDED);
             VoucherController::acceptVoucher($voucher);
-            VoucherController::sendVoucher($voucher);
+            //VoucherController::sendVoucher($voucher);
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0),
