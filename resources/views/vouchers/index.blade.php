@@ -160,7 +160,7 @@ jQuery(document).ready(function($) {
                                         {{ __(\ElectronicInvoicing\VoucherState::find($voucher->voucher_state_id)->name) }}</span>
                                     </td>
                                     <td>{{ str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) }}-{{ str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) }}-{{ str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT) }}</td>
-                                    <td>{{ $voucher->customer_id }}</td>
+                                    <td>{{ \ElectronicInvoicing\Customer::withTrashed()->find($voucher->customer_id)->social_reason }}</td>
                                     <td>{{ $voucher->issue_date }}</td>
                                     <td>
                                         @if($voucher->voucher_state_id >= \ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
