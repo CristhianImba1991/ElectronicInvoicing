@@ -572,12 +572,12 @@ class VoucherController extends Controller
             $voucher->voucher_state_id = $voucherState->id;
             $voucher->sequential = $sequential;
             $voucher->user_id = Auth::user()->id;
+            $voucher->numeric_code = self::generateRandomNumericCode();
         }
 
         $voucher->emission_point_id = $emissionPoint->id;
         $voucher->voucher_type_id = $voucherType->id;
         $voucher->environment_id = $environment->id;
-        $voucher->numeric_code = self::generateRandomNumericCode();
         $voucher->customer_id = $customer->id;
         $voucher->issue_date = $issueDate->format('Y-m-d');
         $voucher->currency_id = $currency->id;
@@ -901,6 +901,13 @@ class VoucherController extends Controller
         }
         foreach ($voucher->additionalFields()->get() as $additionalField) {
             $additionalField->delete();
+        }
+        if ($customer->email !== NULL) {
+            $additionalFields = new AdditionalField;
+            $additionalFields->voucher_id = $voucher->id;
+            $additionalFields->name = "Email";
+            $additionalFields->value = $customer->email;
+            $additionalFields->save();
         }
         $names = $request->additionaldetail_name;
         $values = $request->additionaldetail_value;
