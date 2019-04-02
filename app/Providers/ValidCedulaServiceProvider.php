@@ -41,7 +41,7 @@ class ValidCedulaServiceProvider extends ServiceProvider
                 $total += $coefficients[$i] * $cedula[$i] + ($coefficients[$i] * $cedula[$i] > 9 ? -9 : 0);
             }
             $mod = $total % 10;
-            $digit = $mod == 10 ? 0 : $mod;
+            $digit = $mod == 0 ? 0 : 10 - $mod;
             return $cedula[9] === $digit;
         });
     }
