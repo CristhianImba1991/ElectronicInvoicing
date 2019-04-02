@@ -170,6 +170,7 @@ $(document).ready(function(){
                         $('#customer_create').trigger('reset');
                         $('#customer_company').selectpicker('refresh');
                         $('#customer_identification_type').selectpicker('refresh');
+                        $('#customerModal input[id = customer_email]').tokenfield('setTokens', []);
                     } else {
                         $('#validation').on('show.bs.modal', function(event) {
                             var errors = '';

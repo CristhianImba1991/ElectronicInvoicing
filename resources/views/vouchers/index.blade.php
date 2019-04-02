@@ -3,6 +3,7 @@
 @section('scripts')
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap-tokenfield.min.js') }}"></script>
 <script type="text/javascript">
 $.noConflict();
 jQuery(document).ready(function($) {
@@ -54,6 +55,59 @@ jQuery(document).ready(function($) {
     $('#vouchers-table').DataTable({
         "order": [[ 5, 'desc' ], [ 0, 'desc' ]]
     });
+    @unlessrole('customer')
+        $('#emailModal').on('show.bs.modal', function(event) {
+            $(this).find("#voucher").val($(event.relatedTarget).data('voucher'))
+        });
+        $('#emailModal input[id = email]')
+            .on('tokenfield:createtoken', function (e) {
+                var data = e.attrs.value.split('|')
+                e.attrs.value = data[1] || data[0]
+                e.attrs.label = data[1] ? data[0] + ' (' + data[1] + ')' : data[0]
+            })
+            .on('tokenfield:createdtoken', function (e) {
+                var re = /\S+@\S+\.\S+/
+                var valid = re.test(e.attrs.value)
+                if (!valid) {
+                    $(e.relatedTarget).addClass('invalid')
+                }
+            })
+            .on('tokenfield:edittoken', function (e) {
+                if (e.attrs.label !== e.attrs.value) {
+                    var label = e.attrs.label.split(' (')
+                    e.attrs.value = label[0] + '|' + e.attrs.value
+                }
+            })
+            .tokenfield({
+                beautify: false,
+                createTokensOnBlur: true,
+                inputType: 'email',
+            });
+        $("#submit_email").click(function() {
+            $.ajax({
+                url: "{{ route('vouchers.sendmail') }}",
+                method: "POST",
+                data: $('#modal-form').serialize(),
+                success: function(result) {
+                    var validator = JSON.parse(result);
+                    if (validator['status']) {
+                        $('#emailModal').modal('toggle');
+                        $('#modal-form').trigger('reset');
+                        $('#emailModal input[id = email]').tokenfield('setTokens', []);
+                    } else {
+                        $('#validation').on('show.bs.modal', function(event) {
+                            var errors = '';
+                            $.each(validator['messages'], function(field, message) {
+                                errors += "<li>" + message + "</li>";
+                            });
+                            $(this).find('#modal-body').html("<ul>" + errors + "</ul>");
+                        });
+                        $('#validation').modal('show');
+                    }
+                }
+            });
+        });
+    @endunlessrole
 });
 </script>
 @endsection
@@ -61,6 +115,8 @@ jQuery(document).ready(function($) {
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/bootstrap-tokenfield.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/tokenfield-typeahead.min.css') }}">
 @endsection
 
 @section('content')
@@ -210,7 +266,10 @@ jQuery(document).ready(function($) {
 
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::AUTHORIZED)
-
+                                                    <a href="#">
+                                                        <img alt="EMAIL" height="32" width="32" data-toggle="modal" data-target="#emailModal"
+                                                            data-voucher="{{ $voucher->id }}" src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MDIuMDczIDUwMi4wNzMiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUwMi4wNzMgNTAyLjA3MzsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiNGRkQxNUM7IiBkPSJNNTAxLjgxMiw0ODEuMTc2YzAsNi4yNjktMi4wOSwxMS40OTQtNi4yNjksMTUuNjczYy00LjE4LDMuMTM1LTguMzU5LDUuMjI0LTE0LjYyOSw1LjIyNEgyMS4xNTkgIGMtNS4yMjQsMC0xMC40NDktMi4wOS0xNC42MjktNS4yMjRjLTQuMTgtNC4xOC02LjI2OS05LjQwNC02LjI2OS0xNS42NzNWMTc1LjAyaDUwMS41NTFWNDgxLjE3NnoiLz4KPHBhdGggc3R5bGU9ImZpbGw6I0Y4QjY0QzsiIGQ9Ik00OTUuNTQzLDQ5Ni44NDljLTQuMTgsMy4xMzUtOC4zNTksNS4yMjQtMTQuNjI5LDUuMjI0SDIxLjE1OWMtNS4yMjQsMC0xMC40NDktMi4wOS0xNC42MjktNS4yMjQgIGwyNDQuNTA2LTIxMC4wMjRMNDk1LjU0Myw0OTYuODQ5eiIvPgo8cGF0aCBzdHlsZT0iZmlsbDojNDA1OTZCOyIgZD0iTTUwMS44MTIsMTc1LjAybC03MS4wNTMsNTEuMkwyNjQuNjIsMzQ1LjMzOWMtOC4zNTksNi4yNjktMTkuODUzLDYuMjY5LTI4LjIxMiwwTDcxLjMxNCwyMjYuMjIgIGwtNzEuMDUzLTUxLjJsNzEuMDUzLTUxLjJMMjI1Ljk1OSwxMy4wNjFsMTEuNDk0LTguMzU5YzguMzU5LTYuMjY5LDE5Ljg1My02LjI2OSwyOC4yMTIsMGwxMS40OTQsOC4zNTlsNzQuMTg4LDUzLjI5bDM2LjU3MSwyNi4xMjIgIGw0Mi44NDEsMzEuMzQ3TDUwMS44MTIsMTc1LjAyeiIvPgo8cGF0aCBzdHlsZT0iZmlsbDojRjJGMkYyOyIgZD0iTTQzMC43NTksNzcuODQ1VjIyNi4yMkwyNjQuNjIsMzQ1LjMzOWMtOC4zNTksNi4yNjktMTkuODUzLDYuMjY5LTI4LjIxMiwwTDcxLjMxNCwyMjYuMjJWMzMuOTU5ICBjMC0xMS40OTQsOS40MDQtMjAuODk4LDIwLjg5OC0yMC44OThoMjcyLjcxOEw0MzAuNzU5LDc3Ljg0NXoiLz4KPHBhdGggc3R5bGU9ImZpbGw6I0NERDZFMDsiIGQ9Ik0zNjUuOTc1LDYxLjEyN2MwLDkuNDA0LDcuMzE0LDE2LjcxOCwxNi43MTgsMTYuNzE4aDQ4LjA2NWwtNjQuNzg0LTY0Ljc4NEwzNjUuOTc1LDYxLjEyNyAgTDM2NS45NzUsNjEuMTI3eiIvPgo8cGF0aCBzdHlsZT0iZmlsbDojRkY3MDU4OyIgZD0iTTMxMi42ODYsMjIzLjA4NmgxNi43MThjLTUuMjI0LDExLjQ5NC0xMy41ODQsMTkuODUzLTI1LjA3OCwyNi4xMjIgIGMtMTIuNTM5LDcuMzE0LTI4LjIxMiwxMC40NDktNDcuMDIsMTAuNDQ5Yy0xNy43NjMsMC0zMy40MzctMy4xMzUtNDUuOTc2LTkuNDA0Yy0xMi41MzktNi4yNjktMjIuOTg4LTE0LjYyOS0yOS4yNTctMjcuMTY3ICBjLTYuMjY5LTExLjQ5NC05LjQwNC0yNS4wNzgtOS40MDQtMzguNjYxYzAtMTUuNjczLDMuMTM1LTI5LjI1NywxMC40NDktNDIuODQxYzcuMzE0LTEzLjU4NCwxNi43MTgtMjIuOTg4LDI5LjI1Ny0yOS4yNTcgIGMxMi41MzktNi4yNjksMjcuMTY3LTkuNDA0LDQyLjg0MS05LjQwNGMxMy41ODQsMCwyNi4xMjIsMy4xMzUsMzYuNTcxLDguMzU5YzEwLjQ0OSw1LjIyNCwxOC44MDgsMTIuNTM5LDI0LjAzMywyMi45ODggIGM1LjIyNCw5LjQwNCw4LjM1OSwyMC44OTgsOC4zNTksMzIuMzkyYzAsMTMuNTg0LTQuMTgsMjYuMTIyLTEyLjUzOSwzNy42MTZjLTEwLjQ0OSwxNC42MjktMjQuMDMzLDIwLjg5OC00MC43NTEsMjAuODk4ICBjLTQuMTgsMC04LjM1OS0xLjA0NS0xMC40NDktMi4wOWMtMi4wOS0yLjA5LTQuMTgtNC4xOC00LjE4LTcuMzE0Yy02LjI2OSw2LjI2OS0xMy41ODQsOS40MDQtMjEuOTQzLDkuNDA0ICBjLTkuNDA0LDAtMTYuNzE4LTMuMTM1LTIxLjk0My05LjQwNGMtNi4yNjktNi4yNjktOS40MDQtMTQuNjI5LTkuNDA0LTI1LjA3OGMwLTEyLjUzOSwzLjEzNS0yNC4wMzMsMTAuNDQ5LTM1LjUyNyAgYzguMzU5LTEyLjUzOSwxOS44NTMtMTguODA4LDMzLjQzNy0xOC44MDhjOS40MDQsMCwxNi43MTgsNC4xOCwyMS45NDMsMTEuNDk0bDIuMDktOS40MDRoMjEuOTQzbC0xMi41MzksNTguNTE0ICBjLTEuMDQ1LDQuMTgtMS4wNDUsNi4yNjktMS4wNDUsNy4zMTRzMCwyLjA5LDEuMDQ1LDMuMTM1czEuMDQ1LDEuMDQ1LDIuMDksMS4wNDVjMi4wOSwwLDYuMjY5LTIuMDksMTAuNDQ5LTUuMjI0ICBjNS4yMjQtNC4xOCwxMC40NDktOS40MDQsMTMuNTg0LTE2LjcxOGMzLjEzNS03LjMxNCw1LjIyNC0xNC42MjksNS4yMjQtMjEuOTQzYzAtMTMuNTg0LTUuMjI0LTI1LjA3OC0xNC42MjktMzMuNDM3ICBjLTkuNDA0LTkuNDA0LTIyLjk4OC0xMy41ODQtNDAuNzUxLTEzLjU4NGMtMTQuNjI5LDAtMjcuMTY3LDMuMTM1LTM3LjYxNiw5LjQwNGMtMTAuNDQ5LDYuMjY5LTE3Ljc2MywxNC42MjktMjIuOTg4LDI1LjA3OCAgcy03LjMxNCwyMS45NDMtNy4zMTQsMzQuNDgyYzAsMTEuNDk0LDMuMTM1LDIxLjk0Myw4LjM1OSwzMS4zNDdjNi4yNjksOS40MDQsMTMuNTg0LDE2LjcxOCwyNC4wMzMsMjAuODk4ICBjMTAuNDQ5LDQuMTgsMjEuOTQzLDYuMjY5LDM1LjUyNyw2LjI2OWMxMi41MzksMCwyNC4wMzMtMi4wOSwzMy40MzctNS4yMjRDMjk5LjEwMiwyMzUuNjI0LDMwNi40MTYsMjMwLjQsMzEyLjY4NiwyMjMuMDg2eiAgIE0yMjMuODY5LDE4OS42NDljMCw3LjMxNCwxLjA0NSwxMS40OTQsNC4xOCwxNS42NzNjMy4xMzUsMy4xMzUsNi4yNjksNS4yMjQsMTAuNDQ5LDUuMjI0YzMuMTM1LDAsNi4yNjktMS4wNDUsOC4zNTktMi4wOSAgYzIuMDktMS4wNDUsNC4xOC0zLjEzNSw2LjI2OS01LjIyNGMzLjEzNS0zLjEzNSw1LjIyNS04LjM1OSw3LjMxNC0xNC42MjljMi4wOS02LjI2OSwzLjEzNS0xMi41MzksMy4xMzUtMTcuNzYzICBjMC02LjI2OS0xLjA0NS0xMC40NDktNC4xOC0xNC42MjljLTMuMTM1LTMuMTM1LTYuMjY5LTUuMjI0LTEwLjQ0OS01LjIyNGMtNC4xOCwwLTkuNDA0LDIuMDktMTIuNTM5LDUuMjI0ICBjLTQuMTgsMy4xMzUtNy4zMTQsOC4zNTktOS40MDQsMTUuNjczQzIyNC45MTQsMTc4LjE1NSwyMjMuODY5LDE4NC40MjQsMjIzLjg2OSwxODkuNjQ5eiIvPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" />
+                                                    </a>
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::IN_PROCESS)
 
@@ -234,4 +293,35 @@ jQuery(document).ready(function($) {
         </div>
     </div>
 </div>
+@unlessrole('customer')
+    <div class="modal fade" tabindex="-1" role="dialog" id="emailModal">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <strong><p>Send voucher by email</p></strong>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="modal-form" action="#" method="post">
+                    {{ csrf_field() }}
+                    <div class="modal-body">
+                        <input type="hidden" id="voucher" name="voucher" value="">
+                        <div class="form-group">
+                            <label for="email">{{ __('view.email') }}</label>
+                            <input class="form-control" type="email" id="email" name="email" value="" multiple>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">{{ __('view.close') }}</button>
+                        <button id="submit_email" type="button" class="btn btn-sm btn-primary">Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @include('layouts.validation')
+
+@endunlessrole
 @endsection

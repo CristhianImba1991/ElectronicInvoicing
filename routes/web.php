@@ -241,6 +241,7 @@ Route::group(['prefix' => 'manage'], function () {
 });
 
 Route::group(['prefix' => 'voucher'], function () {
+    Route::post('/send_mail', 'MailController@sendMailVoucher')->name('vouchers.sendmail');
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/', 'VoucherController@index')->name('vouchers.index');
     });
