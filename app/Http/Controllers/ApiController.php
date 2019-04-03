@@ -123,9 +123,13 @@ class ApiController extends Controller
         $request->voucher_type = VoucherType::where('code', '=', $request->voucher_type)->first()->id;
         switch ($request->voucher_type) {
             case 1:
+                $product = [];
                 for ($i = 0; $i < count($request->product); $i++) {
-                    $request->product[$i] = Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id;
+                    array_push($product, Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id);
                 }
+                info($request->product);
+                $request->product = $product;
+                info($request->product);
                 for ($i = 0; $i < count($request->paymentMethod); $i++) {
                     $request->paymentMethod[$i] = PaymentMethod::where('code', '=', $request->paymentMethod[$i])->first()->id;
                 }
