@@ -127,37 +127,47 @@ class ApiController extends Controller
                 for ($i = 0; $i < count($request->product); $i++) {
                     array_push($product, Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id);
                 }
-                info($request->product);
                 $request->product = $product;
-                info($request->product);
+                $paymentMethod = [];
                 for ($i = 0; $i < count($request->paymentMethod); $i++) {
-                    $request->paymentMethod[$i] = PaymentMethod::where('code', '=', $request->paymentMethod[$i])->first()->id;
+                    array_push($paymentMethod, PaymentMethod::where('code', '=', $request->paymentMethod[$i])->first()->id);
                 }
+                $request->paymentMethod = $paymentMethod;
                 break;
             case 2:
+                $product = [];
                 for ($i = 0; $i < count($request->product); $i++) {
-                    $request->product[$i] = Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id;
+                    array_push($product, Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id);
                 }
+                $request->product = $product;
                 break;
             case 3:
+                $paymentMethod = [];
                 for ($i = 0; $i < count($request->paymentMethod); $i++) {
-                    $request->paymentMethod[$i] = PaymentMethod::where('code', '=', $request->paymentMethod[$i])->first()->id;
+                    array_push($paymentMethod, PaymentMethod::where('code', '=', $request->paymentMethod[$i])->first()->id);
                 }
+                $request->paymentMethod = $paymentMethod;
                 $request->iva_tax = IvaTax::where('auxiliary_code', '=', $request->iva_tax)->first()->id;
                 break;
             case 4:
+                $product = [];
                 for ($i = 0; $i < count($request->product); $i++) {
-                    $request->product[$i] = Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id;
+                    array_push($product, Product::where([['branch_id', '=', $request->branch], ['main_code', '=', $request->product[$i]]])->first()->id);
                 }
+                $request->product = $product;
                 $request->identification_type = IdentificationType::where('code', '=', $request->identification_type)->first()->id;
                 break;
             case 5:
+                $tax = [];
                 for ($i = 0; $i < count($request->tax); $i++) {
-                    $request->tax[$i] = RetentionTax::where('code', '=', $request->tax[$i])->first()->id;
+                    array_push($tax, RetentionTax::where('code', '=', $request->tax[$i])->first()->id);
                 }
+                $request->tax[$i] = $tax;
+                $description = [];
                 for ($i = 0; $i < count($request->description); $i++) {
-                    $request->description[$i] = RetentionTaxDescription::where('code', '=', $request->description[$i])->first()->id;
+                    array_push($description, RetentionTaxDescription::where('code', '=', $request->description[$i])->first()->id);
                 }
+                $request->description[$i] = $description;
                 $request->voucher_type_support_document = VoucherType::where('code', '=', $request->voucher_type_support_document)->first()->id;
                 break;
         }
