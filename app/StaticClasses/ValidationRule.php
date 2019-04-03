@@ -213,10 +213,6 @@ class ValidationRule
                             $rules['paymentMethod_timeunit.*'] = 'exists:time_units,id';
                             $rules['paymentMethod_term'] = 'required|array|min:1';
                             $rules['paymentMethod_term.*'] = 'required|numeric|gte:0';
-                            $rules['additionaldetail_name'] = 'array|max:3';
-                            $rules['additionaldetail_name.*'] = 'required|string|max:30';
-                            $rules['additionaldetail_value'] = 'array|max:3';
-                            $rules['additionaldetail_value.*'] = 'required|string|max:300';
                             $rules['waybill_establishment'] = 'required_with:waybill_emissionpoint,waybill_sequential|nullable|integer|min:1|max:999';
                             $rules['waybill_emissionpoint'] = 'required_with:waybill_establishment,waybill_sequential|nullable|integer|min:1|max:999';
                             $rules['waybill_sequential'] = 'required_with:waybill_establishment,waybill_emissionpoint|nullable|integer|min:1|max:999999999';
@@ -234,10 +230,6 @@ class ValidationRule
                             $rules['product_unitprice.*'] = 'required|numeric|gte:0';
                             $rules['product_discount'] = 'required|array|min:1';
                             $rules['product_discount.*'] = 'required|numeric|gte:0';
-                            $rules['additionaldetail_name'] = 'array|max:3';
-                            $rules['additionaldetail_name.*'] = 'required|string|max:30';
-                            $rules['additionaldetail_value'] = 'array|max:3';
-                            $rules['additionaldetail_value.*'] = 'required|string|max:300';
                             $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
                             $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
                             $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
@@ -262,10 +254,6 @@ class ValidationRule
                             $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
                             $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
                             $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
-                            $rules['additionaldetail_name'] = 'array|max:3';
-                            $rules['additionaldetail_name.*'] = 'required|string|max:30';
-                            $rules['additionaldetail_value'] = 'array|max:3';
-                            $rules['additionaldetail_value.*'] = 'required|string|max:300';
                             $rules['extra_detail'] = 'nullable|string';
                             $rules['iva_tax'] = 'required|exists:iva_taxes,id';
                             break;
@@ -281,10 +269,6 @@ class ValidationRule
                             $rules['starting_address'] = 'required|max:300';
                             $rules['start_date_transport'] = 'required|date|before_or_equal:end_date_transport';
                             $rules['end_date_transport'] = 'required|date|after_or_equal:start_date_transport';
-                            $rules['additionaldetail_name'] = 'array|max:3';
-                            $rules['additionaldetail_name.*'] = 'required|string|max:30';
-                            $rules['additionaldetail_value'] = 'array|max:3';
-                            $rules['additionaldetail_value.*'] = 'required|string|max:300';
                             $rules['extra_detail'] = 'nullable|string';
                             $rules['authorization_number'] = 'required|digits:49';
                             $rules['single_customs_doc'] = 'nullable|string|max:20';
@@ -302,10 +286,6 @@ class ValidationRule
                             $rules['value.*'] = 'required|numeric|gte:0';
                             $rules['tax_base'] = 'required|array|min:1';
                             $rules['tax_base.*'] = 'required|numeric|gte:0';
-                            $rules['additionaldetail_name'] = 'array|max:3';
-                            $rules['additionaldetail_name.*'] = 'required|string|max:30';
-                            $rules['additionaldetail_value'] = 'array|max:3';
-                            $rules['additionaldetail_value.*'] = 'required|string|max:300';
                             $rules['extra_detail'] = 'nullable|string';
                             $rules['voucher_type_support_document'] = 'required|exists:voucher_types,id';
                             $rules['supportdocument_establishment'] = 'required|nullable|integer|min:1|max:999';
@@ -315,6 +295,10 @@ class ValidationRule
                             $rules['issue_date_support_document'] = ['required', 'date', 'before_or_equal:"' . $date->format('Y/m/d') . '"'];
                             break;
                     }
+                    $rules['additionaldetail_name'] = 'array|max:15';
+                    $rules['additionaldetail_name.*'] = 'required|string|max:30';
+                    $rules['additionaldetail_value'] = 'array|max:15';
+                    $rules['additionaldetail_value.*'] = 'required|string|max:300';
                 }
                 break;
             default:

@@ -416,15 +416,13 @@ $(document).ready(function(){
             }
         }
     @endif
-    var additionalDetailCount = 0;
     function addRowAdditionalDetail() {
-        if (additionalDetailCount < 3) {
+        if (additionalDetailTable.rows().eq(0).length < 15) {
             additionalDetailTable.row.add([
                 '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="">',
                 '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="">',
                 '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
             ]).draw(false);
-            additionalDetailCount++;
             @if($action === 'edit' || $action === 'draft')
                 if ('additionaldetail_name' in voucher) {
                     if ($("input[id ~= 'additionaldetail_name[]']").length == voucher['additionaldetail_name'].length && voucher['additionaldetail_name'].length > 0) {
@@ -461,9 +459,67 @@ $(document).ready(function(){
             .row($(this).parents('tr'))
             .remove()
             .draw();
-        additionalDetailCount--;
     });
-    @if($action === 'edit' || $action === 'draft')
+    @if($action === 'create')
+        var _token = $('input[name = "_token"]').val();
+        var id = $('#customer').val();
+        if (id != '') {
+            $.ajax({
+                url: "{{ route('customers.customer') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var customer = JSON.parse(result);
+                    var emails = customer[0]['email'].split(',');
+                    var emailsString = '';
+                    for (var i = 0; i < emails.length; i++) {
+                        emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
+                    }
+                    var table = $("input[id ~= 'additionaldetail_name[]']");
+                    if (table.length > 0) {
+                        table.each(function (index) {
+                            if ($(this).val() === 'Dirección' || $(this).val() === 'E-mail' || $(this).val() === 'Teléfono') {
+                                additionalDetailTable
+                                    .row($(this).parents('tr'))
+                                    .remove()
+                                    .draw();
+                            }
+                        })
+                    }
+                    if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
+                        if (customer[0]['address'] != null) {
+                            additionalDetailTable.row.add([
+                                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="Dirección">',
+                                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + customer[0]['address'] + '">',
+                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                            ]).draw(false);
+                        }
+                    }
+                    if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
+                        if (customer[0]['phone'] != null) {
+                            additionalDetailTable.row.add([
+                                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="Teléfono">',
+                                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + customer[0]['phone'] + '">',
+                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                            ]).draw(false);
+                        }
+                    }
+                    if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
+                        if (customer[0]['email'] != null) {
+                            additionalDetailTable.row.add([
+                                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="E-mail">',
+                                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + emailsString + '">',
+                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                            ]).draw(false);
+                        }
+                    }
+                }
+            })
+        }
+    @elseif($action === 'edit' || $action === 'draft')
         if ('additionaldetail_name' in voucher) {
             for (var i = 0; i < voucher['additionaldetail_name'].length; i++) {
                 addRowAdditionalDetail();
