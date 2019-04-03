@@ -83,7 +83,7 @@ class ApiController extends Controller
     }
 
     public function sendVoucher(Request $request)
-    {info($request);
+    {
         $validator = VoucherController::isValidRequest($request, VoucherStates::SENDED);
         $isValid = !$validator->fails();
         if ($isValid) {

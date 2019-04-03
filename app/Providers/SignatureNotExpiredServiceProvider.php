@@ -20,7 +20,7 @@ class SignatureNotExpiredServiceProvider extends ServiceProvider
             if ($parameters[0] === 'id') {
                 $company = Company::find($value);
             } elseif ($parameters[0] === 'ruc') {
-                $company = Company::where('ruc', '=', $value);
+                $company = Company::where('ruc', '=', $value)->first();
             } else {
                 return false;
             }
