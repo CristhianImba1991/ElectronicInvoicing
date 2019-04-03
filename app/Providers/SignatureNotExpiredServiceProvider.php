@@ -17,7 +17,13 @@ class SignatureNotExpiredServiceProvider extends ServiceProvider
     public function boot()
     {
         Validator::extend('sign_not_expired', function ($attribute, $value, $parameters, $validator) {
-            $company = Company::find($value);
+            if ($parameters[0] === 'id') {
+                $company = Company::find($value);
+            } elseif ($parameters[0] === 'ruc') {
+                $company = Company::where('ruc', '=', $value);
+            } else {
+                return false;
+            }
             return DateTime::createFromFormat('Y-m-d H:i:s', $company->sign_valid_from) <= new DateTime() && DateTime::createFromFormat('Y-m-d H:i:s', $company->sign_valid_to) >= new DateTime();
         });
     }
