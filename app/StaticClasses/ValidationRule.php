@@ -4,7 +4,7 @@ namespace ElectronicInvoicing\StaticClasses;
 
 use DateTime;
 use DateTimeZone;
-use ElectronicInvoicing\Customer;
+use ElectronicInvoicing\{Company, Customer};
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -92,17 +92,13 @@ class ValidationRule
                         'phone' => 'max:30',
                         'email' => 'required|max:300|validemailmultiple',
                     ];
-                    if ($request->has('identification_type')) {
-                        $rules['identification'] .= $request['identification_type'] == ($isApiRequest ? 4 : 1) ? '|validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? '|validcedula' : '');
-                    }
-                    if (Customer::where('identification', '=', $request->identification)->exists()) {
-                        $customer = Customer::where('identification', '=', $request->identification)->first();
-                        //$rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
-                        if ($isApiRequest) {
-                            $rules['identification'] = ['required', 'max:20', 'uniquecustomer:company_customers,company_id,"' . $request->company . '",customer_id,"' . $customer->id . '"'];
-                        } else {
-                            $rules['identification'] = ['required', 'max:20', 'uniquecustomer:company_customers,company_id,"' . $request->company . '",customer_id,"' . $customer->id . '"'];
-                        }
+                    if ($isApiRequest) {
+                        $company = Company::where('ruc', '=', $request->company)->first();
+                        $customer = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')->where([['customers.identification', '=', $request->identification], ['company_customers.company_id', '=', ($company === NULL ? $company : $company->id)]])->first();
+                        $rules['identification'] = ['required', 'max:20', $request['identification_type'] == ($isApiRequest ? 4 : 1) ? 'validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? 'validcedula' : ''), 'uniquecustomer:company_customers,company_id,"' . ($company === NULL ? $company : $company->id) . '",customer_id,"' . ($customer === null ? -1 : $customer->id) . '"'];
+                    } else {
+                        $customer = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')->where([['customers.identification', '=', $request->identification], ['company_customers.company_id', '=', $request->company]])->first();
+                        $rules['identification'] = ['required', 'max:20', $request['identification_type'] == ($isApiRequest ? 4 : 1) ? 'validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? 'validcedula' : ''), 'uniquecustomer:company_customers,company_id,"' . $request->company . '",customer_id,"' . ($customer === null ? -1 : $customer->id) . '"'];
                     }
                 }
                 break;
@@ -128,23 +124,26 @@ class ValidationRule
                     $rules = [
                         'main_code' => 'required|max:25',
                         'auxiliary_code' => 'required|max:25',
-                        //'company' => 'required|exists:companies,id',
-                        //'branch' => 'required|exists:branches,id',
                         'unit_price' => 'required|gt:0',
-                        'stock' => 'required|gt:0',
                         'description'=> 'required|max:300',
-                        //'iva_tax'=> 'required'
+                        'stock' => 'required|numeric|gt:0',
+                        'iva_tax' => $isApiRequest ? 'required|exists:iva_taxes,auxiliary_code' : 'required|exists:iva_taxes,id',
+                        'ice_tax' => $isApiRequest ? 'nullable|exists:ice_taxes,auxiliary_code' : 'nullable|exists:ice_taxes,id',
+                        'irbpnr_tax' => $isApiRequest ? 'nullable|exists:irbpnr_taxes,auxiliary_code' : 'nullable|exists:irbpnr_taxes,id',
                     ];
                 } else {
                     $rules = [
+                        'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
+                        'branch' => $isApiRequest ? 'required|min:1|max:999|integer|exists:branches,establishment' : 'required|exists:branches,id',
                         //'main_code' => 'required|max:25|uniquemultiple:products,branch_id,' . $request->branch . ',main_code,' . $request->main_code,
                         'main_code' => ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . $request->branch . '",main_code,"' . $request->main_code . '"'],
                         'auxiliary_code' => 'required|max:25',
-                        'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
-                        'branch' => $isApiRequest ? 'required|min:1|max:999|integer|exists:branches,establishment' : 'required|exists:branches,id',
                         'unit_price' => 'required|gt:0',
-                        'stock' => 'required|gt:0',
                         'description'=> 'required|max:300',
+                        'stock' => 'required|numeric|gt:0',
+                        'iva_tax' => $isApiRequest ? 'required|exists:iva_taxes,auxiliary_code' : 'required|exists:iva_taxes,id',
+                        'ice_tax' => $isApiRequest ? 'nullable|exists:ice_taxes,auxiliary_code' : 'nullable|exists:ice_taxes,id',
+                        'irbpnr_tax' => $isApiRequest ? 'nullable|exists:irbpnr_taxes,auxiliary_code' : 'nullable|exists:irbpnr_taxes,id',
                     ];
                 }
                 break;

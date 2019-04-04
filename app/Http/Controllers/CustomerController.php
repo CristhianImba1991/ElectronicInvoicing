@@ -89,7 +89,7 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    private function store(Request $request)
+    public function store(Request $request)
     {
         $input = $request->except(['company', 'identification_type']);
         $input['identification_type_id'] = $request->identification_type;

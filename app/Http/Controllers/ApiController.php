@@ -141,11 +141,11 @@ class ApiController extends Controller
         $validator = Validator::make($request->all(), ValidationRule::makeRule('customer', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
-            self::changeToIdsProduct($request);
-            ProductController::store($request);
+            self::changeToIdsCustomer($request);
+            CustomerController::store($request);
             return response()->json([
                 'code' => 200,
-                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
+                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)
             ], 200);
         } else {
             return response()->json([
