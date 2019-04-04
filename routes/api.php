@@ -24,5 +24,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('logout', 'ApiController@logout');
         Route::post('send_voucher', 'ApiController@sendVoucher');
+        Route::post('create_product', 'ApiController@createProduct');
+        Route::post('create_customer', 'ApiController@createCustomer');
     });
 });

@@ -18,7 +18,7 @@ use ElectronicInvoicing\{
     VoucherState,
     VoucherType,
 };
-use ElectronicInvoicing\StaticClasses\VoucherStates;
+use ElectronicInvoicing\StaticClasses\{ValidationRule, VoucherStates};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -111,6 +111,33 @@ class ApiController extends Controller
                 ]
             ], 422);
         }
+    }
+
+    public function createProduct(Request $request)
+    {
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('product', $request));
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            self::changeToIdsProduct($request);
+            return response()->json([
+                'code' => 200,
+                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
+            ], 200);
+        } else {
+            return response()->json([
+                'code' => 422,
+                'message' => 'The request was well-formed but was unable to be followed due to semantic errors.',
+                'errors' => [
+                    'error' => 'Unprocessable Entity',
+                    'info' => $validator->messages()->messages()
+                ]
+            ], 422);
+        }
+    }
+
+    public function createCustomer(Request $request)
+    {
+
     }
 
     private static function changeToIds(Request $request)
