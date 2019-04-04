@@ -181,7 +181,7 @@ class ValidationRule
                         'customer' => 'required|exists:customers,identification|max:20',
                         'currency' => 'required|numeric|exists:currencies,id',
                         //'issue_date' => 'required|date|before_or_equal:' . $date->format('Y/m/d'),
-                        'issue_date' => ['required', 'date', 'before_or_equal:"' . $date->format('Y/m/d') . '"'],
+                        'issue_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:"' . $date->format('Y-m-d') . '"'],
                         'environment' => 'required|numeric|exists:environments,code',
                         'voucher_type' => 'required|numeric|exists:voucher_types,code'
                     ];
@@ -235,7 +235,7 @@ class ValidationRule
                                 $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
-                                $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
+                                $rules['issue_date_support_document'] = 'required|date_format:Y-m-d|before_or_equal:issue_date';
                                 $rules['reason'] = 'required|string|max:300';
                                 $rules['extra_detail'] = 'nullable|string';
                                 break;
@@ -255,7 +255,7 @@ class ValidationRule
                                 $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
-                                $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
+                                $rules['issue_date_support_document'] = 'required|date_format:Y-m-d|before_or_equal:issue_date';
                                 $rules['extra_detail'] = 'nullable|string';
                                 $rules['iva_tax'] = 'required|exists:iva_taxes,auxiliary_code';
                                 break;
@@ -269,8 +269,8 @@ class ValidationRule
                                 $rules['carrier_social_reason'] = 'required|max:300';
                                 $rules['licence_plate'] = 'required|max:20';
                                 $rules['starting_address'] = 'required|max:300';
-                                $rules['start_date_transport'] = 'required|date|before_or_equal:end_date_transport';
-                                $rules['end_date_transport'] = 'required|date|after_or_equal:start_date_transport';
+                                $rules['start_date_transport'] = 'required|date_format:Y-m-d|before_or_equal:end_date_transport';
+                                $rules['end_date_transport'] = 'required|date_format:Y-m-d|after_or_equal:start_date_transport';
                                 $rules['extra_detail'] = 'nullable|string';
                                 $rules['authorization_number'] = 'required|digits:49';
                                 $rules['single_customs_doc'] = 'nullable|string|max:20';
@@ -294,7 +294,7 @@ class ValidationRule
                                 $rules['supportdocument_emissionpoint'] = 'required|nullable|integer|min:1|max:999';
                                 $rules['supportdocument_sequential'] = 'required|nullable|integer|min:1|max:999999999';
                                 //$rules['issue_date_support_document'] = 'required|date|before_or_equal:' . $date->format('Y/m/d');
-                                $rules['issue_date_support_document'] = ['required', 'date', 'before_or_equal:"' . $date->format('Y/m/d') . '"'];
+                                $rules['issue_date_support_document'] = ['required', 'date_format:Y-m-d', 'before_or_equal:"' . $date->format('Y-m-d') . '"'];
                                 break;
                         }
                         $rules['additionaldetail_name'] = 'array|max:15';
@@ -311,7 +311,7 @@ class ValidationRule
                         'customer' => 'required|numeric|exists:customers,id',
                         'currency' => 'required|numeric|exists:currencies,id',
                         //'issue_date' => 'required|date|before_or_equal:' . $date->format('Y/m/d'),
-                        'issue_date' => ['required', 'date', 'before_or_equal:"' . $date->format('Y/m/d') . '"'],
+                        'issue_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:"' . $date->format('Y-m-d') . '"'],
                         'environment' => 'required|numeric|exists:environments,id',
                         'voucher_type' => 'required|numeric|exists:voucher_types,id'
                     ];
@@ -365,7 +365,7 @@ class ValidationRule
                                 $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
-                                $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
+                                $rules['issue_date_support_document'] = 'required|date_format:Y-m-d|before_or_equal:issue_date';
                                 $rules['reason'] = 'required|string|max:300';
                                 $rules['extra_detail'] = 'nullable|string';
                                 break;
@@ -385,7 +385,7 @@ class ValidationRule
                                 $rules['supportdocument_establishment'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_emissionpoint'] = 'required|integer|min:1|max:999';
                                 $rules['supportdocument_sequential'] = 'required|integer|min:1|max:999999999';
-                                $rules['issue_date_support_document'] = 'required|date|before_or_equal:issue_date';
+                                $rules['issue_date_support_document'] = 'required|date_format:Y-m-d|before_or_equal:issue_date';
                                 $rules['extra_detail'] = 'nullable|string';
                                 $rules['iva_tax'] = 'required|exists:iva_taxes,id';
                                 break;
@@ -399,8 +399,8 @@ class ValidationRule
                                 $rules['carrier_social_reason'] = 'required|max:300';
                                 $rules['licence_plate'] = 'required|max:20';
                                 $rules['starting_address'] = 'required|max:300';
-                                $rules['start_date_transport'] = 'required|date|before_or_equal:end_date_transport';
-                                $rules['end_date_transport'] = 'required|date|after_or_equal:start_date_transport';
+                                $rules['start_date_transport'] = 'required|date_format:Y-m-d|before_or_equal:end_date_transport';
+                                $rules['end_date_transport'] = 'required|date_format:Y-m-d|after_or_equal:start_date_transport';
                                 $rules['extra_detail'] = 'nullable|string';
                                 $rules['authorization_number'] = 'required|digits:49';
                                 $rules['single_customs_doc'] = 'nullable|string|max:20';
@@ -424,7 +424,7 @@ class ValidationRule
                                 $rules['supportdocument_emissionpoint'] = 'required|nullable|integer|min:1|max:999';
                                 $rules['supportdocument_sequential'] = 'required|nullable|integer|min:1|max:999999999';
                                 //$rules['issue_date_support_document'] = 'required|date|before_or_equal:' . $date->format('Y/m/d');
-                                $rules['issue_date_support_document'] = ['required', 'date', 'before_or_equal:"' . $date->format('Y/m/d') . '"'];
+                                $rules['issue_date_support_document'] = ['required', 'date_format:Y-m-d', 'before_or_equal:"' . $date->format('Y/m/d') . '"'];
                                 break;
                         }
                         $rules['additionaldetail_name'] = 'array|max:15';

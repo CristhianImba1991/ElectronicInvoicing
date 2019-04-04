@@ -236,7 +236,7 @@ class VoucherController extends Controller
         $currencies = Currency::all();
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
-        $voucherTypes = VoucherType::all();
+        $voucherTypes = VoucherType::where('id', '=', $voucher->voucher_type_id)->get();
         return view('vouchers.edit', compact(['action', 'companies', 'currencies', 'voucher', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
@@ -255,7 +255,11 @@ class VoucherController extends Controller
         $draftVoucher = DraftJson::getInstance()->getDraftVoucher($user, intval($id));
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
-        $voucherTypes = VoucherType::all();
+        if ($draftVoucher['voucher_type'] === null) {
+            $voucherTypes = VoucherType::all();
+        } else {
+            $voucherTypes = VoucherType::where('id', '=', $draftVoucher['voucher_type'])->get();
+        }
         return view('vouchers.edit', compact(['action', 'companies', 'currencies', 'draftVoucher', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
@@ -557,7 +561,7 @@ class VoucherController extends Controller
         $currency = Currency::find($request->currency);
         $environment = Environment::find($request->environment);
         $voucherType = VoucherType::find($request->voucher_type);
-        $issueDate = DateTime::createFromFormat('Y/m/d', $request->issue_date);
+        $issueDate = DateTime::createFromFormat('Y-m-d', $request->issue_date);
         if ($isUpdate) {
             $voucher = Voucher::find($id);
         } else {
@@ -672,7 +676,7 @@ class VoucherController extends Controller
                 }
                 break;
             case 2:
-                $issueDateSupportDocument = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document);
+                $issueDateSupportDocument = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document);
                 $voucher->support_document = $issueDateSupportDocument->format('dmY') . '01' .
                     str_pad($request->supportdocument_establishment, 3, '0', STR_PAD_LEFT) .
                     str_pad($request->supportdocument_emissionpoint, 3, '0', STR_PAD_LEFT) .
@@ -746,7 +750,7 @@ class VoucherController extends Controller
                 $creditNote->save();
                 break;
             case 3:
-                $issueDateSupportDocument = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document);
+                $issueDateSupportDocument = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document);
                 $voucher->support_document = $issueDateSupportDocument->format('dmY') . '01' .
                     str_pad($request->supportdocument_establishment, 3, '0', STR_PAD_LEFT) .
                     str_pad($request->supportdocument_emissionpoint, 3, '0', STR_PAD_LEFT) .
@@ -863,12 +867,12 @@ class VoucherController extends Controller
                 }
                 break;
             case 5:
-                $voucher->support_document = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('dmY') .
+                $voucher->support_document = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document)->format('dmY') .
                     str_pad(strval(VoucherType::find($request->voucher_type_support_document)->code), 2, '0', STR_PAD_LEFT) .
                     str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
                     str_pad(strval($request->supportdocument_emissionpoint), 3, '0', STR_PAD_LEFT) .
                     str_pad(strval($request->supportdocument_sequential), 9, '0', STR_PAD_LEFT);
-                $voucher->support_document_date = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('Y-m-d');
+                $voucher->support_document_date = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document)->format('Y-m-d');
                 $voucher->save();
                 foreach (Retention::where('voucher_id', '=', $voucher->id)->get() as $retention) {
                     foreach ($retention->details as $detail) {
@@ -890,7 +894,7 @@ class VoucherController extends Controller
                     $retentionDetail->retention_tax_description_id = $description[$i];
                     $retentionDetail->tax_base = $taxBase[$i];
                     $retentionDetail->rate = $rate[$i];
-                    $retentionDetail->support_doc_code = DateTime::createFromFormat('Y/m/d', $request->issue_date_support_document)->format('dmY') .
+                    $retentionDetail->support_doc_code = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document)->format('dmY') .
                         str_pad(strval(VoucherType::find($request->voucher_type_support_document)->code), 2, '0', STR_PAD_LEFT) .
                         str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
                         str_pad(strval($request->supportdocument_emissionpoint), 3, '0', STR_PAD_LEFT) .

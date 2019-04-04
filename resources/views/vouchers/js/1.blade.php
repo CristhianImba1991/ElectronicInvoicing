@@ -174,12 +174,16 @@ $(document).ready(function(){
                         }
                         voucher['product_additionalDetails'].shift();
                     @elseif($action === 'draft')
-                        reference.closest('tr').find('input[id *= product_detail1]').val(voucher['product_detail1'][0]);
-                        reference.closest('tr').find('input[id *= product_detail2]').val(voucher['product_detail2'][0]);
-                        reference.closest('tr').find('input[id *= product_detail3]').val(voucher['product_detail3'][0]);
-                        voucher['product_detail1'].shift();
-                        voucher['product_detail2'].shift();
-                        voucher['product_detail3'].shift();
+                        for (var i = 0; i < 3; i++) {
+                            if ('product_detail' + (i + 1) in voucher) {
+                                if (voucher['product_detail' + (i + 1)].length > 0) {
+                                    if (voucher['product_detail' + (i + 1)][0] != null) {
+                                        reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_detail' + (i + 1) + ''][0]);
+                                        voucher['product_detail' + (i + 1)].shift();
+                                    }
+                                }
+                            }
+                        }
                     @endif
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')

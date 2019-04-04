@@ -205,14 +205,18 @@ $(document).ready(function(){
         autoclose: true,
         todayBtn: 'linked',
         todayHighlight: true,
-        format: 'yyyy/mm/dd',
+        endDate: '0d',
+        language: '{{ str_replace('_', '-', app()->getLocale()) }}',
+        format: 'yyyy-mm-dd',
         daysOfWeekHighlighted: "0,6"
     });
     $('#end_date_transport').datepicker({
         autoclose: true,
         todayBtn: 'linked',
         todayHighlight: true,
-        format: 'yyyy/mm/dd',
+        endDate: '0d',
+        language: '{{ str_replace('_', '-', app()->getLocale()) }}',
+        format: 'yyyy-mm-dd',
         daysOfWeekHighlighted: "0,6"
     });
     @if($action === 'edit' || $action === 'draft')

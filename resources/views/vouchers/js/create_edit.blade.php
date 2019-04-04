@@ -232,45 +232,49 @@ $(document).ready(function(){
                         emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
                     }
                     $("#customer_email").val(emailsString);
-                    var additionalDetailTable = $('#additionaldetail-table').DataTable();
-                    var table = $("input[id ~= 'additionaldetail_name[]']");
-                    if (table.length > 0) {
-                        table.each(function (index) {
-                            if ($(this).val() === 'Dirección' || $(this).val() === 'E-mail' || $(this).val() === 'Teléfono') {
-                                additionalDetailTable
-                                    .row($(this).parents('tr'))
-                                    .remove()
-                                    .draw();
+                    @if($action === 'create')
+                        var additionalDetailTable = $('#additionaldetail-table').DataTable();
+                        var table = $("input[id ~= 'additionaldetail_name[]']");
+                        if (table.length > 0) {
+                            table.each(function (index) {
+                                if ($(this).val() === 'Dirección' || $(this).val() === 'E-mail' || $(this).val() === 'Teléfono') {
+                                    additionalDetailTable
+                                        .row($(this).parents('tr'))
+                                        .remove()
+                                        .draw();
+                                }
+                            })
+                        }
+                        if (additionalDetailTable.rows().eq(0) != null) {
+                            if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
+                                if (customer[0]['address'] != null) {
+                                    additionalDetailTable.row.add([
+                                        '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="Dirección">',
+                                        '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + customer[0]['address'] + '">',
+                                        '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                                    ]).draw(false);
+                                }
                             }
-                        })
-                    }
-                    if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
-                        if (customer[0]['address'] != null) {
-                            additionalDetailTable.row.add([
-                                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="Dirección">',
-                                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + customer[0]['address'] + '">',
-                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
-                            ]).draw(false);
+                            if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
+                                if (customer[0]['phone'] != null) {
+                                    additionalDetailTable.row.add([
+                                        '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="Teléfono">',
+                                        '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + customer[0]['phone'] + '">',
+                                        '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                                    ]).draw(false);
+                                }
+                            }
+                            if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
+                                if (customer[0]['email'] != null) {
+                                    additionalDetailTable.row.add([
+                                        '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="E-mail">',
+                                        '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + emailsString + '">',
+                                        '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
+                                    ]).draw(false);
+                                }
+                            }
                         }
-                    }
-                    if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
-                        if (customer[0]['phone'] != null) {
-                            additionalDetailTable.row.add([
-                                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="Teléfono">',
-                                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + customer[0]['phone'] + '">',
-                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
-                            ]).draw(false);
-                        }
-                    }
-                    if (additionalDetailTable.rows().eq(0).length + 1 <= 15) {
-                        if (customer[0]['email'] != null) {
-                            additionalDetailTable.row.add([
-                                '<input class="form-control" type="text" id="additionaldetail_name[]" name="additionaldetail_name[]" value="E-mail">',
-                                '<input class="form-control" type="text" id="additionaldetail_value[]" name="additionaldetail_value[]" value="' + emailsString + '">',
-                                '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
-                            ]).draw(false);
-                        }
-                    }
+                    @endif
                 }
             })
         }
@@ -281,7 +285,8 @@ $(document).ready(function(){
         todayBtn: 'linked',
         todayHighlight: true,
         endDate: '0d',
-        format: 'yyyy/mm/dd',
+        language: '{{ str_replace('_', '-', app()->getLocale()) }}',
+        format: 'yyyy-mm-dd',
         daysOfWeekHighlighted: "0,6"
     });
     $('#environment').selectpicker('val', 2);
@@ -305,7 +310,7 @@ $(document).ready(function(){
     });
     @if($action === 'edit')
         $('#company').selectpicker('val', "{{ $voucher->emissionPoint->branch->company->id }}");
-        $('#issue_date').datepicker('update', "{{ $voucher->issue_date }}");
+        $('#issue_date').datepicker('update', "{{ \DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y-m-d') }}");
         $('#environment').selectpicker('val', "{{ $voucher->environment_id }}");
         @if($voucher->voucher_type_id !== null)
             $('#voucher_type').selectpicker('val', "{{ $voucher->voucher_type_id }}");
