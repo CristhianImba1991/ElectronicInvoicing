@@ -208,12 +208,12 @@ class ApiController extends Controller
                 for ($i = 0; $i < count($request->tax); $i++) {
                     array_push($tax, RetentionTax::where('code', '=', $request->tax[$i])->first()->id);
                 }
-                $request->tax[$i] = $tax;
+                $request->tax = $tax;
                 $description = [];
                 for ($i = 0; $i < count($request->description); $i++) {
                     array_push($description, RetentionTaxDescription::where('code', '=', $request->description[$i])->first()->id);
                 }
-                $request->description[$i] = $description;
+                $request->description = $description;
                 $request->voucher_type_support_document = VoucherType::where('code', '=', $request->voucher_type_support_document)->first()->id;
                 break;
         }
