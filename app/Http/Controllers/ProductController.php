@@ -97,7 +97,7 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    private function store(Request $request)
+    public function store(Request $request)
     {
         $input = $request->except(['company', 'branch']);
         $input['branch_id'] = $request->branch;

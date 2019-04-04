@@ -87,7 +87,7 @@ class ApiController extends Controller
         $validator = VoucherController::isValidRequest($request, VoucherStates::SENDED);
         $isValid = !$validator->fails();
         if ($isValid) {
-            self::changeToIds($request);
+            self::changeToIdsVoucher($request);
             $voucher = VoucherController::saveVoucher($request, VoucherStates::SENDED);
             VoucherController::acceptVoucher($voucher);
             //VoucherController::sendVoucher($voucher);
@@ -119,6 +119,7 @@ class ApiController extends Controller
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsProduct($request);
+            ProductController::store($request);
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
@@ -137,10 +138,28 @@ class ApiController extends Controller
 
     public function createCustomer(Request $request)
     {
-
+        $validator = Validator::make($request->all(), ValidationRule::makeRule('customer', $request));
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            self::changeToIdsProduct($request);
+            ProductController::store($request);
+            return response()->json([
+                'code' => 200,
+                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
+            ], 200);
+        } else {
+            return response()->json([
+                'code' => 422,
+                'message' => 'The request was well-formed but was unable to be followed due to semantic errors.',
+                'errors' => [
+                    'error' => 'Unprocessable Entity',
+                    'info' => $validator->messages()->messages()
+                ]
+            ], 422);
+        }
     }
 
-    private static function changeToIds(Request $request)
+    private static function changeToIdsVoucher(Request $request)
     {
         $request->company = Company::where('ruc', '=', $request->company)->first()->id;
         $request->branch = Branch::where([['company_id', '=', $request->company], ['establishment', '=', $request->branch]])->first()->id;
@@ -198,5 +217,11 @@ class ApiController extends Controller
                 $request->voucher_type_support_document = VoucherType::where('code', '=', $request->voucher_type_support_document)->first()->id;
                 break;
         }
+    }
+
+    private static function changeToIdsProduct(Request $request)
+    {
+        $request->company = Company::where('ruc', '=', $request->company)->first()->id;
+        $request->branch = Branch::where([['company_id', '=', $request->company], ['establishment', '=', $request->branch]])->first()->id;
     }
 }

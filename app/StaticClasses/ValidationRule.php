@@ -68,10 +68,11 @@ class ValidationRule
                 }
                 break;
             case 'customer':
+                $isApiRequest = Str::startsWith($request->decodedPath(), 'api/auth');
                 if ($request->method() === 'PUT') {
                     $rules = [
-                        'company' => 'required|exists:companies,id',
-                        'identification_type' => 'required|exists:identification_types,id',
+                        'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
+                        'identification_type' => $isApiRequest ? 'required|exists:identification_types,code' : 'required|exists:identification_types,id',
                         'identification' => 'required|exists:customers,identification|max:20',
                         'social_reason' => 'required|max:300',
                         'address' => 'required|max:300',
@@ -79,12 +80,12 @@ class ValidationRule
                         'email' => 'required|max:300|validemailmultiple',
                     ];
                     if ($request->has('identification_type')) {
-                        $rules['identification'] .= $request['identification_type'] == 1 ? '|validruc' : ($request['identification_type'] == 2 ? '|validcedula' : '');
+                        $rules['identification'] .= $request['identification_type'] == ($isApiRequest ? 4 : 1) ? '|validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? '|validcedula' : '');
                     }
                 } else {
                     $rules = [
-                        'company' => 'required|exists:companies,id',
-                        'identification_type' => 'required|exists:identification_types,id',
+                        'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
+                        'identification_type' => $isApiRequest ? 'required|exists:identification_types,code' : 'required|exists:identification_types,id',
                         'identification' => 'required|max:20',
                         'social_reason' => 'required|max:300',
                         'address' => 'required|max:300',
@@ -92,12 +93,16 @@ class ValidationRule
                         'email' => 'required|max:300|validemailmultiple',
                     ];
                     if ($request->has('identification_type')) {
-                        $rules['identification'] .= $request['identification_type'] == 1 ? '|validruc' : ($request['identification_type'] == 2 ? '|validcedula' : '');
+                        $rules['identification'] .= $request['identification_type'] == ($isApiRequest ? 4 : 1)) ? '|validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? '|validcedula' : '');
                     }
                     if (Customer::where('identification', '=', $request->identification)->exists()) {
                         $customer = Customer::where('identification', '=', $request->identification)->first();
                         //$rules['identification'] .= '|uniquecustomer:company_customers,company_id,' . $request->company . ',customer_id,' . $customer->id;
-                        $rules['identification'] = ['required', 'max:20', 'uniquecustomer:company_customers,company_id,"' . $request->company . '",customer_id,"' . $customer->id . '"'];
+                        if ($isApiRequest) {
+                            # code...
+                        } else {
+                            $rules['identification'] = ['required', 'max:20', 'uniquecustomer:company_customers,company_id,"' . $request->company . '",customer_id,"' . $customer->id . '"'];
+                        }
                     }
                 }
                 break;
