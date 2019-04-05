@@ -133,7 +133,7 @@ class ValidationRule
                         'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
                         'branch' => $isApiRequest ? 'required|min:1|max:999|integer|exists:branches,establishment' : 'required|exists:branches,id',
                         //'main_code' => 'required|max:25|uniquemultiple:products,branch_id,' . $request->branch . ',main_code,' . $request->main_code,
-                        'main_code' => ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . $request->branch . '",main_code,"' . $request->main_code . '"'],
+                        'main_code' => 'required|max:25',
                         'auxiliary_code' => 'required|max:25',
                         'unit_price' => 'required|numeric|gt:0',
                         'description'=> 'required|max:300',
@@ -142,6 +142,13 @@ class ValidationRule
                         'ice_tax' => $isApiRequest ? 'nullable|exists:ice_taxes,auxiliary_code' : 'nullable|exists:ice_taxes,id',
                         'irbpnr_tax' => $isApiRequest ? 'nullable|exists:irbpnr_taxes,auxiliary_code' : 'nullable|exists:irbpnr_taxes,id',
                     ];
+                    if ($isApiRequest) {
+                        $company = Company::where('ruc', '=', $request->company)->first();
+                        $branch = Branch::where([['company_id', '=', ($company === NULL ? $company : $company->id)], ['establishment', '=', $request->branch]])->first();
+                        $rules['main_code'] = ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . ($branch === NULL ? $branch : $branch->id) . '",main_code,"' . $request->main_code . '"'];
+                    } else {
+                        $rules['main_code'] = ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . $request->branch . '",main_code,"' . $request->main_code . '"'];
+                    }
                 }
                 break;
             case 'user':
