@@ -60,15 +60,23 @@ class Handler extends ExceptionHandler
                         'info' => 'Check your request method.'
                     ]
                 ], 405);
+            } elseif ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                return response()->json([
+                    'code' => 419,
+                    'message' => 'Token is missing or expired.',
+                    'errors' => [
+                        'error' => 'Page Expired',
+                        'info' => 'Use your credentials to generate a new token and retry.'
+                    ]
+                ], 419);
             }
             return response()->json([
-                'code' => 419,
-                'message' => 'Token is missing or expired.',
+                'code' => 520,
+                'message' => 'An unknown error has occurred.',
                 'errors' => [
-                    'error' => 'Page Expired',
-                    'info' => 'Use your credentials to generate a new token and retry.'
+                    'error' => 'Unknown Error'
                 ]
-            ], 419);
+            ], 520);
         }
         /*if($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException){
             //return abort('404');
