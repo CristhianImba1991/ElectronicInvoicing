@@ -4,7 +4,7 @@ namespace ElectronicInvoicing\StaticClasses;
 
 use DateTime;
 use DateTimeZone;
-use ElectronicInvoicing\{Company, Customer};
+use ElectronicInvoicing\{Branch, Company, Customer};
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
