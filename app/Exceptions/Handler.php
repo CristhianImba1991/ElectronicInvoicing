@@ -70,6 +70,12 @@ class Handler extends ExceptionHandler
                     ]
                 ], 419);
             }
+            info('#### ERROR IN API REQUEST #######################');
+            info(' CODE: ' . $exception->getCode());
+            info(' FILE: ' . $exception->getFile());
+            info(' LINE: ' . $exception->getLine());
+            info(' MESSAGE: ' . $exception->getMessage());
+            info('#### END ERROR IN API REQUEST ###################');
             return response()->json([
                 'code' => 520,
                 'message' => 'An unknown error has occurred.',
