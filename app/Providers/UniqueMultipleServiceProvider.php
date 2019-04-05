@@ -22,7 +22,7 @@ class UniqueMultipleServiceProvider extends ServiceProvider
                 $column = $field;
                 $field = array_shift($parameters);
                 $value = $field;
-                array_push($conditions, array($column, '=', $value));
+                array_push($conditions, array($column, '=', html_entity_decode($value)));
             }
             $result = DB::table($table)->where($conditions)->get();
             return $result->isEmpty();
