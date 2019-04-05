@@ -224,4 +224,10 @@ class ApiController extends Controller
         $request->company = Company::where('ruc', '=', $request->company)->first()->id;
         $request->branch = Branch::where([['company_id', '=', $request->company], ['establishment', '=', $request->branch]])->first()->id;
     }
+
+    private static function changeToIdsCustomer(Request $request)
+    {
+        $request->company = Company::where('ruc', '=', $request->company)->first()->id;
+        $request->identification_type = IdentificationType::where('code', '=', $request->identification_type)->first()->id;
+    }
 }
