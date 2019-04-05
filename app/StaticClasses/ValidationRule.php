@@ -121,7 +121,7 @@ class ValidationRule
                     $rules = [
                         'main_code' => 'required|max:25',
                         'auxiliary_code' => 'required|max:25',
-                        'unit_price' => 'required|gt:0',
+                        'unit_price' => 'required|numeric|gt:0',
                         'description'=> 'required|max:300',
                         'stock' => 'required|numeric|gt:0',
                         'iva_tax' => $isApiRequest ? 'required|exists:iva_taxes,auxiliary_code' : 'required|exists:iva_taxes,id',
@@ -135,7 +135,7 @@ class ValidationRule
                         //'main_code' => 'required|max:25|uniquemultiple:products,branch_id,' . $request->branch . ',main_code,' . $request->main_code,
                         'main_code' => ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . $request->branch . '",main_code,"' . $request->main_code . '"'],
                         'auxiliary_code' => 'required|max:25',
-                        'unit_price' => 'required|gt:0',
+                        'unit_price' => 'required|numeric|gt:0',
                         'description'=> 'required|max:300',
                         'stock' => 'required|numeric|gt:0',
                         'iva_tax' => $isApiRequest ? 'required|exists:iva_taxes,auxiliary_code' : 'required|exists:iva_taxes,id',
