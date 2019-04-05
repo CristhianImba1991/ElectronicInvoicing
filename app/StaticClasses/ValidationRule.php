@@ -73,15 +73,12 @@ class ValidationRule
                     $rules = [
                         'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
                         'identification_type' => $isApiRequest ? 'required|exists:identification_types,code' : 'required|exists:identification_types,id',
-                        'identification' => 'required|exists:customers,identification|max:20',
+                        'identification' => 'required|exists:customers,identification|max:20' . ($request['identification_type'] == ($isApiRequest ? 4 : 1) ? '|validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? '|validcedula' : '')),
                         'social_reason' => 'required|max:300',
                         'address' => 'required|max:300',
                         'phone' => 'max:30',
                         'email' => 'required|max:300|validemailmultiple',
                     ];
-                    if ($request->has('identification_type')) {
-                        $rules['identification'] .= $request['identification_type'] == ($isApiRequest ? 4 : 1) ? '|validruc' : ($request['identification_type'] == ($isApiRequest ? 5 : 2) ? '|validcedula' : '');
-                    }
                 } else {
                     $rules = [
                         'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
