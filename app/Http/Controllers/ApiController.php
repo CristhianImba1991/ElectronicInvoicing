@@ -119,7 +119,7 @@ class ApiController extends Controller
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsProduct($request);
-            ProductController::store($request);
+            (new ProductController)->store($request);
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
@@ -142,7 +142,7 @@ class ApiController extends Controller
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsCustomer($request);
-            CustomerController::store($request);
+            (new CustomerController)->store($request);
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)
