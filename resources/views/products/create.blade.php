@@ -51,11 +51,12 @@
         });
     });
 </script>
-
 @endsection
+
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 @endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
