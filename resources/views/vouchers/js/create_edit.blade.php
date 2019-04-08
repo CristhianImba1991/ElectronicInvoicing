@@ -226,12 +226,14 @@ $(document).ready(function(){
                     var customer = JSON.parse(result);
                     $("#customer_identification").val(customer[0]['identification_type']['name'] + ": " + customer[0]['identification']);
                     $("#customer_address").val(customer[0]['address']);
-                    var emails = customer[0]['email'].split(',');
-                    var emailsString = '';
-                    for (var i = 0; i < emails.length; i++) {
-                        emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
+                    if (customer[0]['email'] != null) {
+                        var emails = customer[0]['email'].split(',');
+                        var emailsString = '';
+                        for (var i = 0; i < emails.length; i++) {
+                            emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
+                        }
+                        $("#customer_email").val(emailsString);
                     }
-                    $("#customer_email").val(emailsString);
                     @if($action === 'create')
                         var additionalDetailTable = $('#additionaldetail-table').DataTable();
                         var table = $("input[id ~= 'additionaldetail_name[]']");
