@@ -251,6 +251,9 @@ $(document).ready(function(){
                     var ivaValue = 0.0;
                     for (var i = 0; i < id.length; i++) {
                         if (id[i] != "") {
+                            console.log(products);
+                            console.log(i);
+                            console.log(id);
                             if (products[id[i]]['iva'] != null) {
                                 switch (products[id[i]]['iva']['auxiliary_code']) {
                                     case 0: iva0Subtotal += quantities[i] * unitPrices[i] - discounts[i]; break;
