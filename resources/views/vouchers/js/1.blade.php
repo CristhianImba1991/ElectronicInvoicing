@@ -477,10 +477,12 @@ $(document).ready(function(){
                 },
                 success: function(result) {
                     var customer = JSON.parse(result);
-                    var emails = customer[0]['email'].split(',');
-                    var emailsString = '';
-                    for (var i = 0; i < emails.length; i++) {
-                        emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
+                    if (customer[0]['email'] != null) {
+                        var emails = customer[0]['email'].split(',');
+                        var emailsString = '';
+                        for (var i = 0; i < emails.length; i++) {
+                            emailsString += (i === 0 ? '(P) ' : ', ') + emails[i];
+                        }
                     }
                     var table = $("input[id ~= 'additionaldetail_name[]']");
                     if (table.length > 0) {
