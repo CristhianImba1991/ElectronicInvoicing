@@ -145,7 +145,7 @@ class ValidationRule
                     if ($isApiRequest) {
                         $company = Company::where('ruc', '=', $request->company)->first();
                         $branch = Branch::where([['company_id', '=', ($company === NULL ? $company : $company->id)], ['establishment', '=', $request->branch]])->first();
-                        $rules['main_code'] = ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . ($branch === NULL ? $branch : $branch->id) . '",main_code,"' . $request->main_code . '"'];
+                        $rules['main_code'] = ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . ($branch === NULL ? $branch : $branch->id) . '",main_code,"' . htmlentities($request->main_code) . '"'];
                     } else {
                         $rules['main_code'] = ['required', 'max:25', 'uniquemultiple:products,branch_id,"' . $request->branch . '",main_code,"' . htmlentities($request->main_code) . '"'];
                     }
