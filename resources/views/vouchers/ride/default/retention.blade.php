@@ -47,6 +47,16 @@
       </tbody>
     </table>
 </div>
+<div style="padding: 2px 2px 0px 2px" class="card border-dark mb-3">
+    <table class="table table-sm">
+      <tbody>
+        <tr>
+          <td class="align-middle"><b>TOTAL RETENIDO: </b></td>
+          <td class="text-right align-middle">{{ number_format($voucher->total(), 2, '.', '') }}</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
 @endsection
 
 @section('footer')

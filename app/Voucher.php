@@ -129,7 +129,7 @@ class Voucher extends Model
 
     public function total()
     {
-        $total = self::subtotalWithoutTaxes();
+        $total = $this->subtotalWithoutTaxes();
         switch ($this->voucher_type_id) {
             case 1: case 2:
                 foreach ($this->details()->get() as $detail) {
@@ -138,6 +138,12 @@ class Voucher extends Model
                 break;
             case 3:
                 $total *= (1 + $this->debitNotesTaxes()->first()->rate / 100.0);
+                break;
+            case 5:
+                foreach ($this->retentions()->first()->details()->get() as $detail) {
+                    info($detail);
+                    $total += $detail->tax_base * $detail->rate / 100.0;
+                }
                 break;
         }
         return $total;
