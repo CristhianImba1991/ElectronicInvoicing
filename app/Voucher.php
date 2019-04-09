@@ -141,7 +141,6 @@ class Voucher extends Model
                 break;
             case 5:
                 foreach ($this->retentions()->first()->details()->get() as $detail) {
-                    info($detail);
                     $total += $detail->tax_base * $detail->rate / 100.0;
                 }
                 break;
