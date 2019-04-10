@@ -161,6 +161,7 @@ return [
 
     'processing_voucher' => 'Procesando comprobante...',
     'please_wait_while_your_voucher_is_processed' => 'Por favor espere mientras se procesa su comprobante.',
+    'send_voucher_by_email' => 'Enviar comprobante por correo electrónico',
 
     'toggle_navigation' => 'Activar la navegación',
     'manage' => 'Administrar',

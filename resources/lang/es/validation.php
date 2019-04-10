@@ -204,6 +204,19 @@ return [
         'issue_date' => 'Fecha emisión',
         'environment' => 'Ambiente',
         'voucher_type' => 'Tipo de comprobante',
+        'waybill_establishment' => 'Establecimiento de la guía de remisión',
+        'waybill_emissionpoint' => 'Punto de emisión de la guía de remisión',
+        'waybill_sequential' => 'Secuencial de la guía de remisión',
+        'extra_detail' => 'Detalle extra',
+        'ivaRetentionValue' => 'Retención de IVA',
+        'rentRetentionValue' => 'Retención de renta',
+        'tip' => 'Propina',
+        'supportdocument_establishment' => 'Establecimiento del documento de soporte',
+        'supportdocument_emissionpoint' => 'Punto de emisión del documento de soporte',
+        'supportdocument_sequential' => 'Secuencial del documento de soporte',
+        'issue_date_support_document' => 'Fecha de emisión del documento de soporte',
+        'reason' => 'Razón',
+        'voucher_type_support_document' => 'Tipo de comprobante del documento de soporte',
 
         'company.*' => 'Compañía',
         'branch.*' => 'Sucursal',
@@ -234,22 +247,16 @@ return [
         'additionaldetail_name.*' => 'Nombre de la información adicional',
         'additionaldetail_value' => 'Valor de la información adicional',
         'additionaldetail_value.*' => 'Valor de la información adicional',
+        'debit_reason' => 'Razón del débito',
+        'debit_reason.*' => 'Razón del débito',
+        'debit_value' => 'Valor del débito',
+        'debit_value.*' => 'Valor del débito',
         'tax' => 'Impuesto de la retención',
         'tax.*' => 'Impuesto de la retención',
         'value' => 'Tasa de la retención',
         'value.*' => 'Tasa de la retención',
         'tax_base' => 'Base imponible de la retención',
-        'tax_base.*' => 'Base imponible de la retención',
-
-        /*$rules['additionaldetail_name'] = 'array|max:3';
-        $rules['additionaldetail_value'] = 'array|max:3';
-        $rules['waybill_establishment'] = 'required_with:waybill_emissionpoint,waybill_sequential|nullable|integer|min:1|max:999';
-        $rules['waybill_emissionpoint'] = 'required_with:waybill_establishment,waybill_sequential|nullable|integer|min:1|max:999';
-        $rules['waybill_sequential'] = 'required_with:waybill_establishment,waybill_emissionpoint|nullable|integer|min:1|max:999999999';
-        $rules['extra_detail'] = 'nullable|string';
-        $rules['ivaRetentionValue'] = 'nullable|numeric|min:0';
-        $rules['rentRetentionValue'] = 'nullable|numeric|min:0';
-        $rules['tip'] = 'required|numeric|min:0';*/
+        'tax_base.*' => 'Base imponible de la retención'
     ],
 
 ];

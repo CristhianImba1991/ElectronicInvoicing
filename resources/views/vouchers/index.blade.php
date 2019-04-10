@@ -270,7 +270,7 @@ jQuery(document).ready(function($) {
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <strong>Send voucher by email</strong>
+                    <strong>{{ __('view.send_voucher_by_email') }}</strong>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -286,7 +286,7 @@ jQuery(document).ready(function($) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">{{ __('view.close') }}</button>
-                        <button id="submit_email" type="button" class="btn btn-sm btn-primary">Email</button>
+                        <button id="submit_email" type="button" class="btn btn-sm btn-primary">{{ __('view.send') }}</button>
                     </div>
                 </form>
             </div>

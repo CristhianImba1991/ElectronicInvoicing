@@ -161,6 +161,7 @@ return [
 
     'processing_voucher' => 'Processing voucher...',
     'please_wait_while_your_voucher_is_processed' => 'Please wait while your voucher is processed.',
+    'send_voucher_by_email' => 'Send voucher by email',
 
     'toggle_navigation' => 'Toggle navigation',
     'manage' => 'Manage',
