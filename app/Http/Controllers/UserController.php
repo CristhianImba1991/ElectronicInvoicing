@@ -197,6 +197,10 @@ class UserController extends Controller
             $user->syncRoles($request->role);
         }
         $user->fill($request->only(['name', 'email']))->save();
+        if ($request->password !== null) {
+            $user->password = Hash::make($request->password);
+            $user->save();
+        }
         if (!$user->hasRole('admin') && !$user->hasRole('api')) {
             if ($request->company !== null) {
                 if ($user->hasRole('owner')) {
@@ -276,5 +280,11 @@ class UserController extends Controller
         DraftJson::getInstance()->removeUser($userOld);
         $userOld->forceDelete();
         return redirect()->route('users.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.user'), 0)]), 0)]);
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('users.profile', compact('user'));
     }
 }

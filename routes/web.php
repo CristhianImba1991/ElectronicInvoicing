@@ -31,6 +31,7 @@ Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/profile', 'UserController@profile')->name('profile');
 
 Route::group(['prefix' => 'resource'], function () {
     Route::post('/company/branches', 'CompanyController@branches')->name('companies.branches');

@@ -19,6 +19,7 @@ return [
     'home' => 'Inicio',
     'login' => 'Ingresar',
     'logout' => 'Salir',
+    'profile' => 'Perfil',
     'email_address' => 'Correo electrónico',
     'password' => 'Contraseña',
     'remember_me' => 'Recordar credenciales',

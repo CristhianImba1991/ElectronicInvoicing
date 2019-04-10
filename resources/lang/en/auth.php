@@ -19,6 +19,7 @@ return [
     'home' => 'Home',
     'login' => 'Login',
     'logout' => 'Logout',
+    'profile' => 'Profile',
     'email_address' => 'E-Mail Address',
     'password' => 'Password',
     'remember_me' => 'Remember Me',

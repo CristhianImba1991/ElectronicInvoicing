@@ -155,9 +155,9 @@ class ValidationRule
                 if ($request->method() === 'PUT') {
                     $rules = [
                         'role' => 'nullable|exists:roles,name|string',
-                        'name' => 'required|max:255',
-                        'email' => 'required|email|max:255',
-                        //'password' => 'required|min:6|confirmed',
+                        'name' => 'required|max:191',
+                        'email' => 'required|email|max:191',
+                        'password' => 'nullable|min:6|confirmed',
                         'company' => 'nullable|min:1',
                         'company.*' => 'exists:companies,id',
                         'branch' => 'nullable|min:1',
@@ -168,8 +168,8 @@ class ValidationRule
                 } else {
                     $rules = [
                         'role' => 'required|exists:roles,name|string',
-                        'name' => 'required|max:255',
-                        'email' => 'required|email|max:255|unique:users',
+                        'name' => 'required|max:191',
+                        'email' => 'required|email|max:191|unique:users',
                         'password' => 'required|min:6|confirmed',
                         'company' => 'required_unless:role,api,admin|min:1',
                         'company.*' => 'exists:companies,id',
