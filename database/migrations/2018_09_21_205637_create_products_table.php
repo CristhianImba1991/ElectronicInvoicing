@@ -20,7 +20,7 @@ class CreateProductsTable extends Migration
             $table->string('auxiliary_code', 25);
             $table->unsignedDecimal('unit_price', 18, 6);
             $table->string('description', 300);
-            $table->unsignedDecimal('stock', 18, 6);
+            $table->unsignedDecimal('stock', 18, 6)->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('branch_id')->references('id')->on('branches');

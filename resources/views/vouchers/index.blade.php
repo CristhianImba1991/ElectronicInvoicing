@@ -129,39 +129,6 @@ jQuery(document).ready(function($) {
                 </div>
 
                 <div class="card-body">
-                    <p><button class="btn btn-sm btn-light" type="button" data-toggle="collapse" data-target="#filterForm" aria-expanded="false" aria-controls="filterForm">{{ __('view.filter') }}</button></p>
-                    <div class="collapse" id="filterForm">
-                        <div class="card">
-                            <form class="" action="index.html" method="post">
-                                <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
-                                        <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more companies ...">
-                                            @foreach($companies as $company)
-                                                <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="branch">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
-                                        <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more branches ...">
-
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="emission_point">{{ ucfirst(trans_choice(__('view.emission_point'), 0)) }}</label>
-                                        <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="Select one o more emission points ...">
-
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <button type="button" id="draft" class="btn btn-sm btn-primary">{{ __('view.filter') }}</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <br>
                     <table id="vouchers-table" class="display">
                         <thead>
                             <tr>
