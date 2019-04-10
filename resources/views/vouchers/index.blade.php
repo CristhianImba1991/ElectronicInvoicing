@@ -7,6 +7,11 @@
 <script type="text/javascript">
 $.noConflict();
 jQuery(document).ready(function($) {
+    $('body').on('hidden.bs.modal', function () {
+        if($('.modal.show').length > 0) {
+            $('body').addClass('modal-open');
+        }
+    });
     $('#company').change(function() {
         if($(this).val() != '') {
             var _token = $('input[name = "_token"]').val();
@@ -265,7 +270,7 @@ jQuery(document).ready(function($) {
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <strong><p>Send voucher by email</p></strong>
+                    <strong>Send voucher by email</strong>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
