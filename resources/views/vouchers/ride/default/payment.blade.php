@@ -3,7 +3,7 @@
         <thead>
             <th class="align-bottom">FORMA DE PAGO</th>
             <th class="align-bottom"><center>VALOR</center></th>
-            <th class="align-bottom">UNIDAD DE TIEMPO</th>
+            <th class="align-bottom"><center>UNIDAD DE TIEMPO<center></th>
             <th class="align-bottom"><center>PLAZO</center></th>
         </thead>
       <tbody>
@@ -11,8 +11,8 @@
             <tr>
               <td class="align-middle">{{ \ElectronicInvoicing\PaymentMethod::find($payment->payment_method_id)->name }}</td>
               <td class="text-right align-middle">{{ number_format($payment->total, 2, '.', '') }}</td>
-              <td class="align-middle">{{ \ElectronicInvoicing\TimeUnit::find($payment->time_unit_id)->name }}</td>
-              <td class="text-right align-middle">{{ number_format($payment->term, 2, '.', '') }}</td>
+              <td class="text-center align-middle">{{ \ElectronicInvoicing\TimeUnit::find($payment->time_unit_id)->name }}</td>
+              <td class="text-right align-middle">{{ $payment->term }}</td>
             </tr>
         @endforeach
       </tbody>
