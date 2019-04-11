@@ -169,10 +169,12 @@ $(document).ready(function(){
                     productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
                     @if($action === 'edit')
-                        for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
-                            reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                        if (voucher['product_additionalDetails'].length > 0) {
+                            for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
+                                reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                            }
+                            voucher['product_additionalDetails'].shift();
                         }
-                        voucher['product_additionalDetails'].shift();
                     @elseif($action === 'draft')
                         for (var i = 0; i < 3; i++) {
                             if ('product_detail' + (i + 1) in voucher) {
