@@ -20,7 +20,7 @@ $(document).ready(function(){
             "waybill_sequential": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 6, 9) : ''),
             "extra_detail": @json($voucher->extra_detail),
             "tip": @json($voucher->tip)
-        };
+        };console.log(voucher);
         @if($voucher->iva_retention !== NULL)
             voucher['ivaRetention'] = null;
             voucher['ivaRetentionValue'] = @json($voucher->iva_retention);
