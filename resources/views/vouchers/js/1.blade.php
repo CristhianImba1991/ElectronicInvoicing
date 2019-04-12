@@ -181,8 +181,8 @@ $(document).ready(function(){
                         if (voucher['product_additionalDetails'].length > 0) {
                             for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
                                 reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                                voucher['product_additionalDetails'].shift();
                             }
-                            voucher['product_additionalDetails'].shift();
                         }
                     @elseif($action === 'draft')
                         for (var i = 0; i < 3; i++) {
@@ -201,11 +201,9 @@ $(document).ready(function(){
                         if ('product_quantity' in voucher) {
                             if (voucher['product_quantity'].length > 0) {
                                 if (voucher['product_quantity'][0] != null) {
-                                    console.log('BEFORE: ' + JSON.stringify(voucher['product_quantity']));
                                     productQuantity = Number(voucher['product_quantity'][0]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                                     voucher['product_quantity'].shift();
-                                    console.log('AFTER: ' + JSON.stringify(voucher['product_quantity']));
                                 }
                             }
                         }
