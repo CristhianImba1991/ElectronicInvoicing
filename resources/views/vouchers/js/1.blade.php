@@ -3,12 +3,14 @@ $(document).ready(function(){
     @if($action === 'draft')
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
+        var details = @json($voucher->details()->orderBy('id')->with('additionalDetails')->get());
+        console.log(details);
         var voucher = {
-            "product": @json($voucher->details()->orderBy('id')->pluck('product_id')),
-            "product_additionalDetails": @json($voucher->details()->orderBy('id')->with('additionalDetails')->get()),
-            "product_quantity": @json($voucher->details()->orderBy('id')->pluck('quantity')),
-            "product_unitprice": @json($voucher->details()->orderBy('id')->pluck('unit_price')),
-            "product_discount": @json($voucher->details()->orderBy('id')->pluck('discount')),
+            "product": new Array(),//@json($voucher->details()->orderBy('id')->pluck('product_id')),
+            "product_additionalDetails": new Array(),//@json($voucher->details()->orderBy('id')->with('additionalDetails')->get()),
+            "product_quantity": new Array(),//@json($voucher->details()->orderBy('id')->pluck('quantity')),
+            "product_unitprice": new Array(),//@json($voucher->details()->orderBy('id')->pluck('unit_price')),
+            "product_discount": new Array(),//@json($voucher->details()->orderBy('id')->pluck('discount')),
             "paymentMethod": @json($voucher->payments()->get()->pluck('payment_method_id')),
             "paymentMethod_value": @json($voucher->payments()->get()->pluck('total')),
             "paymentMethod_timeunit": @json($voucher->payments()->get()->pluck('time_unit_id')),
@@ -20,7 +22,14 @@ $(document).ready(function(){
             "waybill_sequential": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 6, 9) : ''),
             "extra_detail": @json($voucher->extra_detail),
             "tip": @json($voucher->tip)
-        };console.log(voucher);
+        };
+        for (var i in details) {
+            voucher['product'].push(details[i]['product_id']);
+            voucher['product_additionalDetails'].push(details[i]);
+            voucher['product_quantity'].push(details[i]['quantity']);
+            voucher['product_unitprice'].push(details[i]['unit_price']);
+            voucher['product_discount'].push(details[i]['discount']);
+        }console.log(JSON.stringify(voucher));
         @if($voucher->iva_retention !== NULL)
             voucher['ivaRetention'] = null;
             voucher['ivaRetentionValue'] = @json($voucher->iva_retention);

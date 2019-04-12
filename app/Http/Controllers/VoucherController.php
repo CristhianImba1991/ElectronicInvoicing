@@ -282,8 +282,6 @@ class VoucherController extends Controller
                 self::acceptVoucher(Voucher::find($id));
                 break;
             case VoucherStates::SENDED:
-                info('********SENDED************************');
-                info($request);
                 self::saveVoucher($request, $state, true, $id);
                 self::acceptVoucher(Voucher::find($id));
                 self::sendVoucher(Voucher::find($id));
