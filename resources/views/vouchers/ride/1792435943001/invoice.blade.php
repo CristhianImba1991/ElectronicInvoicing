@@ -34,7 +34,7 @@
             </tr>
         </thead>
       <tbody>
-          @foreach(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get() as $detail)
+          @foreach($voucher->details()->orderBy('id')->get() as $detail)
               <tr>
                 <td class="align-middle">{{ $detail->product->main_code }}</td>
                 <td class="text-center align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : rtrim(rtrim($detail->quantity, '0'), '.') }}</td>
