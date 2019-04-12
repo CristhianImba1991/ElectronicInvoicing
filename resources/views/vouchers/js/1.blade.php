@@ -4,11 +4,11 @@ $(document).ready(function(){
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
         var voucher = {
-            "product": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('product_id')),
-            "product_additionalDetails": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->with('additionalDetails')->get()),
-            "product_quantity": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('quantity')),
-            "product_unitprice": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('unit_price')),
-            "product_discount": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('discount')),
+            "product": @json($voucher->details()->orderBy('id')->pluck('product_id')),
+            "product_additionalDetails": @json($voucher->details()->orderBy('id')->with('additionalDetails')->get()),
+            "product_quantity": @json($voucher->details()->orderBy('id')->pluck('quantity')),
+            "product_unitprice": @json($voucher->details()->orderBy('id')->pluck('unit_price')),
+            "product_discount": @json($voucher->details()->orderBy('id')->pluck('discount')),
             "paymentMethod": @json($voucher->payments()->get()->pluck('payment_method_id')),
             "paymentMethod_value": @json($voucher->payments()->get()->pluck('total')),
             "paymentMethod_timeunit": @json($voucher->payments()->get()->pluck('time_unit_id')),

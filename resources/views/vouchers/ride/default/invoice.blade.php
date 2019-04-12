@@ -32,7 +32,7 @@
             </tr>
         </thead>
       <tbody>
-          @foreach(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get() as $detail)
+          @foreach($voucher->details()->orderBy('id')->get() as $detail)
               <tr>
                 <td class="align-middle">{{ $detail->product->main_code }}</td>
                 <td class="align-middle">{{ $detail->product->auxiliary_code }}</td>

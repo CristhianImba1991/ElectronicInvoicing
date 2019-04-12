@@ -609,7 +609,7 @@ class VoucherController extends Controller
                 $quantities = $request->product_quantity;
                 $unitPrices = $request->product_unitprice;
                 $discounts = $request->product_discount;
-                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
+                foreach ($voucher->details()->get() as $detail) {
                     foreach ($detail->taxDetails as $taxDetail) {
                         $taxDetail->delete();
                     }
@@ -1627,24 +1627,33 @@ class VoucherController extends Controller
                 $xmlReponse = [
                     'estado' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
                     'numeroAutorizacion' => NULL,
-                    'fechaAutorizacion' => array(
-                        '_attributes' => ['class' => 'fechaAutorizacion'],
-                        '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
-                    ),
-                    'comprobante' => array(
-                        '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
-                    ),
+                    'fechaAutorizacion' => NULL,
+                    'comprobante' => NULL,
                     'mensajes' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
                 ];
 
                 switch ($resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
                     case 'AUTORIZADO':
                         $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
+                        $xmlReponse['fechaAutorizacion'] = array(
+                            '_attributes' => ['class' => 'fechaAutorizacion'],
+                            '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                        );
+                        $xmlReponse['comprobante'] = array(
+                            '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                        );
                         $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
                         $voucher->extra_detail = NULL;
                         break;
                     case 'NO AUTORIZADO':
                         unset($xmlReponse['numeroAutorizacion']);
+                        $xmlReponse['fechaAutorizacion'] = array(
+                            '_attributes' => ['class' => 'fechaAutorizacion'],
+                            '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                        );
+                        $xmlReponse['comprobante'] = array(
+                            '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                        );
                         $message = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['tipo'] . ' ' .
                             $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['identificador'] . ': ' .
                             $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['mensaje'];
@@ -1655,6 +1664,9 @@ class VoucherController extends Controller
                         $voucher->extra_detail = $message;
                         break;
                     default:
+                        unset($xmlReponse['numeroAutorizacion']);
+                        unset($xmlReponse['fechaAutorizacion']);
+                        unset($xmlReponse['comprobante']);
                         $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
                         $voucher->extra_detail = NULL;
                         break;
