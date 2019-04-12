@@ -201,10 +201,12 @@ $(document).ready(function(){
                         if ('product_quantity' in voucher) {
                             if (voucher['product_quantity'].length > 0) {
                                 if (voucher['product_quantity'][0] != null) {
+                                    console.log('BEFORE: ' + JSON.stringify(voucher['product_quantity']));
                                     productQuantity = Number(voucher['product_quantity'][0]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                                    voucher['product_quantity'].shift();
+                                    console.log('AFTER: ' + JSON.stringify(voucher['product_quantity']));
                                 }
-                                voucher['product_quantity'].shift();
                             }
                         }
                     @endif
@@ -215,8 +217,8 @@ $(document).ready(function(){
                                 if (voucher['product_unitprice'][0] != null) {
                                     productUnitPrice = Number(voucher['product_unitprice'][0]);
                                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                                    voucher['product_unitprice'].shift();
                                 }
-                                voucher['product_unitprice'].shift();
                             }
                         }
                     @endif
@@ -228,8 +230,8 @@ $(document).ready(function(){
                                 if (voucher['product_discount'][0] != null) {
                                     productDiscount = Number(voucher['product_discount'][0]);
                                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
+                                    voucher['product_discount'].shift();
                                 }
-                                voucher['product_discount'].shift();
                             }
                         }
                     @endif

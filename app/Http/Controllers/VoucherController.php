@@ -1642,6 +1642,8 @@ class VoucherController extends Controller
                         );
                         $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
                         $voucher->extra_detail = NULL;
+                        $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+                        $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
                         break;
                     case 'NO AUTORIZADO':
                         unset($xmlReponse['numeroAutorizacion']);
@@ -1660,6 +1662,8 @@ class VoucherController extends Controller
                         }
                         $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
                         $voucher->extra_detail = $message;
+                        $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+                        $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
                         break;
                     default:
                         unset($xmlReponse['numeroAutorizacion']);
@@ -1669,8 +1673,6 @@ class VoucherController extends Controller
                         $voucher->extra_detail = NULL;
                         break;
                 }
-                $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
-                $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
                 $voucher->save();
                 $xmlPath = 'xmls/' .
                     $voucher->emissionPoint->branch->company->ruc . '/' .
