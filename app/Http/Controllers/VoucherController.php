@@ -282,6 +282,8 @@ class VoucherController extends Controller
                 self::acceptVoucher(Voucher::find($id));
                 break;
             case VoucherStates::SENDED:
+                info('********SENDED************************');
+                info($request);
                 self::saveVoucher($request, $state, true, $id);
                 self::acceptVoucher(Voucher::find($id));
                 self::sendVoucher(Voucher::find($id));
@@ -553,7 +555,7 @@ class VoucherController extends Controller
     }
 
     public static function saveVoucher($request, $state, $isUpdate = false, $id = null)
-    {
+    {info('********** SAVE ***********');info($request);
         $company = Company::find($request->company);
         $branch = Branch::find($request->branch);
         $emissionPoint = EmissionPoint::find($request->emission_point);
