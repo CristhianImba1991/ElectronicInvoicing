@@ -535,9 +535,9 @@ $(document).ready(function(){
                 addRowAdditionalDetail();
             }
         }
-        $('#waybill_establishment').val(Number(voucher['waybill_establishment']));
-        $('#waybill_emissionpoint').val(Number(voucher['waybill_emissionpoint']));
-        $('#waybill_sequential').val(Number(voucher['waybill_sequential']));
+        $('#waybill_establishment').val(voucher['waybill_establishment'] != '' ? Number(voucher['waybill_establishment']) : '');
+        $('#waybill_emissionpoint').val(voucher['waybill_emissionpoint'] != '' ? Number(voucher['waybill_emissionpoint']) : '');
+        $('#waybill_sequential').val(voucher['waybill_sequential'] != '' ? Number(voucher['waybill_sequential']) : '');
         $('#extra_detail').val(voucher['extra_detail']);
     @endif
     $("#ivaRetention").change(function() {

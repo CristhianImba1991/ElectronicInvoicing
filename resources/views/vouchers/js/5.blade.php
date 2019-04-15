@@ -35,7 +35,7 @@ $(document).ready(function(){
                 retentionTable.row.add([
                     '<select class="form-control selectpicker" id="tax[]" name="tax[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.tax"))]), 0) }}">' + options + '</select>',
                     '<select class="form-control selectpicker" id="description[]" name="description[]" data-live-search="true" title="{{ trans_choice(__("view.select_a_model", ["model" => strtolower(__("view.tax_description"))]), 1) }}"></select>',
-                    '<input class="form-control" type="number" id="value[]" name="value[]" min="0.00" max="100.00" value="0.00" step="0.01">',
+                    '<input class="form-control" type="number" id="value[]" name="value[]" min="0.00" max="100.00" value="0.00" step="0.01" lang="en">',
                     '<input class="form-control" type="text" id="tax_base[]" name="tax_base[]" value="0.00">',
                     '<input class="form-control" type="text" id="retained-value[]" name="retained-value[]" value="0.00" readonly>',
                     '<button type="button" class="btn btn-danger btn-sm">&times;</button>',
