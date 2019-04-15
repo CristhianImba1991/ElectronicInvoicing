@@ -1028,15 +1028,12 @@ class VoucherController extends Controller
                     );
                 }
                 $xml['infoFactura']['pagos']['pago'] = $voucherPayments;
-                if ($voucher->iva_retention === NULL) {
+                if ($voucher->iva_retention !== NULL || $voucher->rent_retention !== NULL) {
+                    $xml['infoFactura']['valRetIva'] = number_format($voucher->iva_retention === NULL ? 0.00 : $voucher->iva_retention, 2, '.', '');
+                    $xml['infoFactura']['valRetRenta'] = number_format($voucher->rent_retention === NULL ? 0.00 : $voucher->rent_retention, 2, '.', '');
+                } else {
                     unset($xml['infoFactura']['valRetIva']);
-                } else {
-                    $xml['infoFactura']['valRetIva'] = number_format($voucher->iva_retention, 2, '.', '');
-                }
-                if ($voucher->rent_retention === NULL) {
                     unset($xml['infoFactura']['valRetRenta']);
-                } else {
-                    $xml['infoFactura']['valRetRenta'] = number_format($voucher->rent_retention, 2, '.', '');
                 }
                 $voucherDetails = array();
                 foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
