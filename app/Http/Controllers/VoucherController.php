@@ -553,7 +553,7 @@ class VoucherController extends Controller
     }
 
     public static function saveVoucher($request, $state, $isUpdate = false, $id = null)
-    {info('********** SAVE ***********');info($request);
+    {
         $company = Company::find($request->company);
         $branch = Branch::find($request->branch);
         $emissionPoint = EmissionPoint::find($request->emission_point);
@@ -1695,7 +1695,9 @@ class VoucherController extends Controller
                 info('#### END ERROR IN AUTORIZARCOMPROBANTE WS ###################');
             }
         } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
+            info('#### RETURNED VOUCHER #######################');
             info(' *** ' . $voucher->extra_detail . ' *** ');
+            info('#### END RETURNED VOUCHER #######################');
         }
     }
 

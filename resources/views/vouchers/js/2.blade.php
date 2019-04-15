@@ -3,12 +3,13 @@ $(document).ready(function(){
     @if($action === 'draft')
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
+        var details = @json($voucher->details()->orderBy('id')->with('additionalDetails')->get());
         var voucher = {
-            "product": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('product_id')),
-            "product_additionalDetails": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->with('additionalDetails')->get()),
-            "product_quantity": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('quantity')),
-            "product_unitprice": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('unit_price')),
-            "product_discount": @json(\ElectronicInvoicing\Detail::where('voucher_id', '=', $voucher->id)->get()->pluck('discount')),
+            "product": new Array(),
+            "product_additionalDetails": new Array(),
+            "product_quantity": new Array(),
+            "product_unitprice": new Array(),
+            "product_discount": new Array(),
             "supportdocument_establishment": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 10, 3) : ''),
             "supportdocument_emissionpoint": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 13, 3) : ''),
             "supportdocument_sequential": @json($voucher->support_document !== NULL ? substr($voucher->support_document, 16, 9) : ''),
@@ -18,6 +19,13 @@ $(document).ready(function(){
             "additionaldetail_value": @json($voucher->additionalFields()->get()->pluck('value')),
             "extra_detail": @json($voucher->extra_detail)
         };
+        for (var i in details) {
+            voucher['product'].push(details[i]['product_id']);
+            voucher['product_additionalDetails'].push(details[i]);
+            voucher['product_quantity'].push(details[i]['quantity']);
+            voucher['product_unitprice'].push(details[i]['unit_price']);
+            voucher['product_discount'].push(details[i]['discount']);
+        }
     @endif
     @if(auth()->user()->can('create_products'))
         $("#product_company").selectpicker('render');
@@ -114,7 +122,6 @@ $(document).ready(function(){
                             if ($("select[id ~= 'product[]']").length == voucher['product'].length && voucher['product'].length > 0) {
                                 $("select[id ~= 'product[]']").each(function() {
                                     $(this).selectpicker('val', voucher['product'][0]);
-                                    voucher['product'].shift();
                                 });
                             }
                         }
@@ -157,27 +164,30 @@ $(document).ready(function(){
                     productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
                     @if($action === 'edit')
-                        for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
-                            reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                        if (voucher['product_additionalDetails'].length > 0) {
+                            for (var i = 0; i < voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'].length && i < 3; i++) {
+                                reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value']);
+                            }
                         }
-                        voucher['product_additionalDetails'].shift();
                     @elseif($action === 'draft')
-                        reference.closest('tr').find('input[id *= product_detail1]').val(voucher['product_detail1'][0]);
-                        reference.closest('tr').find('input[id *= product_detail2]').val(voucher['product_detail2'][0]);
-                        reference.closest('tr').find('input[id *= product_detail3]').val(voucher['product_detail3'][0]);
-                        voucher['product_detail1'].shift();
-                        voucher['product_detail2'].shift();
-                        voucher['product_detail3'].shift();
+                        for (var i = 0; i < 3; i++) {
+                            if ('product_detail' + (i + 1) in voucher) {
+                                if (voucher['product_detail' + (i + 1)].length > 0) {
+                                    if (voucher['product_detail' + (i + 1)][voucher['product'].indexOf(Number(id))] != null) {
+                                        reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_detail' + (i + 1) + ''][voucher['product'].indexOf(Number(id))]);
+                                    }
+                                }
+                            }
+                        }
                     @endif
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_quantity' in voucher) {
                             if (voucher['product_quantity'].length > 0) {
-                                if (voucher['product_quantity'][0] != null) {
-                                    productQuantity = Number(voucher['product_quantity'][0]);
+                                if (voucher['product_quantity'][voucher['product'].indexOf(Number(id))] != null) {
+                                    productQuantity = Number(voucher['product_quantity'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                                 }
-                                voucher['product_quantity'].shift();
                             }
                         }
                     @endif
@@ -185,11 +195,10 @@ $(document).ready(function(){
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_unitprice' in voucher) {
                             if (voucher['product_unitprice'].length > 0) {
-                                if (voucher['product_unitprice'][0] != null) {
-                                    productUnitPrice = Number(voucher['product_unitprice'][0]);
+                                if (voucher['product_unitprice'][voucher['product'].indexOf(Number(id))] != null) {
+                                    productUnitPrice = Number(voucher['product_unitprice'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                                 }
-                                voucher['product_unitprice'].shift();
                             }
                         }
                     @endif
@@ -198,11 +207,10 @@ $(document).ready(function(){
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_discount' in voucher) {
                             if (voucher['product_discount'].length > 0) {
-                                if (voucher['product_discount'][0] != null) {
-                                    productDiscount = Number(voucher['product_discount'][0]);
+                                if (voucher['product_discount'][voucher['product'].indexOf(Number(id))] != null) {
+                                    productDiscount = Number(voucher['product_discount'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
                                 }
-                                voucher['product_discount'].shift();
                             }
                         }
                     @endif

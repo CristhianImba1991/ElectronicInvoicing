@@ -5,11 +5,11 @@ $(document).ready(function(){
     @elseif($action === 'edit')
         var details = @json($voucher->details()->orderBy('id')->with('additionalDetails')->get());
         var voucher = {
-            "product": new Array(),//@json($voucher->details()->orderBy('id')->pluck('product_id')),
-            "product_additionalDetails": new Array(),//@json($voucher->details()->orderBy('id')->with('additionalDetails')->get()),
-            "product_quantity": new Array(),//@json($voucher->details()->orderBy('id')->pluck('quantity')),
-            "product_unitprice": new Array(),//@json($voucher->details()->orderBy('id')->pluck('unit_price')),
-            "product_discount": new Array(),//@json($voucher->details()->orderBy('id')->pluck('discount')),
+            "product": new Array(),
+            "product_additionalDetails": new Array(),
+            "product_quantity": new Array(),
+            "product_unitprice": new Array(),
+            "product_discount": new Array(),
             "paymentMethod": @json($voucher->payments()->get()->pluck('payment_method_id')),
             "paymentMethod_value": @json($voucher->payments()->get()->pluck('total')),
             "paymentMethod_timeunit": @json($voucher->payments()->get()->pluck('time_unit_id')),
@@ -133,7 +133,6 @@ $(document).ready(function(){
                             if ($("select[id ~= 'product[]']").length == voucher['product'].length && voucher['product'].length > 0) {
                                 $("select[id ~= 'product[]']").each(function(i,d) {
                                     $(this).selectpicker('val', voucher['product'][i]);
-                                    //voucher['product'].shift();
                                 });
                             }
                         }
@@ -181,7 +180,6 @@ $(document).ready(function(){
                             for (var i = 0; i < voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'].length && i < 3; i++) {
                                 reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value']);
                             }
-                            //voucher['product_additionalDetails'].shift();
                         }
                     @elseif($action === 'draft')
                         for (var i = 0; i < 3; i++) {
@@ -190,7 +188,6 @@ $(document).ready(function(){
                                     if (voucher['product_detail' + (i + 1)][voucher['product'].indexOf(Number(id))] != null) {
                                         reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_detail' + (i + 1) + ''][voucher['product'].indexOf(Number(id))]);
                                     }
-                                    //voucher['product_detail' + (i + 1)].shift();
                                 }
                             }
                         }
@@ -203,7 +200,6 @@ $(document).ready(function(){
                                     productQuantity = Number(voucher['product_quantity'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                                 }
-                                //voucher['product_quantity'].shift();
                             }
                         }
                     @endif
@@ -215,7 +211,6 @@ $(document).ready(function(){
                                     productUnitPrice = Number(voucher['product_unitprice'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                                 }
-                                //voucher['product_unitprice'].shift();
                             }
                         }
                     @endif
@@ -228,7 +223,6 @@ $(document).ready(function(){
                                     productDiscount = Number(voucher['product_discount'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
                                 }
-                                //voucher['product_discount'].shift();
                             }
                         }
                     @endif
