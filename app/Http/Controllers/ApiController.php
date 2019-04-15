@@ -90,7 +90,7 @@ class ApiController extends Controller
             self::changeToIdsVoucher($request);
             $voucher = VoucherController::saveVoucher($request, VoucherStates::SENDED);
             VoucherController::acceptVoucher($voucher);
-            //VoucherController::sendVoucher($voucher);
+            VoucherController::sendVoucher($voucher);
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0),

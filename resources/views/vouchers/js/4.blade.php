@@ -3,10 +3,11 @@ $(document).ready(function(){
     @if($action === 'draft')
         var voucher = @json($draftVoucher);
     @elseif($action === 'edit')
+        var details = @json($voucher->waybills()->first()->addressees()->first()->details()->orderBy('id')->with('additionalDetails')->get());
         var voucher = {
-            "product": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('product_id')),
-            "product_additionalDetails": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->with('additionalDetails')->get()),
-            "product_quantity": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('quantity')),
+            "product": new Array(),//json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('product_id')),
+            "product_additionalDetails": new Array(),//json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->with('additionalDetails')->get()),
+            "product_quantity": new Array(),//json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('quantity')),
             "identification_type": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->identification_type_id),
             "carrier_ruc": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->carrier_ruc),
             "carrier_social_reason": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->carrier_social_reason),
@@ -24,6 +25,11 @@ $(document).ready(function(){
             "destination_establishment_code": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->destination_establishment_code),
             "route": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->route),
         };
+        for (var i in details) {
+            voucher['product'].push(details[i]['product_id']);
+            voucher['product_additionalDetails'].push(details[i]);
+            voucher['product_quantity'].push(details[i]['quantity']);
+        }
     @endif
     @if(auth()->user()->can('create_products'))
         $("#product_company").selectpicker('render');
@@ -114,9 +120,8 @@ $(document).ready(function(){
                         $("select[id ~= 'product[]']").selectpicker();
                         if ('product' in voucher) {
                             if ($("select[id ~= 'product[]']").length == voucher['product'].length && voucher['product'].length > 0) {
-                                $("select[id ~= 'product[]']").each(function() {
-                                    $(this).selectpicker('val', voucher['product'][0]);
-                                    voucher['product'].shift();
+                                $("select[id ~= 'product[]']").each(function(i,d) {
+                                    $(this).selectpicker('val', voucher['product'][i]);
                                 });
                             }
                         }
@@ -152,27 +157,30 @@ $(document).ready(function(){
                     productQuantity = isNaN(productQuantity) ? 1.0 : productQuantity;
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
                     @if($action === 'edit')
-                        for (var i = 0; i < voucher['product_additionalDetails'][0]['additional_details'].length && i < 3; i++) {
-                            reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][0]['additional_details'][i]['value']);
+                        if (voucher['product_additionalDetails'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
+                            for (var i = 0; i < voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'].length && i < 3; i++) {
+                                reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value']);
+                            }
                         }
-                        voucher['product_additionalDetails'].shift();
                     @elseif($action === 'draft')
-                        reference.closest('tr').find('input[id *= product_detail1]').val(voucher['product_detail1'][0]);
-                        reference.closest('tr').find('input[id *= product_detail2]').val(voucher['product_detail2'][0]);
-                        reference.closest('tr').find('input[id *= product_detail3]').val(voucher['product_detail3'][0]);
-                        voucher['product_detail1'].shift();
-                        voucher['product_detail2'].shift();
-                        voucher['product_detail3'].shift();
+                        for (var i = 0; i < 3; i++) {
+                            if ('product_detail' + (i + 1) in voucher) {
+                                if (voucher['product_detail' + (i + 1)].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
+                                    if (voucher['product_detail' + (i + 1)][voucher['product'].indexOf(Number(id))] != null) {
+                                        reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_detail' + (i + 1) + ''][voucher['product'].indexOf(Number(id))]);
+                                    }
+                                }
+                            }
+                        }
                     @endif
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_quantity' in voucher) {
-                            if (voucher['product_quantity'].length > 0) {
-                                if (voucher['product_quantity'][0] != null) {
-                                    productQuantity = Number(voucher['product_quantity'][0]);
+                            if (voucher['product_quantity'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
+                                if (voucher['product_quantity'][voucher['product'].indexOf(Number(id))] != null) {
+                                    productQuantity = Number(voucher['product_quantity'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                                 }
-                                voucher['product_quantity'].shift();
                             }
                         }
                     @endif
