@@ -176,7 +176,7 @@ $(document).ready(function(){
                     productDiscount = isNaN(productDiscount) ? 0.0 : productDiscount;
                     reference.closest('tr').find('input[id *= product-description]').val(taxes[0]['product']['description']);
                     @if($action === 'edit')
-                        if (voucher['product_additionalDetails'].length > 0) {
+                        if (voucher['product_additionalDetails'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                             for (var i = 0; i < voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'].length && i < 3; i++) {
                                 reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value']);
                             }
@@ -184,7 +184,7 @@ $(document).ready(function(){
                     @elseif($action === 'draft')
                         for (var i = 0; i < 3; i++) {
                             if ('product_detail' + (i + 1) in voucher) {
-                                if (voucher['product_detail' + (i + 1)].length > 0) {
+                                if (voucher['product_detail' + (i + 1)].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                                     if (voucher['product_detail' + (i + 1)][voucher['product'].indexOf(Number(id))] != null) {
                                         reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_detail' + (i + 1) + ''][voucher['product'].indexOf(Number(id))]);
                                     }
@@ -195,7 +195,7 @@ $(document).ready(function(){
                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_quantity' in voucher) {
-                            if (voucher['product_quantity'].length > 0) {
+                            if (voucher['product_quantity'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                                 if (voucher['product_quantity'][voucher['product'].indexOf(Number(id))] != null) {
                                     productQuantity = Number(voucher['product_quantity'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
@@ -206,7 +206,7 @@ $(document).ready(function(){
                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_unitprice' in voucher) {
-                            if (voucher['product_unitprice'].length > 0) {
+                            if (voucher['product_unitprice'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                                 if (voucher['product_unitprice'][voucher['product'].indexOf(Number(id))] != null) {
                                     productUnitPrice = Number(voucher['product_unitprice'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
@@ -218,7 +218,7 @@ $(document).ready(function(){
                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
                     @if($action === 'edit' || $action === 'draft')
                         if ('product_discount' in voucher) {
-                            if (voucher['product_discount'].length > 0) {
+                            if (voucher['product_discount'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                                 if (voucher['product_discount'][voucher['product'].indexOf(Number(id))] != null) {
                                     productDiscount = Number(voucher['product_discount'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
@@ -535,9 +535,9 @@ $(document).ready(function(){
                 addRowAdditionalDetail();
             }
         }
-        $('#waybill_establishment').val(voucher['waybill_establishment']);
-        $('#waybill_emissionpoint').val(voucher['waybill_emissionpoint']);
-        $('#waybill_sequential').val(voucher['waybill_sequential']);
+        $('#waybill_establishment').val(Number(voucher['waybill_establishment']));
+        $('#waybill_emissionpoint').val(Number(voucher['waybill_emissionpoint']));
+        $('#waybill_sequential').val(Number(voucher['waybill_sequential']));
         $('#extra_detail').val(voucher['extra_detail']);
     @endif
     $("#ivaRetention").change(function() {
