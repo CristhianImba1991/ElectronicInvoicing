@@ -297,7 +297,17 @@ class CompanyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      */
     public function customers(Request $request) {
-        if (is_string($request->id)) {
+        if (is_array($request->id)) {
+            $customers = collect();
+            $companies = Company::whereIn('id', $request->id)->get();
+            foreach ($companies as $company) {
+                foreach ($company->customers()->get() as $customer) {
+                    $customers->push($customer);
+                }
+            }
+            $customers->push(Customer::where('identification', '=', '9999999999999')->first());
+            return $customers->toJson();
+        } else if (is_string($request->id)) {
             $customers = Company::where('id', $request->id)->first()->customers()->get();
             $customers->push(Customer::where('identification', '=', '9999999999999')->first());
             return $customers->toJson();
