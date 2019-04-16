@@ -23,7 +23,7 @@ return [
     'retention' => 'Retention',
 
     'establishment' => 'Establishment',
-    'environment' => 'Environment',
+    'environment' => '{0} Environment|{1} Environments',
     'role' => 'Role',
     'current_role' => 'Current role',
     'name' => 'Name',
@@ -63,7 +63,7 @@ return [
     'state' => 'State',
     'issue_date' => 'Issue date',
     'view' => 'View',
-    'voucher_type' => 'Voucher type',
+    'voucher_type' => '{0} Voucher type|{1} Voucher types',
     'voucher_type_of_the_support_document' => 'Voucher type of the support document',
     'issue_date_of_the_support_document' => 'Issue date of the support document',
     'reason' => 'Reason',

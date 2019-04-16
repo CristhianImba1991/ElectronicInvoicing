@@ -214,7 +214,7 @@ $(document).ready(function(){
         todayBtn: 'linked',
         todayHighlight: true,
         endDate: '0d',
-        language: '{{ str_replace('_', '-', app()->getLocale()) }}',
+        language: '{{ str_replace("_", "-", app()->getLocale()) }}',
         format: 'yyyy-mm-dd',
         daysOfWeekHighlighted: "0,6"
     });
@@ -223,7 +223,7 @@ $(document).ready(function(){
         todayBtn: 'linked',
         todayHighlight: true,
         endDate: '0d',
-        language: '{{ str_replace('_', '-', app()->getLocale()) }}',
+        language: '{{ str_replace("_", "-", app()->getLocale()) }}',
         format: 'yyyy-mm-dd',
         daysOfWeekHighlighted: "0,6"
     });

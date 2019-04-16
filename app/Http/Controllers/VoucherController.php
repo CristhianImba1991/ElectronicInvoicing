@@ -132,9 +132,11 @@ class VoucherController extends Controller
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
-            $companies = $user->hasRole('customer') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = $user->hasRole('customer') ? collect() : CompanyUser::getCompaniesAllowedToUser($user);
         }
-        return view('vouchers.index', compact(['companies', 'vouchers']));
+        $environments = Environment::all();
+        $voucherTypes = VoucherType::all();
+        return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherTypes']));
     }
 
     /**

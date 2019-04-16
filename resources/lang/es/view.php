@@ -23,7 +23,7 @@ return [
     'retention' => 'Retención',
 
     'establishment' => 'Establecimiento',
-    'environment' => 'Ambiente',
+    'environment' => '{0} Ambiente|{1} Ambientes',
     'role' => 'Rol',
     'current_role' => 'Rol actual',
     'name' => 'Nombre',
@@ -63,7 +63,7 @@ return [
     'state' => 'Estado',
     'issue_date' => 'Fecha emisión',
     'view' => 'Ver',
-    'voucher_type' => 'Tipo de comprobante',
+    'voucher_type' => '{0} Tipo de comprobante|{1} Tipos de comprobante',
     'voucher_type_of_the_support_document' => 'Tipo de comprobante del documento de soporte',
     'issue_date_of_the_support_document' => 'Fecha de emisión del documento de soporte',
     'reason' => 'Razón',

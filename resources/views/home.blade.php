@@ -185,8 +185,8 @@ $(document).ready(function(){
                                             <thead>
                                                 <tr>
                                                     <th>{{ ucfirst(trans_choice(__('view.company'), 0)) }}</th>
-                                                    <th>{{ __('view.environment') }}</th>
-                                                    <th>{{ __('view.voucher_type') }}</th>
+                                                    <th>{{ trans_choice(__('view.environment'), 0) }}</th>
+                                                    <th>{{ trans_choice(__('view.voucher_type'), 0) }}</th>
                                                     <th>{{ __('view.created_at') }}</th>
                                                     <th>{{ __('view.updated_at') }}</th>
                                                     <th></th>

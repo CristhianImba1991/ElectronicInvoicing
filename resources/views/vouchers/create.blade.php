@@ -4,7 +4,7 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
-<script src="{{ asset('js/locales/bootstrap-datepicker.' . str_replace('_', '-', app()->getLocale()) . '.min.js') }}" charset="UTF-8"></script>
+<script src="{{ asset('js/locales/bootstrap-datepicker.' . str_replace("_", "-", app()->getLocale()) . '.min.js') }}" charset="UTF-8"></script>
 <script src="{{ asset('js/bootstrap-tokenfield.min.js') }}"></script>
 @include('vouchers.js.create_edit', ['action' => 'create'])
 @endsection
@@ -145,7 +145,7 @@
                                             <input class="form-control" id="issue_date" name="issue_date" readonly>
                                         </div>
                                         <div class="form-group">
-                                            <label for="environment">{{ __('view.environment') }}</label>
+                                            <label for="environment">{{ trans_choice(__('view.environment'), 0) }}</label>
                                             <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.environment'))]), 0) }}">
                                                 @foreach($environments as $environment)
                                                     <option value="{{ $environment->id }}">{{ $environment->name }}</option>
@@ -153,7 +153,7 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="voucher_type">{{ __('view.voucher_type') }}</label>
+                                            <label for="voucher_type">{{ trans_choice(__('view.voucher_type'), 0) }}</label>
                                             <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.voucher_type'))]), 0) }}">
                                                 @foreach($voucherTypes as $voucherType)
                                                     <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
