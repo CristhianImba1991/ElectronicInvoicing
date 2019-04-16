@@ -147,7 +147,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="environment">{{ trans_choice(__('view.environment'), 0) }}</label>
-                                            <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.environment'))]), 0) }}">
+                                            <select class="form-control selectpicker" id="environment" name="environment" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(trans_choice(__('view.environment'), 0))]), 0) }}">
                                                 @foreach($environments as $environment)
                                                     <option value="{{ $environment->id }}">{{ $environment->name }}</option>
                                                 @endforeach
@@ -155,7 +155,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="voucher_type">{{ trans_choice(__('view.voucher_type'), 0) }}</label>
-                                            <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(__('view.voucher_type'))]), 0) }}">
+                                            <select class="form-control selectpicker" id="voucher_type" name="voucher_type" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => strtolower(trans_choice(__('view.voucher_type'), 0))]), 0) }}">
                                                 @foreach($voucherTypes as $voucherType)
                                                     <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
                                                 @endforeach

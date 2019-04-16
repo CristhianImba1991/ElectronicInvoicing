@@ -63,7 +63,7 @@
             <h5 class="card-title">7. {{ __('view.support_document') }}</h5>
             <div class="form-group">
                 <label for="voucher_type_support_document">{{ __('view.voucher_type_of_the_support_document') }}</label>
-                <select class="form-control selectpicker" id="voucher_type_support_document" name="voucher_type_support_document" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(__('view.voucher_type'))]), 0) }}">
+                <select class="form-control selectpicker" id="voucher_type_support_document" name="voucher_type_support_document" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_a_model', ['model' => lcfirst(trans_choice(__('view.voucher_type'), 0))]), 0) }}">
                     @foreach($voucherTypes as $voucherType)
                         <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
                     @endforeach

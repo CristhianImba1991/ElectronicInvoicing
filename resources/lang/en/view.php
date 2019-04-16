@@ -69,6 +69,8 @@ return [
     'reason' => 'Reason',
     'created_at' => 'Created at',
     'updated_at' => 'Updated at',
+    'sequential' => 'Sequential',
+    'to' => 'to',
     'tax' => 'Tax',
     'tax_description' => 'Tax description',
     'payment_method' => 'Payment method',

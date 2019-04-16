@@ -69,6 +69,8 @@ return [
     'reason' => 'Razón',
     'created_at' => 'Creado',
     'updated_at' => 'Actualizado',
+    'sequential' => 'Secuencial',
+    'to' => 'a',
     'tax' => 'Impuesto',
     'tax_description' => 'Descripción de impuesto',
     'payment_method' => 'Método de pago',
