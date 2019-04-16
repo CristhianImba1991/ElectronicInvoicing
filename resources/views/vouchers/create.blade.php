@@ -4,7 +4,7 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
-<script src="{{ asset('js/locales/bootstrap-datepicker.' . str_replace("_", "-", app()->getLocale()) . '.min.js') }}" charset="UTF-8"></script>
+<script src="{{ asset('js/locales/bootstrap-datepicker.' . str_replace('_', '-', app()->getLocale()) . '.min.js') }}" charset="UTF-8"></script>
 <script src="{{ asset('js/bootstrap-tokenfield.min.js') }}"></script>
 @include('vouchers.js.create_edit', ['action' => 'create'])
 @endsection
