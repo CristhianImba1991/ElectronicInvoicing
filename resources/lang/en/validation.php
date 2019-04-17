@@ -157,6 +157,9 @@ return [
         ],
         'email' => [
             'validemailmultiple' => 'The :ATTRIBUTE must be a valid email address.',
+        ],
+        'support_document' => [
+            'uniquesupportdocument' => 'The :ATTRIBUTE has already been taken.'
         ]
     ],
 

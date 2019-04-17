@@ -158,6 +158,7 @@ return [
         ElectronicInvoicing\Providers\SignatureNotExpiredServiceProvider::class,
         ElectronicInvoicing\Providers\UniqueCustomerServiceProvider::class,
         ElectronicInvoicing\Providers\UniqueMultipleServiceProvider::class,
+        ElectronicInvoicing\Providers\UniqueSupportDocumentServiceProvider::class,
         ElectronicInvoicing\Providers\ValidCedulaServiceProvider::class,
         ElectronicInvoicing\Providers\ValidEmailMultipleServiceProvider::class,
         ElectronicInvoicing\Providers\ValidRUCServiceProvider::class,

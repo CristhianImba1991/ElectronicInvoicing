@@ -44,6 +44,7 @@ use ElectronicInvoicing\Http\Logic\DraftJson;
 use ElectronicInvoicing\StaticClasses\{VoucherStates, ValidationRule};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use PDF;
 use SoapClient;
 use Spatie\ArrayToXml\ArrayToXml;
@@ -62,6 +63,42 @@ class VoucherController extends Controller
 
     public static function isValidRequest(Request $request, $state)
     {
+        if ($request->voucher_type !== NULL) {
+            $isApiRequest = Str::startsWith($request->decodedPath(), 'api/auth');
+            if ($request->voucher_type === $isApiRequest ? "7" : 5) {
+                if ($isApiRequest) {
+                    if ($request->customer !== NULL && $request->issue_date_support_document !== NULL && $request->voucher_type_support_document !== NULL && $request->supportdocument_establishment !== NULL && $request->supportdocument_emissionpoint !== NULL && $request->supportdocument_sequential !== NULL) {
+                        $issueDateSupportDocument = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document);
+                        if ($issueDateSupportDocument) {
+                            $request->merge([
+                                'support_document' => $request->customer .
+                                    $issueDateSupportDocument->format('dmY') .
+                                    str_pad(strval($request->voucher_type_support_document), 2, '0', STR_PAD_LEFT) .
+                                    str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
+                                    str_pad(strval($request->supportdocument_emissionpoint), 3, '0', STR_PAD_LEFT) .
+                                    str_pad(strval($request->supportdocument_sequential), 9, '0', STR_PAD_LEFT)
+                            ]);
+                        }
+                    }
+                } else {
+                    if ($request->customer !== NULL && $request->issue_date_support_document !== NULL && $request->voucher_type_support_document !== NULL && $request->supportdocument_establishment !== NULL && $request->supportdocument_emissionpoint !== NULL && $request->supportdocument_sequential !== NULL) {
+                        $issueDateSupportDocument = DateTime::createFromFormat('Y-m-d', $request->issue_date_support_document);
+                        if ($issueDateSupportDocument) {
+                            $customer = Customer::find($request->customer);
+                            $voucherTypeSupportDocument = VoucherType::find($request->voucher_type_support_document);
+                            $request->merge([
+                                'support_document' => ($customer === NULL ? '' : $customer->identification) .
+                                    $issueDateSupportDocument->format('dmY') .
+                                    str_pad(strval($voucherTypeSupportDocument === NULL ? '' : $voucherTypeSupportDocument->code), 2, '0', STR_PAD_LEFT) .
+                                    str_pad(strval($request->supportdocument_establishment), 3, '0', STR_PAD_LEFT) .
+                                    str_pad(strval($request->supportdocument_emissionpoint), 3, '0', STR_PAD_LEFT) .
+                                    str_pad(strval($request->supportdocument_sequential), 9, '0', STR_PAD_LEFT)
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
         return Validator::make($request->all(), ValidationRule::makeRule('voucher', $request, $state));
     }
 
@@ -137,6 +174,17 @@ class VoucherController extends Controller
         $environments = Environment::all();
         $voucherTypes = VoucherType::all();
         return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherTypes']));
+    }
+
+    /**
+     * Display a listing of the resource according to a filter criteria.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function filter(Request $request)
+    {
+
+        return $request;
     }
 
     /**

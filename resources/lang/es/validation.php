@@ -157,6 +157,9 @@ return [
         ],
         'email' => [
             'validemailmultiple' => 'El campo :ATTRIBUTE debe ser una dirección válida de correo electrónico.',
+        ],
+        'support_document' => [
+            'uniquesupportdocument' => 'El campo :ATTRIBUTE ya ha sido tomado.'
         ]
     ],
 
@@ -217,6 +220,7 @@ return [
         'issue_date_support_document' => 'Fecha de emisión del documento de soporte',
         'reason' => 'Razón',
         'voucher_type_support_document' => 'Tipo de comprobante del documento de soporte',
+        'support_document' => 'Documento de soporte',
 
         'company.*' => 'Compañía',
         'branch.*' => 'Sucursal',

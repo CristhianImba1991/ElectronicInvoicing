@@ -304,6 +304,7 @@ class ValidationRule
                             $rules['supportdocument_sequential'] = 'required|nullable|integer|min:1|max:999999999';
                             //$rules['issue_date_support_document'] = 'required|date|before_or_equal:' . $date->format('Y/m/d');
                             $rules['issue_date_support_document'] = ['required', 'date_format:Y-m-d', 'before_or_equal:"' . $date->format('Y-m-d') . '"'];
+                            $rules['support_document'] = 'uniquesupportdocument';
                             break;
                     }
                     $rules['additionaldetail_name'] = 'array|max:15';
