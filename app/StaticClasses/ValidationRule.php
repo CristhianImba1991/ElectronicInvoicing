@@ -201,7 +201,7 @@ class ValidationRule
                 }
                 if ($request->voucher_type !== NULL) {
                     switch ($request->voucher_type) {
-                        case 1:
+                        case $isApiRequest ? "1" : 1:
                             $rules['product'] = 'required|array|min:1';
                             $rules['product.*'] = $isApiRequest ? 'distinct|exists:products,main_code' : 'distinct|exists:products,id';
                             $rules['product_detail1'] = 'array';
@@ -232,7 +232,7 @@ class ValidationRule
                             $rules['rentRetentionValue'] = 'nullable|numeric|min:0';
                             $rules['tip'] = 'required|numeric|min:0';
                             break;
-                        case 2:
+                        case $isApiRequest ? "4" : 2:
                             $rules['product'] = 'required|array|min:1';
                             $rules['product.*'] = $isApiRequest ? 'distinct|exists:products,main_code' : 'distinct|exists:products,id';
                             $rules['product_quantity'] = 'required|array|min:1';
@@ -248,7 +248,7 @@ class ValidationRule
                             $rules['reason'] = 'required|string|max:300';
                             $rules['extra_detail'] = 'nullable|string';
                             break;
-                        case 3:
+                        case $isApiRequest ? "5" : 3:
                             $rules['debit_reason'] = 'required|array|min:1';
                             $rules['debit_reason.*'] = 'required|string|max:300';
                             $rules['debit_value'] = 'required|array|min:1';
@@ -268,7 +268,7 @@ class ValidationRule
                             $rules['extra_detail'] = 'nullable|string';
                             $rules['iva_tax'] = $isApiRequest ? 'required|exists:iva_taxes,auxiliary_code' : 'required|exists:iva_taxes,id';
                             break;
-                        case 4:
+                        case $isApiRequest ? "6" : 4:
                             $rules['product'] = 'required|array|min:1';
                             $rules['product.*'] = $isApiRequest ? 'distinct|exists:products,main_code' : 'distinct|exists:products,id';
                             $rules['product_quantity'] = 'required|array|min:1';
@@ -288,7 +288,7 @@ class ValidationRule
                             $rules['destination_establishment_code'] = 'nullable|min:1|max:999|integer';
                             $rules['route'] = 'required|string|max:300';
                             break;
-                        case 5:
+                        case $isApiRequest ? "7" : 5:
                             $rules['tax'] = 'required|array|min:1';
                             $rules['tax.*'] = $isApiRequest ? 'exists:retention_taxes,code' : 'exists:retention_taxes,id';
                             $rules['description'] = 'required|array|min:1';
