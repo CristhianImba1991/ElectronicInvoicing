@@ -167,6 +167,7 @@ $(document).ready(function(){
                         if (voucher['product_additionalDetails'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                             for (var i = 0; i < voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'].length && i < 3; i++) {
                                 reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value']);
+                                voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value'] = null;
                             }
                         }
                     @elseif($action === 'draft')
@@ -175,6 +176,7 @@ $(document).ready(function(){
                                 if (voucher['product_detail' + (i + 1)].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                                     if (voucher['product_detail' + (i + 1)][voucher['product'].indexOf(Number(id))] != null) {
                                         reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_detail' + (i + 1) + ''][voucher['product'].indexOf(Number(id))]);
+                                        voucher['product_detail' + (i + 1) + ''][voucher['product'].indexOf(Number(id))] = null;
                                     }
                                 }
                             }
@@ -187,6 +189,7 @@ $(document).ready(function(){
                                 if (voucher['product_quantity'][voucher['product'].indexOf(Number(id))] != null) {
                                     productQuantity = Number(voucher['product_quantity'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                                    voucher['product_quantity'][voucher['product'].indexOf(Number(id))] = null;
                                 }
                             }
                         }
@@ -198,6 +201,7 @@ $(document).ready(function(){
                                 if (voucher['product_unitprice'][voucher['product'].indexOf(Number(id))] != null) {
                                     productUnitPrice = Number(voucher['product_unitprice'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_unitprice]').val(productUnitPrice.toFixed(Math.floor(productUnitPrice) !== productUnitPrice ? (productUnitPrice.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                                    voucher['product_unitprice'][voucher['product'].indexOf(Number(id))] = null;
                                 }
                             }
                         }
@@ -210,8 +214,23 @@ $(document).ready(function(){
                                 if (voucher['product_discount'][voucher['product'].indexOf(Number(id))] != null) {
                                     productDiscount = Number(voucher['product_discount'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_discount]').val(productDiscount.toFixed(2));
+                                    voucher['product_discount'][voucher['product'].indexOf(Number(id))] = null;
                                 }
                             }
+                        }
+                    @endif
+                    @if($action === 'edit' || $action === 'draft')
+                        if (voucher['product_quantity'].every(element => element === null)) {
+                            voucher['product_quantity'] = new Array();
+                        }
+                        if (voucher['product_unitprice'].every(element => element === null)) {
+                            voucher['product_unitprice'] = new Array();
+                        }
+                        if (voucher['product_discount'].every(element => element === null)) {
+                            voucher['product_discount'] = new Array();
+                        }
+                        if (voucher['product_quantity'].length == 0 && voucher['product_unitprice'].length == 0 && voucher['product_discount'].length == 0) {
+                            voucher['product'] = new Array();
                         }
                     @endif
                     var productSubtotal = (productQuantity * productUnitPrice - productDiscount) * (1 + productIva / 100.0);

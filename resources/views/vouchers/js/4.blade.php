@@ -160,6 +160,7 @@ $(document).ready(function(){
                         if (voucher['product_additionalDetails'].length > 0 && voucher['product'].indexOf(Number(id)) != -1) {
                             for (var i = 0; i < voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'].length && i < 3; i++) {
                                 reference.closest('tr').find('input[id *= product_detail' + (i + 1) + ']').val(voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value']);
+                                voucher['product_additionalDetails'][voucher['product'].indexOf(Number(id))]['additional_details'][i]['value'] = null;
                             }
                         }
                     @elseif($action === 'draft')
@@ -180,8 +181,17 @@ $(document).ready(function(){
                                 if (voucher['product_quantity'][voucher['product'].indexOf(Number(id))] != null) {
                                     productQuantity = Number(voucher['product_quantity'][voucher['product'].indexOf(Number(id))]);
                                     reference.closest('tr').find('input[id *= product_quantity]').val(productQuantity.toFixed(Math.floor(productQuantity) !== productQuantity ? (productQuantity.toString().split(".")[1].length <= 2 ? 2 : 6) : 2));
+                                    voucher['product_quantity'][voucher['product'].indexOf(Number(id))] = null;
                                 }
                             }
+                        }
+                    @endif
+                    @if($action === 'edit' || $action === 'draft')
+                        if (voucher['product_quantity'].every(element => element === null)) {
+                            voucher['product_quantity'] = new Array();
+                        }
+                        if (voucher['product_quantity'].length == 0) {
+                            voucher['product'] = new Array();
                         }
                     @endif
                 }
