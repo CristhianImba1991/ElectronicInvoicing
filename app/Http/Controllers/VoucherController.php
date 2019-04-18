@@ -125,16 +125,23 @@ class VoucherController extends Controller
         return json_encode(array("status" => $isValid, "messages" => $validator->messages()->messages()));
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    private static function getVoucherQueryBuilder()
     {
-        $user = Auth::user();
+        return Voucher::join('emission_points', 'emission_points.id', '=', 'vouchers.emission_point_id')
+            ->join('branches', 'branches.id', '=', 'emission_points.branch_id')
+            ->join('companies', 'companies.id', '=', 'branches.company_id')
+            ->join('users', 'users.id', '=', 'vouchers.user_id')
+            ->join('customers', 'customers.id', '=', 'vouchers.customer_id')
+            ->join('environments', 'environments.id', '=', 'vouchers.environment_id')
+            ->join('voucher_states', 'voucher_states.id', '=', 'vouchers.voucher_state_id')
+            ->join('voucher_types', 'voucher_types.id', '=', 'vouchers.voucher_type_id')
+            ->select('vouchers.*');
+    }
+
+    public static function getVouchersAllowedToUserQueryBuilder(User $user, $limit = NULL)
+    {
         if ($user->hasRole('admin')) {
-            $vouchers = Voucher::all();
+            $query = self::getVoucherQueryBuilder();
         } elseif ($user->hasRole('owner')) {
             $branches = CompanyUser::getBranchesAllowedToUser($user, false);
             $emissionPoints = collect();
@@ -143,7 +150,8 @@ class VoucherController extends Controller
                     $emissionPoints->push($emissionPoint);
                 }
             }
-            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
+            $query = self::getVoucherQueryBuilder()
+                ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'));
         } elseif ($user->hasRole('supervisor')) {
             $branches = CompanyUser::getBranchesAllowedToUser($user, false);
             $allEmissionPoints = collect();
@@ -158,22 +166,107 @@ class VoucherController extends Controller
                     $emissionPoints->push($emissionPoint);
                 }
             }
-            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
+            $query = self::getVoucherQueryBuilder()
+                ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'));
         } elseif ($user->hasRole('employee')) {
-            $vouchers = Voucher::where('user_id', $user->id)->get();
+            $query = self::getVoucherQueryBuilder()
+                ->where('vouchers.user_id', $user->id);
         } elseif ($user->hasRole('customer')) {
-            $vouchers = Voucher::whereIn('customer_id', $user->customers->pluck('id'))->where('voucher_state_id', VoucherStates::AUTHORIZED)->where('environment_id', 2)->get();
-        } else {
-            $vouchers = collect();
+            $query = self::getVoucherQueryBuilder()
+                ->whereIn('vouchers.customer_id', $user->customers->pluck('id'))
+                ->where('voucher_state_id', VoucherStates::AUTHORIZED)
+                ->where('environment_id', 2);
         }
+        $query = $query->latest('vouchers.created_at');
+        return $limit === NULL ? $query : $query->limit($limit);
+    }
+
+    private static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
+    {
+        $query = self::getVouchersAllowedToUserQueryBuilder($user);
+        if ($criteria->has('company')) {
+            $query = $query->whereIn('companies.id', $criteria->company);
+        }
+        if ($criteria->has('branch')) {
+            $query = $query->whereIn('branches.id', $criteria->branch);
+        }
+        if ($criteria->has('emission_point')) {
+            $query = $query->whereIn('emission_points.id', $criteria->emission_point);
+        }
+        if ($criteria->has('customer')) {
+            $query = $query->whereIn('customers.id', $criteria->customer);
+        }
+        if ($criteria->has('environment')) {
+            $query = $query->whereIn('environments.id', $criteria->environment);
+        }
+        if ($criteria->has('voucher_state')) {
+            $query = $query->whereIn('voucher_states.id', $criteria->voucher_state);
+        }
+        if ($criteria->has('voucher_type')) {
+            $query = $query->whereIn('voucher_types.id', $criteria->voucher_type);
+        }
+        if ($criteria->has('issue_date_from') && $criteria->has('issue_date_to')) {
+            if ($criteria->issue_date_from !== NULL && $criteria->issue_date_to !== NULL) {
+                $query = $query->whereBetween('vouchers.issue_date', [$criteria->issue_date_from, $criteria->issue_date_to]);
+            } else if ($criteria->issue_date_from !== NULL && $criteria->issue_date_to === NULL) {
+                $query = $query->where('vouchers.issue_date', '>=', $criteria->issue_date_from);
+            } else if ($criteria->issue_date_from === NULL && $criteria->issue_date_to !== NULL) {
+                $query = $query->where('vouchers.issue_date', '<=', $criteria->issue_date_to);
+            }
+        } else if ($criteria->has('issue_date_from') && !$criteria->has('issue_date_to')) {
+            if ($criteria->issue_date_from !== NULL && $criteria->issue_date_to === NULL) {
+                $query = $query->where('vouchers.issue_date', '>=', $criteria->issue_date_from);
+            }
+        } else if (!$criteria->has('issue_date_from') && $criteria->has('issue_date_to')) {
+            if ($criteria->issue_date_from === NULL && $criteria->issue_date_to !== NULL) {
+                $query = $query->where('vouchers.issue_date', '<=', $criteria->issue_date_to);
+            }
+        }
+        if ($criteria->has('sequential_from') && $criteria->has('sequential_to')) {
+            if ($criteria->sequential_from !== NULL && $criteria->sequential_to !== NULL) {
+                $query = $query->whereBetween('vouchers.sequential', [$criteria->sequential_from, $criteria->sequential_to]);
+            } else if ($criteria->sequential_from !== NULL && $criteria->sequential_to === NULL) {
+                $query = $query->where('vouchers.sequential', '>=', $criteria->sequential_from);
+            } else if ($criteria->sequential_from === NULL && $criteria->sequential_to !== NULL) {
+                $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
+            }
+        } else if ($criteria->has('sequential_from') && !$criteria->has('sequential_to')) {
+            if ($criteria->sequential_from !== NULL && $criteria->sequential_to === NULL) {
+                $query = $query->where('vouchers.sequential', '>=', $criteria->sequential_from);
+            }
+        } else if (!$criteria->has('sequential_from') && $criteria->has('sequential_to')) {
+            if ($criteria->sequential_from === NULL && $criteria->sequential_to !== NULL) {
+                $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
+            }
+        }
+        return $query;
+    }
+
+    private static function doesVoucherBelongToUser(Voucher $voucher, User $user)
+    {
+        return self::getVouchersAllowedToUserQueryBuilder($user)
+            ->where('vouchers.id', '=', $voucher->id)
+            ->exists();
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $vouchers = self::getVouchersAllowedToUserQueryBuilder($user)->get();
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
             $companies = $user->hasRole('customer') ? collect() : CompanyUser::getCompaniesAllowedToUser($user);
         }
         $environments = Environment::all();
+        $voucherStates = VoucherState::where('id', '>', 1)->get();
         $voucherTypes = VoucherType::all();
-        return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherTypes']));
+        return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherStates', 'voucherTypes']));
     }
 
     /**
@@ -183,8 +276,17 @@ class VoucherController extends Controller
      */
     public function filter(Request $request)
     {
-
-        return $request;
+        $user = Auth::user();
+        $vouchers = self::getFilteredVouchersAllowedToUserQueryBuilder($user, $request)->get();
+        if ($user->hasRole('admin')) {
+            $companies = Company::all();
+        } else {
+            $companies = $user->hasRole('customer') ? collect() : CompanyUser::getCompaniesAllowedToUser($user);
+        }
+        $environments = Environment::all();
+        $voucherStates = VoucherState::where('id', '>', 1)->get();
+        $voucherTypes = VoucherType::all();
+        return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherStates', 'voucherTypes']));
     }
 
     /**
@@ -281,13 +383,28 @@ class VoucherController extends Controller
     public function edit(Voucher $voucher)
     {
         $user = Auth::user();
-        $action = 'edit';
-        $companies = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
-        $currencies = Currency::all();
-        $environments = Environment::all();
-        $identificationTypes = IdentificationType::all();
-        $voucherTypes = VoucherType::where('id', '=', $voucher->voucher_type_id)->get();
-        return view('vouchers.edit', compact(['action', 'companies', 'currencies', 'voucher', 'environments', 'identificationTypes', 'voucherTypes']));
+        if (self::doesVoucherBelongToUser($voucher, $user)) {
+            $canEditVoucher = self::getVouchersAllowedToUserQueryBuilder($user)
+                ->where('vouchers.id', '=', $voucher->id)
+                ->whereNotIn('vouchers.voucher_state_id', [
+                    VoucherStates::ACCEPTED,
+                    VoucherStates::SENDED,
+                    VoucherStates::RECEIVED,
+                    VoucherStates::AUTHORIZED,
+                    VoucherStates::IN_PROCESS,
+                    VoucherStates::CANCELED
+                ])->exists();
+            if ($canEditVoucher) {
+                $action = 'edit';
+                $companies = $user->hasRole('admin') ? Company::all() : CompanyUser::getCompaniesAllowedToUser($user);
+                $currencies = Currency::all();
+                $environments = Environment::all();
+                $identificationTypes = IdentificationType::all();
+                $voucherTypes = VoucherType::where('id', '=', $voucher->voucher_type_id)->get();
+                return view('vouchers.edit', compact(['action', 'companies', 'currencies', 'voucher', 'environments', 'identificationTypes', 'voucherTypes']));
+            }
+        }
+        return abort('404');
     }
 
     /**
@@ -435,44 +552,6 @@ class VoucherController extends Controller
             }
         }
         return $draftVouchers;
-    }
-
-    public static function getVouchers(User $user)
-    {
-        if ($user->hasRole('admin')) {
-            $vouchers = Voucher::all();
-        } elseif ($user->hasRole('owner')) {
-            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
-            $emissionPoints = collect();
-            foreach ($branches as $branch) {
-                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
-                    $emissionPoints->push($emissionPoint);
-                }
-            }
-            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
-        } elseif ($user->hasRole('supervisor')) {
-            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
-            $allEmissionPoints = collect();
-            foreach ($branches as $branch) {
-                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
-                    $allEmissionPoints->push($emissionPoint);
-                }
-            }
-            $emissionPoints = collect();
-            foreach ($allEmissionPoints as $emissionPoint) {
-                if (in_array($emissionPoint->id, $user->emissionPoints()->pluck('id')->toArray(), true)) {
-                    $emissionPoints->push($emissionPoint);
-                }
-            }
-            $vouchers = Voucher::whereIn('emission_point_id', $emissionPoints->pluck('id'))->get();
-        } elseif ($user->hasRole('employee')) {
-            $vouchers = Voucher::where('user_id', $user->id)->get();
-        } elseif ($user->hasRole('customer')) {
-            $vouchers = Voucher::whereIn('customer_id', $user->customers->pluck('id'))->where('voucher_state_id', VoucherStates::AUTHORIZED)->where('environment_id', 2)->get();
-        } else {
-            $vouchers = collect();
-        }
-        return $vouchers->splice(-5);
     }
 
     /**

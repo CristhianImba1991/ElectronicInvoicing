@@ -4,6 +4,8 @@
 <script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-tokenfield.min.js') }}"></script>
+<script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
+<script src="{{ asset('js/locales/bootstrap-datepicker.' . str_replace('_', '-', app()->getLocale()) . '.min.js') }}" charset="UTF-8"></script>
 <script type="text/javascript">
 $.noConflict();
 jQuery(document).ready(function($) {
@@ -31,8 +33,44 @@ jQuery(document).ready(function($) {
                     }
                     $("#branch").html(options).selectpicker('refresh');
                     $("#emission_point").html('').selectpicker('refresh');
+                    $.ajax({
+                        url: "{{ route('companies.customers') }}",
+                        method: "POST",
+                        data: {
+                            _token: _token,
+                            id: id,
+                        },
+                        success: function(result) {
+                            var customers = JSON.parse(result);
+                            var options = '';
+                            for (var i = 0; i < customers.length; i++) {
+                                options += '<option value="' + customers[i]['id'] + '">' + customers[i]['social_reason'] + '</option>';
+                            }
+                            $("#customer").html(options).selectpicker('refresh');
+                        }
+                    });
                 }
-            })
+            });
+            $.ajax({
+                url: "{{ route('companies.customers') }}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    id: id,
+                },
+                success: function(result) {
+                    var customers = JSON.parse(result);
+                    var options = '';
+                    for (var i = 0; i < customers.length; i++) {
+                        options += '<option value="' + customers[i]['id'] + '">' + customers[i]['social_reason'] + '</option>';
+                    }
+                    $("#customer").html(options).selectpicker('refresh');
+                }
+            });
+        } else {
+            $("#branch").html('').selectpicker('refresh');
+            $("#emission_point").html('').selectpicker('refresh');
+            $("#customer").html('').selectpicker('refresh');
         }
     });
     $('#branch').change(function() {
@@ -55,10 +93,23 @@ jQuery(document).ready(function($) {
                     $("#emission_point").html(options).selectpicker('refresh');
                 }
             })
+        } else {
+            $("#emission_point").html('').selectpicker('refresh');
         }
     });
+    $('.input-daterange input').each(function() {
+        $(this).datepicker({
+            autoclose: true,
+            todayBtn: 'linked',
+            todayHighlight: true,
+            endDate: '0d',
+            language: '{{ str_replace("_", "-", app()->getLocale()) }}',
+            format: 'yyyy-mm-dd',
+            daysOfWeekHighlighted: "0,6"
+        });
+    });
     $('#vouchers-table').DataTable({
-        "order": [[ 5, 'desc' ], [ 0, 'desc' ]]
+        "order": [[ 6, 'desc' ], [ 0, 'desc' ]]
     });
     @unlessrole('customer')
         $('#emailModal').on('show.bs.modal', function(event) {
@@ -92,12 +143,12 @@ jQuery(document).ready(function($) {
             $.ajax({
                 url: "{{ route('vouchers.sendmail') }}",
                 method: "POST",
-                data: $('#modal-form').serialize(),
+                data: $('#modal-formemail').serialize(),
                 success: function(result) {
                     var validator = JSON.parse(result);
                     if (validator['status']) {
                         $('#emailModal').modal('toggle');
-                        $('#modal-form').trigger('reset');
+                        $('#modal-formemail').trigger('reset');
                         $('#emailModal input[id = email]').tokenfield('setTokens', []);
                     } else {
                         $('#validation').on('show.bs.modal', function(event) {
@@ -120,6 +171,7 @@ jQuery(document).ready(function($) {
 @section('styles')
 <link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/bootstrap-datepicker3.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/bootstrap-tokenfield.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/tokenfield-typeahead.min.css') }}">
 @endsection
@@ -131,6 +183,7 @@ jQuery(document).ready(function($) {
             <div class="card">
                 <div class="card-header">
                     {{ ucfirst(trans_choice(__('view.voucher'), 1)) }}
+                    <button type="button" class="btn btn-sm btn-info float-right" data-toggle="modal" data-target="#filterModal">{{ __('view.filter') }}</button>
                 </div>
 
                 <div class="card-body">
@@ -140,7 +193,7 @@ jQuery(document).ready(function($) {
                                 <th>{{ __('view.id') }}</th>
                                 <th>{{ ucfirst(trans_choice(__('view.company'), 0)) }}</th>
                                 <th>{{ __('view.type') }}</th>
-                                <th>{{ __('view.state') }}</th>
+                                <th>{{ trans_choice(__('view.state'), 0) }}</th>
                                 <th>{{ ucfirst(trans_choice(__('view.voucher'), 0)) }}</th>
                                 <th>{{ ucfirst(trans_choice(__('view.customer'), 0)) }}</th>
                                 <th>{{ __('view.issue_date') }}</th>
@@ -158,29 +211,38 @@ jQuery(document).ready(function($) {
                                     <td>{{ \ElectronicInvoicing\VoucherType::find($voucher->voucher_type_id)->name }}</td>
                                     <td>
                                         @switch($voucher->voucher_state_id)
-                                            @case(3)
-                                                <span class="badge badge-info">
-                                                @break
-                                            @case(4)
-                                                <span class="badge badge-dark">
-                                                @break
-                                            @case(5)
-                                                <span class="badge badge-light">
-                                                @break
-                                            @case(6)
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT)
                                                 <span class="badge badge-secondary">
                                                 @break
-                                            @case(7)
-                                                <span class="badge badge-warning">
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
+                                                <span class="badge badge-info">
                                                 @break
-                                            @case(8)
-                                                <span class="badge badge-success">
-                                                @break
-                                            @case(9)
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                 <span class="badge badge-primary">
                                                 @break
-                                            @case(10)
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
+                                                <span class="badge badge-dark">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED)
+                                                <span class="badge badge-light">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RECEIVED)
+                                                <span class="badge badge-secondary">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RETURNED)
+                                                <span class="badge badge-warning">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::AUTHORIZED)
+                                                <span class="badge badge-success">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::IN_PROCESS)
+                                                <span class="badge badge-primary">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
                                                 <span class="badge badge-danger">
+                                                @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
+                                                <span class="badge badge-white">
                                                 @break
                                             @default
                                                 <span class="badge">
@@ -265,6 +327,133 @@ jQuery(document).ready(function($) {
         </div>
     </div>
 </div>
+<div class="modal fade" tabindex="-1" role="dialog" id="filterModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <strong>{{ __('view.filter') }}</strong>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="modal-formfilter" action="{{ route('vouchers.filter') }}" method="post">
+                {{ csrf_field() }}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
+                        <select class="form-control selectpicker input-lg dynamic" id="company" name="company[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.company'), 1)]), 1) }}">
+                            @foreach($companies as $company)
+                                <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="branch">{{ ucfirst(trans_choice(__('view.branch'), 0)) }}</label>
+                        <select class="form-control selectpicker input-lg dynamic" id="branch" name="branch[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.branch'), 1)]), 1) }}">
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="emission_point">{{ ucfirst(trans_choice(__('view.emission_point'), 0)) }}</label>
+                        <select class="form-control selectpicker input-lg" id="emission_point" name="emission_point[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.emission_point'), 1)]), 0) }}">
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer">{{ ucfirst(trans_choice(__('view.customer'), 0)) }}</label>
+                        <select class="form-control selectpicker input-lg" id="customer" name="customer[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => trans_choice(__('view.customer'), 1)]), 0) }}">
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="issue_date_from">{{ ucfirst(trans_choice(__('view.issue_date'), 0)) }}</label>
+                        <div class="input-group mb-3 input-daterange">
+                            <input class="form-control" id="issue_date_from" name="issue_date_from" readonly>
+                            <div class="input-group-append">
+                                <div class="input-group-text">{{ __('view.to') }}</div>
+                            </div>
+                            <input class="form-control" id="issue_date_to" name="issue_date_to" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="environment">{{ trans_choice(__('view.environment'), 0) }}</label>
+                        <select class="form-control selectpicker input-lg" id="environment" name="environment[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => strtolower(trans_choice(__('view.environment'), 1))]), 0) }}">
+                            @foreach($environments as $environment)
+                                <option value="{{ $environment->id }}">{{ $environment->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="voucher_type">{{ trans_choice(__('view.voucher_type'), 0) }}</label>
+                        <select class="form-control selectpicker input-lg" id="voucher_type" name="voucher_type[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => strtolower(trans_choice(__('view.voucher_type'), 1))]), 0) }}">
+                            @foreach($voucherTypes as $voucherType)
+                                <option value="{{ $voucherType->id }}">{{ $voucherType->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="voucher_state">{{ trans_choice(__('view.state'), 0) }}</label>
+                        <select class="form-control selectpicker input-lg" id="voucher_state" name="voucher_state[]" multiple data-actions-box="true" data-live-search="true" data-dependent="branch" title="{{ trans_choice(__('view.select_one_or_more_model', ['model' => strtolower(trans_choice(__('view.state'), 1))]), 0) }}">
+                            @foreach($voucherStates as $voucherState)
+                                @switch($voucherState->id)
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT)
+                                        <option data-content="<span class='badge badge-secondary'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
+                                        <option data-content="<span class='badge badge-info'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
+                                        <option data-content="<span class='badge badge-primary'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
+                                        <option data-content="<span class='badge badge-dark'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED)
+                                        <option data-content="<span class='badge badge-light'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RECEIVED)
+                                        <option data-content="<span class='badge badge-secondary'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RETURNED)
+                                        <option data-content="<span class='badge badge-warning'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::AUTHORIZED)
+                                        <option data-content="<span class='badge badge-success'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::IN_PROCESS)
+                                        <option data-content="<span class='badge badge-primary'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
+                                        <option data-content="<span class='badge badge-danger'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
+                                        <option data-content="<span class='badge badge-white'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
+                                    @default
+                                        <option data-content="<span class='badge'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                @endswitch
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sequential_from">{{ __('view.sequential') }}</label>
+                        <div class="input-group mb-3">
+                            <input class="form-control" type="text" id="sequential_from" name="sequential_from" value="" >
+                            <div class="input-group-append">
+                                <div class="input-group-text">{{ __('view.to') }}</div>
+                            </div>
+                            <input class="form-control" type="text" id="sequential_to" name="sequential_to" value="" >
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">{{ __('view.close') }}</button>
+                    <button id="submit_filter" type="submit" class="btn btn-sm btn-info">{{ __('view.filter') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @unlessrole('customer')
     <div class="modal fade" tabindex="-1" role="dialog" id="emailModal">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -275,7 +464,7 @@ jQuery(document).ready(function($) {
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="modal-form" action="#" method="post">
+                <form id="modal-formemail" action="#" method="post">
                     {{ csrf_field() }}
                     <div class="modal-body">
                         <input type="hidden" id="voucher" name="voucher" value="">

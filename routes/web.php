@@ -246,6 +246,9 @@ Route::group(['prefix' => 'voucher'], function () {
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/', 'VoucherController@index')->name('vouchers.index');
     });
+    Route::group(['middleware' => ['permission:report_vouchers']], function () {
+        Route::post('/filter', 'VoucherController@filter')->name('vouchers.filter');
+    });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/create', 'VoucherController@create')->name('vouchers.create');
     });

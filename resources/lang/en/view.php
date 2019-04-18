@@ -60,7 +60,7 @@ return [
     'all' => 'All',
     'none' => 'None',
     'type' => 'Type',
-    'state' => 'State',
+    'state' => '{0} State|{1} States',
     'issue_date' => 'Issue date',
     'view' => 'View',
     'voucher_type' => '{0} Voucher type|{1} Voucher types',

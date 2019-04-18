@@ -62,7 +62,7 @@ $(document).ready(function(){
                                             <tr>
                                                 <th>{{ __('view.id') }}</th>
                                                 <th>{{ __('view.type') }}</th>
-                                                <th>{{ __('view.state') }}</th>
+                                                <th>{{ trans_choice(__('view.state'), 0) }}</th>
                                                 <th>{{ ucfirst(trans_choice(__('view.voucher'), 0)) }}</th>
                                                 <th>{{ ucfirst(trans_choice(__('view.customer'), 0)) }}</th>
                                                 <th>{{ __('view.issue_date') }}</th>
@@ -77,8 +77,14 @@ $(document).ready(function(){
                                                     <td>{{ \ElectronicInvoicing\VoucherType::find($voucher->voucher_type_id)->name }}</td>
                                                     <td>
                                                         @switch($voucher->voucher_state_id)
-                                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
+                                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::DRAFT)
+                                                                <span class="badge badge-secondary">
+                                                                @break
+                                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
                                                                 <span class="badge badge-info">
+                                                                @break
+                                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
+                                                                <span class="badge badge-primary">
                                                                 @break
                                                             @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
                                                                 <span class="badge badge-dark">
@@ -100,6 +106,9 @@ $(document).ready(function(){
                                                                 @break
                                                             @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
                                                                 <span class="badge badge-danger">
+                                                                @break
+                                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
+                                                                <span class="badge badge-white">
                                                                 @break
                                                             @default
                                                                 <span class="badge">

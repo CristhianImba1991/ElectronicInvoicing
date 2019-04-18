@@ -60,7 +60,7 @@ return [
     'all' => 'Todo',
     'none' => 'Ninguno',
     'type' => 'Tipo',
-    'state' => 'Estado',
+    'state' => '{0} Estado|{1} Estados',
     'issue_date' => 'Fecha emisión',
     'view' => 'Ver',
     'voucher_type' => '{0} Tipo de comprobante|{1} Tipos de comprobante',

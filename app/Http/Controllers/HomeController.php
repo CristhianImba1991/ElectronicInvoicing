@@ -27,7 +27,7 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $vouchers = VoucherController::getVouchers($user);
+        $vouchers = VoucherController::getVouchersAllowedToUserQueryBuilder($user, 5)->get();
         if (!$user->hasRole('customer')) {
             $draftVouchers = VoucherController::getDraftVouchers($user);
             $notification = [];
