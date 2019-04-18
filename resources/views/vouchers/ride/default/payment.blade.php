@@ -1,10 +1,10 @@
 <div style="padding: 2px 2px 0px 2px" class="card border-dark mb-3">
     <table class="table table-sm">
         <thead>
-            <th class="align-bottom">FORMA DE PAGO</th>
-            <th class="align-bottom"><center>VALOR</center></th>
-            <th class="align-bottom"><center>UNIDAD DE TIEMPO<center></th>
-            <th class="align-bottom"><center>PLAZO</center></th>
+            <th class="align-bottom">Forma de pago</th>
+            <th class="align-bottom"><center>Valor</center></th>
+            <th class="align-bottom"><center>Unidad de tiempo<center></th>
+            <th class="align-bottom"><center>Plazo</center></th>
         </thead>
       <tbody>
         @foreach ($voucher->payments as $payment)
