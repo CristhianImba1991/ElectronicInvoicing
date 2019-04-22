@@ -11,6 +11,12 @@
             body {
                 font-size: 10pt;
             }
+            thead {
+                display: table-header-group
+            }
+            tr {
+                page-break-inside: avoid
+            }
         </style>
     </head>
     <body>

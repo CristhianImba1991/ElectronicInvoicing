@@ -188,6 +188,7 @@ class VoucherController extends Controller
                 ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'))
                 ->where('voucher_state_id', VoucherStates::AUTHORIZED)
                 ->where('vouchers.user_id', '<>', $user->id)
+                ->latest('vouchers.created_at')
                 ->union($union);
         } elseif ($user->hasRole('customer')) {
             $query = self::getVoucherQueryBuilder()
@@ -195,7 +196,9 @@ class VoucherController extends Controller
                 ->where('voucher_state_id', VoucherStates::AUTHORIZED)
                 ->where('environment_id', 2);
         }
-        $query = $query->latest('created_at');
+        if (!$user->hasRole('employee')) {
+            $query = $query->latest('vouchers.created_at');
+        }
         return $limit === NULL ? $query : $query->limit($limit);
     }
 
@@ -1861,18 +1864,30 @@ class VoucherController extends Controller
 
     public function html(Voucher $voucher)
     {
-        $html = true;
-        return view('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']));
+        $user = Auth::user();
+        if (self::doesVoucherBelongToUser($voucher, $user)) {
+            $html = true;
+            return view('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']));
+        }
+        return abort('404');
     }
 
     public function xml(Voucher $voucher)
     {
-        return Storage::download($voucher->xml);
+        $user = Auth::user();
+        if (self::doesVoucherBelongToUser($voucher, $user)) {
+            return Storage::download($voucher->xml);
+        }
+        return abort('404');
     }
 
     public function pdf(Voucher $voucher)
     {
-        $html = false;
-        return PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->download($voucher->accessKey() . '.pdf');
+        $user = Auth::user();
+        if (self::doesVoucherBelongToUser($voucher, $user)) {
+            $html = false;
+            return PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->download($voucher->accessKey() . '.pdf');
+        }
+        return abort('404');
     }
 }
