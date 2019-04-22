@@ -5,9 +5,9 @@ $(document).ready(function(){
     @elseif($action === 'edit')
         var details = @json($voucher->waybills()->first()->addressees()->first()->details()->orderBy('id')->with('additionalDetails')->get());
         var voucher = {
-            "product": new Array(),//json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('product_id')),
-            "product_additionalDetails": new Array(),//json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->with('additionalDetails')->get()),
-            "product_quantity": new Array(),//json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->addressees()->first()->details()->get()->pluck('quantity')),
+            "product": new Array(),
+            "product_additionalDetails": new Array(),
+            "product_quantity": new Array(),
             "identification_type": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->identification_type_id),
             "carrier_ruc": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->carrier_ruc),
             "carrier_social_reason": @json(\ElectronicInvoicing\Waybill::where('voucher_id', '=', $voucher->id)->first()->carrier_social_reason),

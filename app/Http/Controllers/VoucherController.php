@@ -169,15 +169,33 @@ class VoucherController extends Controller
             $query = self::getVoucherQueryBuilder()
                 ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'));
         } elseif ($user->hasRole('employee')) {
-            $query = self::getVoucherQueryBuilder()
+            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
+            $allEmissionPoints = collect();
+            foreach ($branches as $branch) {
+                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
+                    $allEmissionPoints->push($emissionPoint);
+                }
+            }
+            $emissionPoints = collect();
+            foreach ($allEmissionPoints as $emissionPoint) {
+                if (in_array($emissionPoint->id, $user->emissionPoints()->pluck('id')->toArray(), true)) {
+                    $emissionPoints->push($emissionPoint);
+                }
+            }
+            $union = self::getVoucherQueryBuilder()
                 ->where('vouchers.user_id', $user->id);
+            $query = self::getVoucherQueryBuilder()
+                ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'))
+                ->where('voucher_state_id', VoucherStates::AUTHORIZED)
+                ->where('vouchers.user_id', '<>', $user->id)
+                ->union($union);
         } elseif ($user->hasRole('customer')) {
             $query = self::getVoucherQueryBuilder()
                 ->whereIn('vouchers.customer_id', $user->customers->pluck('id'))
                 ->where('voucher_state_id', VoucherStates::AUTHORIZED)
                 ->where('environment_id', 2);
         }
-        $query = $query->latest('vouchers.created_at');
+        $query = $query->latest('created_at');
         return $limit === NULL ? $query : $query->limit($limit);
     }
 
