@@ -304,7 +304,7 @@ class ApiController extends Controller
             $query = self::getVoucherQuery($request);;
             if ($query->exists()) {
                 $voucher = $query->first();
-                $html = false;info(storage_path('app/' . $voucher->xml));
+                $html = false;
                 return response()->download(storage_path('app/' . $voucher->xml), basename($voucher->xml), [
                         'Content-Type' => 'application/xml',
                         'Cache-Control' => 'no-cache, private'
