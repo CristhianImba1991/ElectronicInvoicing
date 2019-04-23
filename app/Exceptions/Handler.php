@@ -50,7 +50,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        if (($request->wantsJson() || $request->expectsJson()) && Str::startsWith($request->decodedPath(), 'api/auth')) {
+        if (Str::startsWith($request->decodedPath(), 'api/auth')) {
             if($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException){
                 return response()->json([
                     'code' => 405,
