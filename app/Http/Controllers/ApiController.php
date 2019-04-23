@@ -163,9 +163,9 @@ class ApiController extends Controller
         }
     }
 
-    public function getPdf(Request $request)
+    private static function validateRequest(Request $request)
     {
-        $validator = Validator::make($request->only('access_key'), [
+        return Validator::make($request->only('access_key'), [
             'access_key' => [
                 'required',
                 'digits:49',
@@ -240,22 +240,32 @@ class ApiController extends Controller
                 }
             ]
         ]);
+    }
+
+    private static function getVoucherQuery(Request $request)
+    {
+         return Voucher::join('emission_points', 'emission_points.id', '=', 'vouchers.emission_point_id')
+            ->join('branches', 'branches.id', '=', 'emission_points.branch_id')
+            ->join('companies', 'companies.id', '=', 'branches.company_id')
+            ->join('environments', 'environments.id', '=', 'vouchers.environment_id')
+            ->join('voucher_types', 'voucher_types.id', '=', 'vouchers.voucher_type_id')
+            ->select('vouchers.*')
+            ->where('vouchers.issue_date', DateTime::createFromFormat('dmY', substr($request->access_key, 0, 8))->format('Y-m-d'))
+            ->where('voucher_types.code', substr($request->access_key, 8, 2))
+            ->where('companies.ruc', substr($request->access_key, 10, 13))
+            ->where('environments.code', substr($request->access_key, 23, 1))
+            ->where('branches.establishment', substr($request->access_key, 24, 3))
+            ->where('emission_points.code', substr($request->access_key, 27, 3))
+            ->where('vouchers.sequential', substr($request->access_key, 30, 9))
+            ->where('vouchers.numeric_code', substr($request->access_key, 39, 8));
+    }
+
+    public function getPdf(Request $request)
+    {
+        $validator = self::validateRequest($request);
         $isValid = !$validator->fails();
         if ($isValid) {
-            $query = Voucher::join('emission_points', 'emission_points.id', '=', 'vouchers.emission_point_id')
-                ->join('branches', 'branches.id', '=', 'emission_points.branch_id')
-                ->join('companies', 'companies.id', '=', 'branches.company_id')
-                ->join('environments', 'environments.id', '=', 'vouchers.environment_id')
-                ->join('voucher_types', 'voucher_types.id', '=', 'vouchers.voucher_type_id')
-                ->select('vouchers.*')
-                ->where('vouchers.issue_date', DateTime::createFromFormat('dmY', substr($request->access_key, 0, 8))->format('Y-m-d'))
-                ->where('voucher_types.code', substr($request->access_key, 8, 2))
-                ->where('companies.ruc', substr($request->access_key, 10, 13))
-                ->where('environments.code', substr($request->access_key, 23, 1))
-                ->where('branches.establishment', substr($request->access_key, 24, 3))
-                ->where('emission_points.code', substr($request->access_key, 27, 3))
-                ->where('vouchers.sequential', substr($request->access_key, 30, 9))
-                ->where('vouchers.numeric_code', substr($request->access_key, 39, 8));
+            $query = self::getVoucherQuery($request);;
             if ($query->exists()) {
                 $voucher = $query->first();
                 $html = false;
@@ -264,6 +274,41 @@ class ApiController extends Controller
                         'Content-Type' => 'application/pdf',
                         'Cache-Control' => 'no-cache, private'
                     ])->deleteFileAfterSend();
+            } else {
+                return response()->json([
+                    'code' => 404,
+                    'message' => 'The requested resource could not be found.',
+                    'errors' => [
+                        'error' => 'Not Found',
+                        'info' => 'The requested voucher could not be found.'
+                    ]
+                ], 404);
+            }
+
+        }
+        return response()->json([
+            'code' => 422,
+            'message' => 'The request was well-formed but was unable to be followed due to semantic errors.',
+            'errors' => [
+                'error' => 'Unprocessable Entity',
+                'info' => $validator->messages()->messages()
+            ]
+        ], 422);
+    }
+
+    public function getXml(Request $request)
+    {
+        $validator = self::validateRequest($request);
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            $query = self::getVoucherQuery($request);;
+            if ($query->exists()) {
+                $voucher = $query->first();
+                $html = false;info(storage_path('app/' . $voucher->xml));
+                return response()->download(storage_path('app/' . $voucher->xml), basename($voucher->xml), [
+                        'Content-Type' => 'application/xml',
+                        'Cache-Control' => 'no-cache, private'
+                    ]);
             } else {
                 return response()->json([
                     'code' => 404,

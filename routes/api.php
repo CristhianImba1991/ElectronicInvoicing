@@ -26,6 +26,7 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('send_voucher', 'ApiController@sendVoucher');
         Route::post('create_product', 'ApiController@createProduct');
         Route::post('create_customer', 'ApiController@createCustomer');
+        Route::post('get_xml', 'ApiController@getXml');
         Route::post('get_pdf', 'ApiController@getPdf');
     });
 });
