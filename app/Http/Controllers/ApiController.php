@@ -3,6 +3,7 @@
 namespace ElectronicInvoicing\Http\Controllers;
 
 use Carbon\Carbon;
+use DateTime;
 use ElectronicInvoicing\{
     Branch,
     Company,
@@ -15,12 +16,15 @@ use ElectronicInvoicing\{
     Product,
     RetentionTax,
     RetentionTaxDescription,
+    Voucher,
     VoucherState,
     VoucherType,
 };
 use ElectronicInvoicing\StaticClasses\{ValidationRule, VoucherStates};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use PDF;
 use Validator;
 
 class ApiController extends Controller
@@ -66,9 +70,9 @@ class ApiController extends Controller
             'code' => 200,
             'message' => 'Successful login.',
             'token' => [
-                'tokenType' => 'Bearer',
-                'expireDate' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
-                'accessToken' => $personalAccessToken->accessToken
+                'token_type' => 'Bearer',
+                'expire_date' => Carbon::parse($personalAccessToken->token->expires_at)->toDateTimeString(),
+                'access_token' => $personalAccessToken->accessToken
             ]
         ], 200);
     }
@@ -95,10 +99,10 @@ class ApiController extends Controller
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0),
                 'voucher' => [
-                    'accessKey' => $voucher->accessKey(),
+                    'access_key' => $voucher->accessKey(),
                     'state' => __(VoucherState::find($voucher->voucher_state_id)->name),
-                    'authorizationDate' => $voucher->authorization_date,
-                    'extraDetail' => $voucher->extra_detail,
+                    'authorization_date' => $voucher->authorization_date,
+                    'extra_detail' => $voucher->extra_detail,
                 ]
             ], 200);
         } else {
@@ -157,6 +161,129 @@ class ApiController extends Controller
                 ]
             ], 422);
         }
+    }
+
+    public function getPdf(Request $request)
+    {
+        $validator = Validator::make($request->only('access_key'), [
+            'access_key' => [
+                'required',
+                'digits:49',
+                'validaccesskey',
+                function ($attribute, $value, $fail) {
+                    if (strlen($value) === 49) {
+                        $failMessages = [];
+                        $validAccessKeyDate = Validator::make(['access_key_date' => substr($value, 0, 8)], [
+                            'access_key_date' => 'date_format:dmY'
+                        ]);
+                        if ($validAccessKeyDate->fails()) {
+                            array_push($failMessages, $validAccessKeyDate->messages()->messages());
+                        }
+                        $validAccessKeyVoucherType = Validator::make(['access_key_voucher_type' => substr($value, 8, 2)], [
+                            'access_key_voucher_type' => 'exists:voucher_types,code'
+                        ]);
+                        if ($validAccessKeyVoucherType->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherType->messages()->messages());
+                        }
+                        $validAccessKeyVoucherCompany = Validator::make(['access_key_company' => substr($value, 10, 13)], [
+                            'access_key_company' => 'validruc|exists:companies,ruc'
+                        ]);
+                        if ($validAccessKeyVoucherCompany->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherCompany->messages()->messages());
+                        }
+                        $validAccessKeyVoucherEnvironment = Validator::make(['access_key_environment' => substr($value, 23, 1)], [
+                            'access_key_environment' => 'exists:environments,code'
+                        ]);
+                        if ($validAccessKeyVoucherEnvironment->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherEnvironment->messages()->messages());
+                        }
+                        $validAccessKeyVoucherBranch = Validator::make(['access_key_branch' => (integer) substr($value, 24, 3)], [
+                            'access_key_branch' => 'min:1|max:999|integer|exists:branches,establishment'
+                        ]);
+                        if ($validAccessKeyVoucherBranch->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherBranch->messages()->messages());
+                        }
+                        $validAccessKeyVoucherEmissionPoint = Validator::make(['access_key_emission_point' => (integer) substr($value, 27, 3)], [
+                            'access_key_emission_point' => 'min:1|max:999|integer|exists:emission_points,code'
+                        ]);
+                        if ($validAccessKeyVoucherEmissionPoint->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherEmissionPoint->messages()->messages());
+                        }
+                        $validAccessKeyVoucherSequential = Validator::make(['access_key_sequential' => (integer) substr($value, 30, 9)], [
+                            'access_key_sequential' => 'min:1|max:999999999|integer'
+                        ]);
+                        if ($validAccessKeyVoucherSequential->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherSequential->messages()->messages());
+                        }
+                        $validAccessKeyVoucherNumericCode = Validator::make(['access_key_numeric_code' => substr($value, 39, 8)], [
+                            'access_key_numeric_code' => 'min:0|max:99999999|integer'
+                        ]);
+                        if ($validAccessKeyVoucherNumericCode->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherNumericCode->messages()->messages());
+                        }
+                        $validAccessKeyVoucherEmissionType = Validator::make(['access_key_emission_type' => substr($value, 47, 1)], [
+                            'access_key_emission_type' => 'min:1|max:1|integer'
+                        ]);
+                        if ($validAccessKeyVoucherEmissionType->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherEmissionType->messages()->messages());
+                        }
+                        $validAccessKeyVoucherCheckDigit = Validator::make(['access_key_check_digit' => substr($value, 48, 1)], [
+                            'access_key_check_digit' => 'min:0|max:9|integer'
+                        ]);
+                        if ($validAccessKeyVoucherCheckDigit->fails()) {
+                            array_push($failMessages, $validAccessKeyVoucherCheckDigit->messages()->messages());
+                        }
+                        if (count($failMessages) > 0) {
+                            $fail($failMessages);
+                        }
+                    }
+                }
+            ]
+        ]);
+        $isValid = !$validator->fails();
+        if ($isValid) {
+            $query = Voucher::join('emission_points', 'emission_points.id', '=', 'vouchers.emission_point_id')
+                ->join('branches', 'branches.id', '=', 'emission_points.branch_id')
+                ->join('companies', 'companies.id', '=', 'branches.company_id')
+                ->join('environments', 'environments.id', '=', 'vouchers.environment_id')
+                ->join('voucher_types', 'voucher_types.id', '=', 'vouchers.voucher_type_id')
+                ->select('vouchers.*')
+                ->where('vouchers.issue_date', DateTime::createFromFormat('dmY', substr($request->access_key, 0, 8))->format('Y-m-d'))
+                ->where('voucher_types.code', substr($request->access_key, 8, 2))
+                ->where('companies.ruc', substr($request->access_key, 10, 13))
+                ->where('environments.code', substr($request->access_key, 23, 1))
+                ->where('branches.establishment', substr($request->access_key, 24, 3))
+                ->where('emission_points.code', substr($request->access_key, 27, 3))
+                ->where('vouchers.sequential', substr($request->access_key, 30, 9))
+                ->where('vouchers.numeric_code', substr($request->access_key, 39, 8));
+            if ($query->exists()) {
+                $voucher = $query->first();
+                $html = false;
+                PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($voucher->accessKey() . '.pdf');
+                return response()->download(public_path($voucher->accessKey() . '.pdf'), $voucher->accessKey() . '.pdf', [
+                        'Content-Type' => 'application/pdf',
+                        'Cache-Control' => 'no-cache, private'
+                    ])->deleteFileAfterSend();
+            } else {
+                return response()->json([
+                    'code' => 404,
+                    'message' => 'The requested resource could not be found.',
+                    'errors' => [
+                        'error' => 'Not Found',
+                        'info' => 'The requested voucher could not be found.'
+                    ]
+                ], 404);
+            }
+
+        }
+        return response()->json([
+            'code' => 422,
+            'message' => 'The request was well-formed but was unable to be followed due to semantic errors.',
+            'errors' => [
+                'error' => 'Unprocessable Entity',
+                'info' => $validator->messages()->messages()
+            ]
+        ], 422);
     }
 
     private static function changeToIdsVoucher(Request $request)

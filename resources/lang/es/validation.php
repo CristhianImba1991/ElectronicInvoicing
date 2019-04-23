@@ -160,6 +160,9 @@ return [
         ],
         'support_document' => [
             'uniquesupportdocument' => 'El campo :ATTRIBUTE ya ha sido tomado.'
+        ],
+        'access_key' => [
+            'validaccesskey' => 'El campo :ATTRIBUTE no es una clave de acceso válida.'
         ]
     ],
 

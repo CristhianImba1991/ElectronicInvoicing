@@ -160,6 +160,9 @@ return [
         ],
         'support_document' => [
             'uniquesupportdocument' => 'The :ATTRIBUTE has already been taken.'
+        ],
+        'access_key' => [
+            'validaccesskey' => 'The :ATTRIBUTE is not a valid access key.'
         ]
     ],
 
