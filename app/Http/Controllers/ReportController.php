@@ -387,8 +387,10 @@ class ReportController extends Controller
                     $zipper->close();
                     File::deleteDirectory($headers['File-Name'] . '/');
                 }
-                info('END OF FUNCTION');
-                return response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
+                info('BINARY FILE RESPONSE START');
+                $binaryFileResponse = response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
+                info('END OF OBJECT CREATION AND FUNCTION');
+                return $binaryFileResponse;
                 break;
         }
     }
