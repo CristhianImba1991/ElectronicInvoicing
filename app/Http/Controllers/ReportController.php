@@ -106,7 +106,6 @@ class ReportController extends Controller
     {
         $voucherCollection = collect();
         foreach ($vouchers as $voucher) {
-            info($voucher->id);
             $additionalFields = NULL;
             $payments = NULL;
             if ($voucher->additionalFields()->exists()) {
@@ -375,17 +374,20 @@ class ReportController extends Controller
                 $zipper = new Zipper;
                 $zipper->make('vouchers.zip');
                 foreach ($vouchers as $voucher) {
+                    info($voucher->id);
                     if ($voucher->xml !== NULL) {
                         $zipper->add(storage_path('app/' . $voucher->xml));
                     }
                     $html = false;
                     PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($headers['File-Name'] . '/' . $voucher->accessKey() . '.pdf');
                 }
+                info('FINISHED CREATING PDFs');
                 if (File::exists($headers['File-Name'] . '/')) {
                     $zipper->add($headers['File-Name'] . '/');
                     $zipper->close();
                     File::deleteDirectory($headers['File-Name'] . '/');
                 }
+                info('END OF FUNCTION');
                 return response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
                 break;
         }
