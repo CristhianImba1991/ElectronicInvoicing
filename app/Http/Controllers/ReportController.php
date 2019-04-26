@@ -389,7 +389,7 @@ class ReportController extends Controller
                 }
                 info('BINARY FILE RESPONSE START');
                 $binaryFileResponse = response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
-                ob_end_clean();
+                ob_clean();
                 info('END OF OBJECT CREATION AND FUNCTION');
                 return $binaryFileResponse;
                 break;
