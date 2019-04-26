@@ -307,7 +307,27 @@ class VoucherController extends Controller
         $environments = Environment::all();
         $voucherStates = VoucherState::where('id', '>', 1)->get();
         $voucherTypes = VoucherType::all();
-        return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherStates', 'voucherTypes']));
+        $filter = $request->only(['company', 'branch', 'emission_point', 'customer', 'environment', 'voucher_state', 'voucher_type', 'issue_date_from', 'issue_date_to', 'sequential_from', 'sequential_to']);
+        return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherStates', 'voucherTypes', 'filter']));
+    }
+
+    public function download(Request $request)
+    {
+        $filter = array();
+        foreach (explode('&', $request->filter) as $chunk) {
+            $param = explode("=", $chunk);
+            if ($param) {
+                if (Str::endsWith(urldecode($param[0]), '[]')) {
+                    if (!array_key_exists(Str::replaceLast('[]', '', urldecode($param[0])), $filter)) {
+                        $filter[Str::replaceLast('[]', '', urldecode($param[0]))] = array();
+                    }
+                    array_push($filter[Str::replaceLast('[]', '', urldecode($param[0]))], urldecode($param[1]) === '' ? NULL : urldecode($param[1]));
+                } else {
+                    $filter[urldecode($param[0])] = urldecode($param[1]) === '' ? NULL : urldecode($param[1]);
+                }
+            }
+        }
+        return ReportController::download(Auth::user(), (new Request)->merge($filter), $request->type);
     }
 
     /**

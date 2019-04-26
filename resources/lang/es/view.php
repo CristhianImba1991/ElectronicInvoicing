@@ -139,6 +139,8 @@ return [
     'delete' => 'Eliminar',
     'deactivate' => 'Desactivar',
     'filter' => 'Filtrar',
+    'download' => 'Descargar',
+    'clear' => 'Limpiar',
     'all_draft_vouchers' => 'Todos los borradores',
     'all_vouchers' => 'Todos los comprobantes',
     'draft' => 'Borrador',

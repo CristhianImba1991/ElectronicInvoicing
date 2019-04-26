@@ -139,6 +139,8 @@ return [
     'delete' => 'Delete',
     'deactivate' => 'Deactivate',
     'filter' => 'Filter',
+    'download' => 'Download',
+    'clear' => 'Clear',
     'all_draft_vouchers' => 'All draft vouchers',
     'all_vouchers' => 'All vouchers',
     'draft' => 'Draft',
