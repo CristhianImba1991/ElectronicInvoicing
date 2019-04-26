@@ -106,6 +106,7 @@ class ReportController extends Controller
     {
         $voucherCollection = collect();
         foreach ($vouchers as $voucher) {
+            info($voucher->id);
             $additionalFields = NULL;
             $payments = NULL;
             if ($voucher->additionalFields()->exists()) {
