@@ -137,6 +137,7 @@ jQuery(document).ready(function($) {
         xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             var a;
+            console.log(xhttp.readyState + ' >>> ' + xhttp.status);
             if (xhttp.readyState === 4 && xhttp.status === 200) {
                 $("#downloadModal").modal('hide');
                 a = document.createElement('a');
