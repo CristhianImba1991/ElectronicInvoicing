@@ -16,6 +16,7 @@ use ElectronicInvoicing\{
     VoucherType
 };
 use ElectronicInvoicing\Exports\VouchersExport;
+use ElectronicInvoicing\StaticClasses\VoucherStates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Laracsv\Export;
@@ -112,7 +113,7 @@ class ReportController extends Controller
                 $additionalFields = json_encode(array_combine($voucher->additionalFields()->pluck('name')->toArray(), $voucher->additionalFields()->pluck('value')->toArray()), JSON_UNESCAPED_UNICODE);
             }
             if ($voucher->payments()->exists()) {
-                $paymentBase = ['METHOD', 'VALUE', 'TIEM UNIT', 'TERM'];
+                $paymentBase = ['METHOD', 'VALUE', 'TIME UNIT', 'TERM'];
                 $paymentsArray = [];
                 foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
                     array_push($paymentsArray, array_combine($paymentBase, [
@@ -279,7 +280,7 @@ class ReportController extends Controller
 
     public static function download(User $user, Request $filter, $type)
     {
-        $vouchers = self::getFilteredVouchersAllowedToUserQueryBuilder($user, $filter)->get();
+        $vouchers = self::getFilteredVouchersAllowedToUserQueryBuilder($user, $filter);
         $contentType = 'text/plain';
         $headers = [
             'Content-Type' => $contentType,
@@ -290,7 +291,7 @@ class ReportController extends Controller
             case 'csv':
                 $contentType = 'application/csv';
                 $headers['Content-Type'] = $contentType;
-                $voucherCollection = self::getVouchersCollection($vouchers);
+                $voucherCollection = self::getVouchersCollection($vouchers->get());
                 return response()->stream(function () use ($voucherCollection) {
                     $writer = Writer::createFromStream(fopen('php://output', 'w'));
                     $csvExporter = new Export($writer);
@@ -368,21 +369,22 @@ class ReportController extends Controller
             case 'xls':
                 $contentType = 'application/vnd.ms-excel';
                 $headers['Content-Type'] = $contentType;
-                $voucherCollection = self::getVouchersCollection($vouchers);
+                $voucherCollection = self::getVouchersCollection($vouchers->get());
                 return Excel::download(new VouchersExport($voucherCollection), 'vouchers.xlsx', NULL, $headers);
                 break;
             case 'zip':
+                $vouchers->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED]);
                 $contentType = 'application/zip';
                 $headers['Content-Type'] = $contentType;
                 $zipper = new Zipper;
                 $zipper->make('vouchers.zip');
-                foreach ($vouchers as $voucher) {
+                foreach ($vouchers->get() as $voucher) {
                     info($voucher->id);
                     if ($voucher->xml !== NULL) {
                         $zipper->add(storage_path('app/' . $voucher->xml));
                     }
-                    //$html = false;
-                    //PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($headers['File-Name'] . '/' . $voucher->accessKey() . '.pdf');
+                    $html = false;
+                    PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($headers['File-Name'] . '/' . $voucher->accessKey() . '.pdf');
                 }
                 $zipper->close();
                 /*info('FINISHED CREATING PDFs');
@@ -391,10 +393,7 @@ class ReportController extends Controller
                     $zipper->close();
                     File::deleteDirectory($headers['File-Name'] . '/');
                 }*/
-                info('BINARY FILE RESPONSE START');
-                $binaryFileResponse = response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
-                info('END OF OBJECT CREATION AND FUNCTION');
-                return $binaryFileResponse;
+                return response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
                 break;
         }
     }
