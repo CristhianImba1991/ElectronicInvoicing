@@ -296,6 +296,7 @@ class ReportController extends Controller
         $tempFolder = round((microtime(true) * 1000)) . '/';
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
+            info($vouchers->id);
             if ($voucher->xml !== NULL) {
                 $zipper->add(storage_path('app/' . $voucher->xml));
             }
