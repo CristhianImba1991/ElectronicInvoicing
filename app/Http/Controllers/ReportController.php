@@ -289,6 +289,7 @@ class ReportController extends Controller
         switch ($type) {
             case 'csv':
                 $contentType = 'application/csv';
+                $headers['Content-Type'] = $contentType;
                 $voucherCollection = self::getVouchersCollection($vouchers);
                 return response()->stream(function () use ($voucherCollection) {
                     $writer = Writer::createFromStream(fopen('php://output', 'w'));
@@ -366,11 +367,13 @@ class ReportController extends Controller
                 break;
             case 'xls':
                 $contentType = 'application/vnd.ms-excel';
+                $headers['Content-Type'] = $contentType;
                 $voucherCollection = self::getVouchersCollection($vouchers);
                 return Excel::download(new VouchersExport($voucherCollection), 'vouchers.xlsx', NULL, $headers);
                 break;
             case 'zip':
                 $contentType = 'application/zip';
+                $headers['Content-Type'] = $contentType;
                 $zipper = new Zipper;
                 $zipper->make('vouchers.zip');
                 foreach ($vouchers as $voucher) {
