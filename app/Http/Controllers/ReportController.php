@@ -12,6 +12,7 @@ use ElectronicInvoicing\{
     RetentionTaxDescription,
     TimeUnit,
     User,
+    Voucher,
     VoucherState,
     VoucherType
 };
@@ -23,10 +24,11 @@ use Laracsv\Export;
 use League\Csv\Writer;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
+use Storage;
 
 class ReportController extends Controller
 {
-    private static function getVoucherQueryBuilder()
+    /*private static function getVoucherQueryBuilder()
     {
         return Voucher::join('emission_points', 'emission_points.id', '=', 'vouchers.emission_point_id')
             ->join('branches', 'branches.id', '=', 'emission_points.branch_id')
@@ -40,7 +42,7 @@ class ReportController extends Controller
             ->join('currencies', 'currencies.id', '=', 'vouchers.currency_id')
             ->join('additional_fields', 'vouchers.id', '=', 'additional_fields.voucher_id')
             ->select('vouchers.*');
-    }
+    }*/
 
     private static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
     {
@@ -278,6 +280,37 @@ class ReportController extends Controller
         return $voucherCollection;
     }
 
+    public static function createZip()
+    {
+        if(File::exists(storage_path('app/') . 'vouchers.zip')){
+            File::delete(storage_path('app/') . 'vouchers.zip');
+        }
+        $vouchers = Voucher::join('environments', 'environments.id', '=', 'vouchers.environment_id')
+            ->join('voucher_states', 'voucher_states.id', '=', 'vouchers.voucher_state_id')
+            ->select('vouchers.*')
+            ->where('environments.id', '=', '2')
+            ->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
+            ->get();
+        $zipper = new Zipper;
+        $zipper->make(storage_path('app/') . 'vouchers.zip');
+        $tempFolder = round((microtime(true) * 1000)) . '/';
+        Storage::makeDirectory($tempFolder);
+        foreach ($vouchers as $voucher) {
+            if ($voucher->xml !== NULL) {
+                $zipper->add(storage_path('app/' . $voucher->xml));
+            }
+            $html = false;
+            PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) . $voucher->accessKey() . '.pdf');
+        }
+        if (File::exists(storage_path('app/' . $tempFolder))) {
+            $zipper->add(storage_path('app/' . $tempFolder));
+        }
+        $zipper->close();
+        if (File::exists(storage_path('app/' . $tempFolder))) {
+            File::deleteDirectory(storage_path('app/' . $tempFolder));
+        }
+    }
+
     public static function download(User $user, Request $filter, $type)
     {
         $vouchers = self::getFilteredVouchersAllowedToUserQueryBuilder($user, $filter);
@@ -373,27 +406,24 @@ class ReportController extends Controller
                 return Excel::download(new VouchersExport($voucherCollection), 'vouchers.xlsx', NULL, $headers);
                 break;
             case 'zip':
-                $vouchers->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED]);
+                $vouchers = $vouchers->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED]);
                 $contentType = 'application/zip';
                 $headers['Content-Type'] = $contentType;
+                if (!File::exists(storage_path('app/') . . 'vouchers.zip')) {
+                    self::createZip();
+                }
+                File::copy(storage_path('app/') . 'vouchers.zip', storage_path('app/') . $headers['File-Name']);
                 $zipper = new Zipper;
-                $zipper->make('vouchers.zip');
-                foreach ($vouchers->get() as $voucher) {
-                    info($voucher->id);
-                    if ($voucher->xml !== NULL) {
-                        $zipper->add(storage_path('app/' . $voucher->xml));
-                    }
-                    $html = false;
-                    PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($headers['File-Name'] . '/' . $voucher->accessKey() . '.pdf');
+                $zipper->make(storage_path('app/') . $headers['File-Name']);
+                foreach (Voucher::whereNotIn('id', $vouchers->get()->pluck('id'))->get() as $voucher) {
+                    $zipper->remove($voucher->accessKey() . '.xml');
+                    $zipper->remove($voucher->accessKey() . '.pdf');
                 }
                 $zipper->close();
-                /*info('FINISHED CREATING PDFs');
-                if (File::exists($headers['File-Name'] . '/')) {
-                    $zipper->add($headers['File-Name'] . '/');
-                    $zipper->close();
-                    File::deleteDirectory($headers['File-Name'] . '/');
-                }*/
-                return response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
+                if (File::exists(storage_path('app/') . $headers['File-Name'])) {
+                    return response()->download(storage_path('app/') . $headers['File-Name'], 'vouchers.zip', $headers)->deleteFileAfterSend();
+                }
+                return response()->download(storage_path('app/vouchers_empty.zip'), 'vouchers.zip', $headers);
                 break;
         }
     }
