@@ -410,7 +410,7 @@ class ReportController extends Controller
                 $vouchers = $vouchers->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED]);
                 $contentType = 'application/zip';
                 $headers['Content-Type'] = $contentType;
-                if (!File::exists(storage_path('app/') . . 'vouchers.zip')) {
+                if (!File::exists(storage_path('app/') . 'vouchers.zip')) {
                     self::createZip();
                 }
                 File::copy(storage_path('app/') . 'vouchers.zip', storage_path('app/') . $headers['File-Name']);
