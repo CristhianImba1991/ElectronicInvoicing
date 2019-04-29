@@ -381,15 +381,16 @@ class ReportController extends Controller
                     if ($voucher->xml !== NULL) {
                         $zipper->add(storage_path('app/' . $voucher->xml));
                     }
-                    $html = false;
-                    PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($headers['File-Name'] . '/' . $voucher->accessKey() . '.pdf');
+                    //$html = false;
+                    //PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($headers['File-Name'] . '/' . $voucher->accessKey() . '.pdf');
                 }
-                info('FINISHED CREATING PDFs');
+                $zipper->close();
+                /*info('FINISHED CREATING PDFs');
                 if (File::exists($headers['File-Name'] . '/')) {
                     $zipper->add($headers['File-Name'] . '/');
                     $zipper->close();
                     File::deleteDirectory($headers['File-Name'] . '/');
-                }
+                }*/
                 info('BINARY FILE RESPONSE START');
                 $binaryFileResponse = response()->download('vouchers.zip', 'vouchers.zip', $headers)->deleteFileAfterSend();
                 info('END OF OBJECT CREATION AND FUNCTION');
