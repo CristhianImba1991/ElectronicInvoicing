@@ -602,10 +602,10 @@ jQuery(document).ready(function($) {
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <strong>{{ __('veiw.generating_report') }}</strong>
+                    <strong>{{ __('view.generating_report') }}</strong>
                 </div>
                 <div class="modal-body">
-                    <p>{{ __('veiw.please_wait_while_your_report_is_generated') }}</p>
+                    <p>{{ __('view.please_wait_while_your_report_is_generated') }}</p>
                 </div>
             </div>
         </div>
