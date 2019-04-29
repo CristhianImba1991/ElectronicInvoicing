@@ -165,6 +165,8 @@ return [
 
     'processing_voucher' => 'Processing voucher...',
     'please_wait_while_your_voucher_is_processed' => 'Please wait while your voucher is processed.',
+    'generating_report' => 'Generating report...',
+    'please_wait_while_your_report_is_generated' => 'Please wait while your report is generated.',
     'send_voucher_by_email' => 'Send voucher by email',
 
     'toggle_navigation' => 'Toggle navigation',

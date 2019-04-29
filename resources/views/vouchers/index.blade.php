@@ -597,18 +597,18 @@ jQuery(document).ready(function($) {
     @include('layouts.validation')
 
 @endunlessrole
-@role('admin')
+@unlessrole('customer')
     <div class="modal fade" tabindex="-1" role="dialog" id="downloadModal">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <strong>Generating report</strong>
+                    <strong>{{ __('veiw.generating_report') }}</strong>
                 </div>
                 <div class="modal-body">
-                    <p>Please wait while your report is generated.</p>
+                    <p>{{ __('veiw.please_wait_while_your_report_is_generated') }}</p>
                 </div>
             </div>
         </div>
     </div>
-@endrole
+@endunlessrole
 @endsection
