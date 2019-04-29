@@ -2,6 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
+use Chumper\Zipper\Zipper;
 use DateTime;
 use DateTimeZone;
 use ElectronicInvoicing\{
@@ -44,6 +45,7 @@ use ElectronicInvoicing\Http\Logic\DraftJson;
 use ElectronicInvoicing\StaticClasses\{VoucherStates, ValidationRule};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use PDF;
 use SoapClient;
@@ -1855,6 +1857,18 @@ class VoucherController extends Controller
                 $voucher->save();
                 if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED && $voucher->environment->code === 2) {
                     MailController::sendMailNewVoucher($voucher);
+                    $zipper = new Zipper;
+                    $zipper->make(storage_path('app/') . $headers['File-Name']);
+                    $zipper->add(storage_path('app/' . $voucher->xml));
+                    $tempFolder = round((microtime(true) * 1000)) . '/';
+                    Storage::makeDirectory($tempFolder);
+                    $html = false;
+                    PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) . $voucher->accessKey() . '.pdf');
+                    $zipper->add(storage_path('app/' . $tempFolder));
+                    $zipper->close();
+                    if (File::exists(storage_path('app/' . $tempFolder))) {
+                        File::deleteDirectory(storage_path('app/' . $tempFolder));
+                    }
                 }
             } catch (\Exception $e) {
                 info('#### ERROR IN AUTORIZARCOMPROBANTE WS #######################');

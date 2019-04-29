@@ -126,44 +126,44 @@ jQuery(document).ready(function($) {
         $('#modal-formfilter [id = sequential_from]').val('');
         $('#modal-formfilter [id = sequential_to]').val('');
     });
-    function download(filetype) {
-        $('#downloadModal').modal('show');
-        var _token = $('input[name = "_token"]').val();
-        var data = {
-            _token: _token,
-            filter: $('#modal-formfilter').serialize(),
-            type: filetype
-        };
-        xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            var a;
-            console.log(xhttp.readyState + ' >>> ' + xhttp.status);
-            if (xhttp.readyState === 4 && xhttp.status === 200) {
-                $("#downloadModal").modal('hide');
-                a = document.createElement('a');
-                a.href = window.URL.createObjectURL(xhttp.response);
-                a.download = xhttp.getResponseHeader("File-Name");
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-            }
-        };
-        xhttp.open("POST", "{{ route('vouchers.download') }}", true);
-        xhttp.setRequestHeader("Content-Type", "application/json");
-        xhttp.setRequestHeader("X-CSRF-TOKEN", '{!! csrf_token() !!}');
-        xhttp.responseType = 'blob';
-        xhttp.send(JSON.stringify(data));
-    }
-    $("#csv").click(function() {
-        download('csv');
-    });
-    $("#xls").click(function() {
-        download('xls');
-    });
-    $("#zip").click(function() {
-        download('zip');
-    });
     @unlessrole('customer')
+        function download(filetype) {
+            $('#downloadModal').modal('show');
+            var _token = $('input[name = "_token"]').val();
+            var data = {
+                _token: _token,
+                filter: $('#modal-formfilter').serialize(),
+                type: filetype
+            };
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                var a;
+                console.log(xhttp.readyState + ' >>> ' + xhttp.status);
+                if (xhttp.readyState === 4 && xhttp.status === 200) {
+                    $("#downloadModal").modal('hide');
+                    a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(xhttp.response);
+                    a.download = xhttp.getResponseHeader("File-Name");
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                }
+            };
+            xhttp.open("POST", "{{ route('vouchers.download') }}", true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            xhttp.setRequestHeader("X-CSRF-TOKEN", '{!! csrf_token() !!}');
+            xhttp.responseType = 'blob';
+            xhttp.send(JSON.stringify(data));
+        }
+        $("#csv").click(function() {
+            download('csv');
+        });
+        $("#xls").click(function() {
+            download('xls');
+        });
+        $("#zip").click(function() {
+            download('zip');
+        });
         $('#emailModal').on('show.bs.modal', function(event) {
             $(this).find("#voucher").val($(event.relatedTarget).data('voucher'))
         });
@@ -273,7 +273,7 @@ jQuery(document).ready(function($) {
                         <div class="btn-group mr-2" role="group" aria-label="First group">
                             <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#filterModal">{{ __('view.filter') }}</button>
                         </div>
-                        @role('admin')
+                        @unlessrole('customer')
                         <div class="btn-group mr-2" role="group" aria-label="Second group">
                             <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 {{ __('view.download') }}
@@ -293,7 +293,7 @@ jQuery(document).ready(function($) {
                                 </button>
                             </div>
                         </div>
-                        @endrole
+                        @endunlessrole
                     </div>
                 </div>
 
