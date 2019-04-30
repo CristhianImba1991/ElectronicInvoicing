@@ -1858,7 +1858,7 @@ class VoucherController extends Controller
                 if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED && $voucher->environment->code === 2) {
                     MailController::sendMailNewVoucher($voucher);
                     $zipper = new Zipper;
-                    $zipper->make(storage_path('app/') . $headers['File-Name']);
+                    $zipper->make(storage_path('app/') . 'vouchers.zip');
                     $zipper->add(storage_path('app/' . $voucher->xml));
                     $tempFolder = round((microtime(true) * 1000)) . '/';
                     Storage::makeDirectory($tempFolder);
