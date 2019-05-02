@@ -36,6 +36,9 @@
                 <th class="align-bottom"><center>Cod. Auxiliar</center></th>
                 <th class="align-bottom"><center>Cant.</center></th>
                 <th class="align-bottom"><center>Descripción</center></th>
+                <th class="align-bottom"><center>Detalle Adicional</center></th>
+                <th class="align-bottom"><center>Detalle Adicional</center></th>
+                <th class="align-bottom"><center>Detalle Adicional</center></th>
                 <th class="align-bottom"><center>Precio Unitario</center></th>
                 <th class="align-bottom"><center>Descuento</center></th>
                 <th class="align-bottom"><center>Subtotal</center></th>
@@ -48,6 +51,12 @@
                 <td class="align-middle">{{ $detail->product->auxiliary_code }}</td>
                 <td class="text-center align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : $detail->quantity }}</td>
                 <td class="align-middle">{{ $detail->product->description }}</td>
+                @foreach($detail->additionalDetails as $additionalDetail)
+                    <td class="align-middle">{{ $additionalDetail->value }}</td>
+                @endforeach
+                @for($i = count($detail->additionalDetails); $i < 3; $i++)
+                    <td class="align-middle"></td>
+                @endfor
                 <td class="text-right align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : $detail->unit_price }}</td>
                 <td class="text-right align-middle">{{ number_format($detail->discount, 2, '.', '') }}</td>
                 <td class="text-right align-middle">{{ $detail->quantity * $detail->unit_price - $detail->discount }}</td>
