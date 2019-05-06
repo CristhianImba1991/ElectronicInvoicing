@@ -288,7 +288,7 @@ class VoucherController extends Controller
         }
         $environments = Environment::all();
         $voucherStates = VoucherState::where('id', '>', 1)->get();
-        $voucherTypes = VoucherType::all();
+        $voucherTypes = VoucherType::whereIn('code', [1, 4, 5, 6, 7])->get();
         return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherStates', 'voucherTypes']));
     }
 
@@ -308,7 +308,7 @@ class VoucherController extends Controller
         }
         $environments = Environment::all();
         $voucherStates = VoucherState::where('id', '>', 1)->get();
-        $voucherTypes = VoucherType::all();
+        $voucherTypes = VoucherType::whereIn('code', [1, 4, 5, 6, 7])->get();
         $filter = $request->only(['company', 'branch', 'emission_point', 'customer', 'environment', 'voucher_state', 'voucher_type', 'issue_date_from', 'issue_date_to', 'sequential_from', 'sequential_to']);
         return view('vouchers.index', compact(['companies', 'environments', 'vouchers', 'voucherStates', 'voucherTypes', 'filter']));
     }
@@ -359,7 +359,7 @@ class VoucherController extends Controller
         $currencies = Currency::all();
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
-        $voucherTypes = VoucherType::all();
+        $voucherTypes = VoucherType::whereIn('code', [1, 4, 5, 6, 7])->get();
         return view('vouchers.create', compact(['companies', 'currencies', 'environments', 'identificationTypes', 'voucherTypes']));
     }
 
@@ -466,7 +466,7 @@ class VoucherController extends Controller
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();
         if ($draftVoucher['voucher_type'] === null) {
-            $voucherTypes = VoucherType::all();
+            $voucherTypes = VoucherType::whereIn('code', [1, 4, 5, 6, 7])->get();
         } else {
             $voucherTypes = VoucherType::where('id', '=', $draftVoucher['voucher_type'])->get();
         }
@@ -634,7 +634,7 @@ class VoucherController extends Controller
                 $data = ['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes'];
                 break;
             case 5:
-                $voucherTypes = VoucherType::all();
+                $voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9])->get();
                 $data = ['action', 'voucherTypes'];
                 break;
         }
@@ -683,7 +683,7 @@ class VoucherController extends Controller
                 $data = ['action', 'draftVoucher', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes'];
                 break;
             case 5:
-                $voucherTypes = VoucherType::all();
+                $voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9])->get();
                 $data = ['action', 'draftVoucher', 'voucherTypes'];
                 break;
         }
