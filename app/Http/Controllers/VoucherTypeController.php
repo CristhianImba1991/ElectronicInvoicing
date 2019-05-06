@@ -83,7 +83,7 @@ class VoucherTypeController extends Controller
         //
     }
 
-    public function updateNames()
+    public static function updateNames()
     {
         $vt7 = VoucherType::find(7);
         $vt7->name = 'LIQUIDACIÓN DE COMPRA';
