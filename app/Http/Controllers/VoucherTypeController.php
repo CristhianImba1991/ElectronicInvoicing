@@ -82,4 +82,17 @@ class VoucherTypeController extends Controller
     {
         //
     }
+
+    public function updateNames()
+    {
+        $vt7 = VoucherType::find(7);
+        $vt7->name = 'LIQUIDACIÓN DE COMPRA';
+        $vt7->save();
+        $vt8 = VoucherType::find(8);
+        $vt8->name = 'BOLETOS ESPECTÁCULOS PÚBLICOS';
+        $vt8->save();
+        $vt9 = VoucherType::find(9);
+        $vt9->name = 'TIQUETES DE MÁQ. REGISTRADORAS';
+        $vt9->save();
+    }
 }
