@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
             ['code' => 5, 'name' => 'NOTA DE DÉBITO', 'created_at' => Carbon::now()],
             ['code' => 6, 'name' => 'GUÍA DE REMISIÓN', 'created_at' => Carbon::now()],
             ['code' => 7, 'name' => 'COMPROBANTE DE RETENCIÓN', 'created_at' => Carbon::now()]
+            ['code' => 2, 'name' => 'NOTA O BOLETA DE VENTA', 'created_at' => Carbon::now()]
+            ['code' => 3, 'name' => 'LIQUIDACIÓN DE COMPRA', 'created_at' => Carbon::now()]
+            ['code' => 8, 'name' => 'BOLETO DE ESPECTÁCULO PÚBLICO', 'created_at' => Carbon::now()]
+            ['code' => 9, 'name' => 'TIQUETE DE MÁQ. REGISTRADORA', 'created_at' => Carbon::now()]
         ]);
 
         DB::table('voucher_states')->insert([
