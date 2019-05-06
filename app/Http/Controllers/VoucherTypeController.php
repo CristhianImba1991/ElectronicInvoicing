@@ -82,14 +82,4 @@ class VoucherTypeController extends Controller
     {
         //
     }
-
-    public static function updateNames()
-    {
-        $vt8 = VoucherType::find(8);
-        $vt8->name = 'BOLETO DE ESPECTÁCULO PÚBLICO';
-        $vt8->save();
-        $vt9 = VoucherType::find(9);
-        $vt9->name = 'TIQUETE DE MÁQ. REGISTRADORA';
-        $vt9->save();
-    }
 }
