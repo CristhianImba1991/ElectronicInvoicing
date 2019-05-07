@@ -294,7 +294,7 @@ class ValidationRule
                             $rules['description'] = 'required|array|min:1';
                             $rules['description.*'] = $isApiRequest ? 'distinct|exists:retention_tax_descriptions,code' : 'distinct|exists:retention_tax_descriptions,id';
                             $rules['value'] = 'required|array|min:1';
-                            $rules['value.*'] = 'required|numeric|gte:0';
+                            $rules['value.*'] = 'required|numeric|gte:0|lte:100';
                             $rules['tax_base'] = 'required|array|min:1';
                             $rules['tax_base.*'] = 'required|numeric|gte:0';
                             $rules['extra_detail'] = 'nullable|string';
