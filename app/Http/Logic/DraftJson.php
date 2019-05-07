@@ -129,6 +129,9 @@ class DraftJson
             $voucher['product'] = array_values(array_filter($voucher['product'], function ($var) {
                 return !is_null($var);
             }));
+            $voucher['product'] = array_map(function ($value) {
+                return intval($value);
+            }, $voucher['product']);
         }
         if (array_key_exists('product_quantity', $voucher)) {
             $voucher['product_quantity'] = array_values(array_filter($voucher['product_quantity'], function ($var) {
