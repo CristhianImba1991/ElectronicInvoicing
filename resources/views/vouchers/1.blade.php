@@ -214,7 +214,7 @@
                         </div>
                         <div class="form-group">
                             <label for="product_unit_price">{{ __('view.unit_price') }}</label>
-                            <input type="number" step="0.01" class="form-control" id="product_unit_price" name="unit_price"  value="">
+                            <input type="number" step="0.000001" class="form-control" id="unit_price" name="unit_price"  value="" lang="en">
                         </div>
                         <div class="form-group">
                             <label for="product_description">{{ __('view.description') }}</label>
