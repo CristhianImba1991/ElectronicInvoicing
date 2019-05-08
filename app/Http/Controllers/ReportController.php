@@ -126,7 +126,7 @@ class ReportController extends Controller
                     ]));
                 }
                 $payments = json_encode($paymentsArray, JSON_UNESCAPED_UNICODE);
-            }
+            }info('DEBUG: ' . $voucher->customer);
             $voucherBase = [
                 'company_ruc' => $voucher->emissionPoint->branch->company->ruc,
                 'company_social_reason' => $voucher->emissionPoint->branch->company->social_reason,
