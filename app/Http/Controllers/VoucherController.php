@@ -1737,11 +1737,9 @@ class VoucherController extends Controller
         switch ($voucher->environment->code) {
             case 1:
                 $wsdlReceipt = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl';
-                $wsdlAuthorization = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
                 break;
             case 2:
                 $wsdlReceipt = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl';
-                $wsdlAuthorization = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
                 break;
         }
         $options = array(
@@ -1783,101 +1781,7 @@ class VoucherController extends Controller
         }
 
         if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
-            $soapClientValidation = new SoapClient($wsdlAuthorization);
-            $accessKey = array(
-                'autorizacionComprobante' => array(
-                    'claveAccesoComprobante' =>  $voucher->accessKey()
-                )
-            );
-            try {
-                $resultAuthorization = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
-                info('**** AUTHORIZATION RESULT *********************************');
-                info($resultAuthorization);
-                info('**** END AUTHORIZATION RESULT *****************************');
-                $xmlReponse = [
-                    'estado' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
-                    'numeroAutorizacion' => NULL,
-                    'fechaAutorizacion' => NULL,
-                    'comprobante' => NULL,
-                    'mensajes' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
-                ];
-
-                switch ($resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
-                    case 'AUTORIZADO':
-                        $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
-                        $xmlReponse['fechaAutorizacion'] = array(
-                            '_attributes' => ['class' => 'fechaAutorizacion'],
-                            '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
-                        );
-                        $xmlReponse['comprobante'] = array(
-                            '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
-                        );
-                        $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
-                        $voucher->extra_detail = NULL;
-                        $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
-                        $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
-                        break;
-                    case 'NO AUTORIZADO':
-                        unset($xmlReponse['numeroAutorizacion']);
-                        $xmlReponse['fechaAutorizacion'] = array(
-                            '_attributes' => ['class' => 'fechaAutorizacion'],
-                            '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
-                        );
-                        $xmlReponse['comprobante'] = array(
-                            '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
-                        );
-                        $message = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['tipo'] . ' ' .
-                            $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['identificador'] . ': ' .
-                            $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['mensaje'];
-                        if (array_key_exists('informacionAdicional', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje'])) {
-                            $message .= '. ' . $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['informacionAdicional'];
-                        }
-                        $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
-                        $voucher->extra_detail = $message;
-                        $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
-                        $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
-                        break;
-                    default:
-                        unset($xmlReponse['numeroAutorizacion']);
-                        unset($xmlReponse['fechaAutorizacion']);
-                        unset($xmlReponse['comprobante']);
-                        $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
-                        $voucher->extra_detail = NULL;
-                        break;
-                }
-                $voucher->save();
-                $xmlPath = 'xmls/' .
-                    $voucher->emissionPoint->branch->company->ruc . '/' .
-                    VoucherState::find($voucher->voucher_state_id)->name . '/' .
-                    DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y/m') . '/' .
-                    $voucher->accessKey() . '.xml';
-                Storage::put($xmlPath, ArrayToXml::convert($xmlReponse, 'autorizacion', false, 'UTF-8'));
-                Storage::delete($voucher->xml);
-                $voucher->xml = $xmlPath;
-                $voucher->save();
-                if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED && $voucher->environment->code === 2) {
-                    MailController::sendMailNewVoucher($voucher);
-                    $zipper = new Zipper;
-                    $zipper->make(storage_path('app/') . 'vouchers.zip');
-                    $zipper->add(storage_path('app/' . $voucher->xml));
-                    $tempFolder = round((microtime(true) * 1000)) . '/';
-                    Storage::makeDirectory($tempFolder);
-                    $html = false;
-                    PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) . $voucher->accessKey() . '.pdf');
-                    $zipper->add(storage_path('app/' . $tempFolder));
-                    $zipper->close();
-                    if (File::exists(storage_path('app/' . $tempFolder))) {
-                        File::deleteDirectory(storage_path('app/' . $tempFolder));
-                    }
-                }
-            } catch (\Exception $e) {
-                info('#### ERROR IN AUTORIZARCOMPROBANTE WS #######################');
-                info(' CODE: ' . $e->getCode());
-                info(' FILE: ' . $e->getFile());
-                info(' LINE: ' . $e->getLine());
-                info(' MESSAGE: ' . $e->getMessage());
-                info('#### END ERROR IN AUTORIZARCOMPROBANTE WS ###################');
-            }
+            self::authorizeVoucher($voucher, $wsdlAuthorization);
         } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
             info('#### RETURNED VOUCHER #######################');
             info(' *** ' . $voucher->extra_detail . ' *** ');
@@ -1889,6 +1793,116 @@ class VoucherController extends Controller
     {
         self::sendVoucher($voucher);
         return redirect()->route('vouchers.index')->with(['status' => 'Voucher sended successfully.']);
+    }
+
+    private static function authorizeVoucher($voucher)
+    {
+        if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED || $voucher->voucher_state_id === VoucherStates::CANCELLED) {
+            return;
+        }
+        switch ($voucher->environment->code) {
+            case 1:
+                $wsdlAuthorization = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+                break;
+            case 2:
+                $wsdlAuthorization = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
+                break;
+        }
+        $soapClientValidation = new SoapClient($wsdlAuthorization);
+        $accessKey = array(
+            'autorizacionComprobante' => array(
+                'claveAccesoComprobante' =>  $voucher->accessKey()
+            )
+        );
+        try {
+            $resultAuthorization = json_decode(json_encode($soapClientValidation->__soapCall("autorizacionComprobante", $accessKey)), True);
+            info('**** AUTHORIZATION RESULT *********************************');
+            info($resultAuthorization);
+            info('**** END AUTHORIZATION RESULT *****************************');
+            $xmlReponse = [
+                'estado' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado'],
+                'numeroAutorizacion' => NULL,
+                'fechaAutorizacion' => NULL,
+                'comprobante' => NULL,
+                'mensajes' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes'],
+            ];
+
+            switch ($resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['estado']) {
+                case 'AUTORIZADO':
+                    $xmlReponse['numeroAutorizacion'] = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['numeroAutorizacion'];
+                    $xmlReponse['fechaAutorizacion'] = array(
+                        '_attributes' => ['class' => 'fechaAutorizacion'],
+                        '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                    );
+                    $xmlReponse['comprobante'] = array(
+                        '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                    );
+                    $voucher->voucher_state_id = VoucherStates::AUTHORIZED;
+                    $voucher->extra_detail = NULL;
+                    $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+                    $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
+                    break;
+                case 'NO AUTORIZADO':
+                    unset($xmlReponse['numeroAutorizacion']);
+                    $xmlReponse['fechaAutorizacion'] = array(
+                        '_attributes' => ['class' => 'fechaAutorizacion'],
+                        '_value' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion'],
+                    );
+                    $xmlReponse['comprobante'] = array(
+                        '_cdata' => $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['comprobante'],
+                    );
+                    $message = $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['tipo'] . ' ' .
+                        $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['identificador'] . ': ' .
+                        $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['mensaje'];
+                    if (array_key_exists('informacionAdicional', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje'])) {
+                        $message .= '. ' . $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['mensajes']['mensaje']['informacionAdicional'];
+                    }
+                    $voucher->voucher_state_id = VoucherStates::UNAUTHORIZED;
+                    $voucher->extra_detail = $message;
+                    $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
+                    $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
+                    break;
+                default:
+                    unset($xmlReponse['numeroAutorizacion']);
+                    unset($xmlReponse['fechaAutorizacion']);
+                    unset($xmlReponse['comprobante']);
+                    $voucher->voucher_state_id = VoucherStates::IN_PROCESS;
+                    $voucher->extra_detail = NULL;
+                    break;
+            }
+            $voucher->save();
+            $xmlPath = 'xmls/' .
+                $voucher->emissionPoint->branch->company->ruc . '/' .
+                VoucherState::find($voucher->voucher_state_id)->name . '/' .
+                DateTime::createFromFormat('Y-m-d', $voucher->issue_date)->format('Y/m') . '/' .
+                $voucher->accessKey() . '.xml';
+            Storage::put($xmlPath, ArrayToXml::convert($xmlReponse, 'autorizacion', false, 'UTF-8'));
+            Storage::delete($voucher->xml);
+            $voucher->xml = $xmlPath;
+            $voucher->save();
+            if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED && $voucher->environment->code === 2) {
+                MailController::sendMailNewVoucher($voucher);
+                $zipper = new Zipper;
+                $zipper->make(storage_path('app/') . 'vouchers.zip');
+                $zipper->add(storage_path('app/' . $voucher->xml));
+                $tempFolder = round((microtime(true) * 1000)) . '/';
+                Storage::makeDirectory($tempFolder);
+                $html = false;
+                PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) . $voucher->accessKey() . '.pdf');
+                $zipper->add(storage_path('app/' . $tempFolder));
+                $zipper->close();
+                if (File::exists(storage_path('app/' . $tempFolder))) {
+                    File::deleteDirectory(storage_path('app/' . $tempFolder));
+                }
+            }
+        } catch (\Exception $e) {
+            info('#### ERROR IN AUTORIZARCOMPROBANTE WS #######################');
+            info(' CODE: ' . $e->getCode());
+            info(' FILE: ' . $e->getFile());
+            info(' LINE: ' . $e->getLine());
+            info(' MESSAGE: ' . $e->getMessage());
+            info('#### END ERROR IN AUTORIZARCOMPROBANTE WS ###################');
+        }
     }
 
     private static function cancelVoucher()
