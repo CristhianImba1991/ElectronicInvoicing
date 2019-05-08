@@ -1795,7 +1795,7 @@ class VoucherController extends Controller
         return redirect()->route('vouchers.index')->with(['status' => 'Voucher sended successfully.']);
     }
 
-    private static function authorizeVoucher($voucher)
+    public static function authorizeVoucher($voucher)
     {
         if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED || $voucher->voucher_state_id === VoucherStates::CANCELLED) {
             return;
