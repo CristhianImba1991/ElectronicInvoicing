@@ -1797,7 +1797,7 @@ class VoucherController extends Controller
 
     public static function authorizeVoucher($voucher)
     {
-        if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED || $voucher->voucher_state_id === VoucherStates::CANCELLED) {
+        if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED || $voucher->voucher_state_id === VoucherStates::CANCELED) {
             return;
         }
         switch ($voucher->environment->code) {
