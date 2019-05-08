@@ -317,7 +317,7 @@ jQuery(document).ready(function($) {
                             @foreach($vouchers as $voucher)
                                 <tr>
                                     <td>{{ $voucher->id }}</td>
-                                    <td>{{ $voucher->emissionPoint->branch->company->tradename }}</td>
+                                    <td>{{ $voucher->emissionPoint->branch->company->social_reason }}</td>
                                     <td>{{ \ElectronicInvoicing\VoucherType::find($voucher->voucher_type_id)->name }}</td>
                                     <td>
                                         @switch($voucher->voucher_state_id)
