@@ -78,9 +78,9 @@ class UserController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::all()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         }
         $roles = Role::all()->where('id', '>=', Role::findByName($user->getRoleNames()->first())->id)->where('id', '<>', Role::findByName('customer')->id);
         return view('users.create', compact(['companies', 'roles']));
@@ -176,9 +176,9 @@ class UserController extends Controller
             }
         }
         if (Auth::user()->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::all()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser(Auth::user());
+            $companies = CompanyUser::getCompaniesAllowedToUser(Auth::user())->sortBy('social_reason');
         }
         $roles = Role::all()->where('id', '>=', Role::findByName(Auth::user()->getRoleNames()->first())->id)->where('id', '<>', Role::findByName('customer')->id);
         return view('users.edit', compact(['companies', 'roles', 'user']));

@@ -71,6 +71,7 @@ class EmissionPointController extends Controller
                 $emissionPoints->push($emissionPoint);
             }
         }
+        $emissionPoints = $emissionPoints->sortBy(['branch_id', 'code']);
         return view('emission_points.index', compact('emissionPoints'));
     }
 
@@ -83,9 +84,9 @@ class EmissionPointController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::all()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         }
         return view('emission_points.create', compact('companies'));
     }

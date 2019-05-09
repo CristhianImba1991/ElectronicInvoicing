@@ -195,7 +195,7 @@ class VoucherController extends Controller
         } elseif ($user->hasRole('customer')) {
             $query = self::getVoucherQueryBuilder()
                 ->whereIn('vouchers.customer_id', $user->customers->pluck('id'))
-                ->where('voucher_state_id', VoucherStates::AUTHORIZED)
+                ->whereIn('voucher_state_id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
                 ->where('environment_id', 2);
         }
         if (!$user->hasRole('employee')) {
@@ -355,7 +355,7 @@ class VoucherController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $companies = $user->hasRole('admin') ? Company::all() : $companies = CompanyUser::getCompaniesAllowedToUser($user);
+        $companies = $user->hasRole('admin') ? Company::all()->sortBy('social_reason') : $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         $currencies = Currency::all();
         $environments = Environment::all();
         $identificationTypes = IdentificationType::all();

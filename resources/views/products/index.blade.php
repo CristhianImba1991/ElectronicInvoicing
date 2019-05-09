@@ -3,6 +3,13 @@
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#products').DataTable({
+        "order": [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc' ]]
+    });
+});
+</script>
 @endsection
 
 @section('styles')
@@ -27,7 +34,7 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="table" class="display">
+                    <table id="products" class="display">
                         <thead>
                             <tr>
                                 <th>{{ __('view.main_code') }}</th>

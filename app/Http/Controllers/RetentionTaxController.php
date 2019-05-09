@@ -95,10 +95,10 @@ class RetentionTaxController extends Controller
      */
     public function retentionTaxDescriptions(Request $request){
         if (is_array($request->id)) {
-            $retentionTaxDescriptions = RetentionTaxDescription::whereIn('retention_tax_id', $request->id)->get();
+            $retentionTaxDescriptions = RetentionTaxDescription::whereIn('retention_tax_id', $request->id)->orderByRaw('cast(code as unsigned)')->get();
             return $retentionTaxDescriptions->toJson();
         } else if (is_string($request->id)) {
-            $retentionTaxDescriptions = RetentionTaxDescription::where('retention_tax_id', $request->id)->get();
+            $retentionTaxDescriptions = RetentionTaxDescription::where('retention_tax_id', $request->id)->orderByRaw('cast(code as unsigned)')->get();
             return $retentionTaxDescriptions->toJson();
         }
     }

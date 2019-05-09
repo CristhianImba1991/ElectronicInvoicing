@@ -81,9 +81,9 @@ class ProductController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::all()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         }
         $iva_taxes = IvaTax::all()->sortBy(['auxiliary_code']);
         $ice_taxes = IceTax::all()->sortBy(['auxiliary_code']);

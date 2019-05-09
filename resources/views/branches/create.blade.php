@@ -54,7 +54,7 @@
                             <label for="company">{{ ucfirst(trans_choice(__('view.company'), 0)) }}</label>
                             <select class="form-control selectpicker" id="company" name="company" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.company'), 0)]), 1) }}">
                                 @foreach($companies as $company)
-                                    <option value="{{ $company->id }}">{{ $company->tradename }} - {{ $company->social_reason }}</option>
+                                    <option value="{{ $company->id }}">{{ $company->social_reason }} - {{ $company->tradename }}</option>
                                 @endforeach
                             </select>
                         </div>

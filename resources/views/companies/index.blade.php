@@ -3,6 +3,13 @@
 @section('scripts')
 <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
 <script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#companies').DataTable({
+        "order": [[ 2, 'asc' ], [ 1, 'asc' ]]
+    });
+});
+</script>
 @endsection
 
 @section('styles')
@@ -27,12 +34,12 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                    <table id="table" class="display">
+                    <table id="companies" class="display">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th>{{ __('view.ruc') }}</th>
-                                <th>{{ __('view.tradename') }} - {{ __('view.social_reason') }}</th>
+                                <th>{{ __('view.social_reason') }} - {{ __('view.tradename') }}</th>
                                 @if(auth()->user()->can('delete_hard_companies'))
                                     <th></th>
                                 @endif
@@ -45,14 +52,14 @@
                                     <td>{{ $company->ruc }}</td>
                                     <td>
                                         @if($company->deleted_at !== NULL)
-                                            {{ $company->tradename }} - {{ $company->social_reason }}
+                                            {{ $company->social_reason }} - {{ $company->tradename }}
                                         @else
                                             @if(auth()->user()->can('update_companies'))
-                                                <a href="{{ route('companies.edit', $company) }}">{{ $company->tradename }} - {{ $company->social_reason }}</a>
+                                                <a href="{{ route('companies.edit', $company) }}">{{ $company->social_reason }} - {{ $company->tradename }}</a>
                                             @elseif(auth()->user()->can('read_companies'))
-                                                <a href="{{ route('companies.show', $company) }}">{{ $company->tradename }} - {{ $company->social_reason }}</a>
+                                                <a href="{{ route('companies.show', $company) }}">{{ $company->social_reason }} - {{ $company->tradename }}</a>
                                             @else
-                                                {{ $company->tradename }} - {{ $company->social_reason }}
+                                                {{ $company->social_reason }} - {{ $company->tradename }}
                                             @endif
                                         @endif
                                     </td>

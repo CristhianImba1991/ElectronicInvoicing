@@ -71,9 +71,9 @@ class BranchController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::all()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         }
         return view('branches.create', compact('companies'));
     }
@@ -239,10 +239,10 @@ class BranchController extends Controller
      */
     public function products(Request $request){
         if (is_array($request->id)) {
-            $products = Product::whereIn('branch_id', $request->id)->get();
+            $products = Product::whereIn('branch_id', $request->id)->orderBy('main_code')->get();
             return $products->toJson();
         } else if (is_string($request->id)) {
-            $products = Product::where('branch_id', $request->id)->get();
+            $products = Product::where('branch_id', $request->id)->orderBy('main_code')->get();
             return $products->toJson();
         }
     }

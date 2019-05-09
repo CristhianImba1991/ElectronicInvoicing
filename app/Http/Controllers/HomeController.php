@@ -36,12 +36,12 @@ class HomeController extends Controller
                 if (DateTime::createFromFormat('Y-m-d H:i:s', $company->sign_valid_from) > new DateTime() || DateTime::createFromFormat('Y-m-d H:i:s', $company->sign_valid_to) < new DateTime()) {
                     array_push($notification, [
                         'status' => 'danger',
-                        'message' => __('view.the_sign_of_tradename_has_expired_or_is_not_within_the_validity_period_signvalidfrom_signvalidto', ['tradename' => $company->tradename, 'sign_valid_from' => $company->sign_valid_from, 'sign_valid_to' => $company->sign_valid_to])
+                        'message' => __('view.the_sign_of_tradename_has_expired_or_is_not_within_the_validity_period_signvalidfrom_signvalidto', ['tradename' => $company->social_reason, 'sign_valid_from' => $company->sign_valid_from, 'sign_valid_to' => $company->sign_valid_to])
                     ]);
                 } elseif (DateTime::createFromFormat('Y-m-d H:i:s', $company->sign_valid_to) < (new DateTime())->modify('+3 week')) {
                     array_push($notification, [
                         'status' => 'warning',
-                        'message' => __('view.the_sign_of_tradename_has_less_than_three_weeks_validity_it_will_expire_on_signvalidto', ['tradename' => $company->tradename, 'sign_valid_to' => $company->sign_valid_to])
+                        'message' => __('view.the_sign_of_tradename_has_less_than_three_weeks_validity_it_will_expire_on_signvalidto', ['tradename' => $company->social_reason, 'sign_valid_to' => $company->sign_valid_to])
                     ]);
                 }
             }

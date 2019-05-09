@@ -75,9 +75,9 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('admin')) {
-            $companies = Company::all();
+            $companies = Company::all()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         }
         $identificationTypes = IdentificationType::where('code', '!=', 7)->get();
         return view('customers.create', compact(['companies', 'identificationTypes']));

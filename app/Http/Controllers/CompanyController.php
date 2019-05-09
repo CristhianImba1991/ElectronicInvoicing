@@ -54,9 +54,9 @@ class CompanyController extends Controller
     {
         $user = Auth::user();
         if ($user->hasPermissionTo('delete_hard_companies')) {
-            $companies = Company::withTrashed()->get();
+            $companies = Company::withTrashed()->get()->sortBy('social_reason');
         } else {
-            $companies = CompanyUser::getCompaniesAllowedToUser($user);
+            $companies = CompanyUser::getCompaniesAllowedToUser($user)->sortBy('social_reason');
         }
         return view('companies.index', compact('companies'));
     }
@@ -301,7 +301,7 @@ class CompanyController extends Controller
     public function customers(Request $request) {
         if (is_array($request->id)) {
             $customers = collect();
-            $companies = Company::whereIn('id', $request->id)->get();
+            $companies = Company::whereIn('id', $request->id)->orderBy('social_reason')->get();
             foreach ($companies as $company) {
                 foreach ($company->customers()->get() as $customer) {
                     $customers->push($customer);
@@ -310,7 +310,7 @@ class CompanyController extends Controller
             $customers->push(Customer::where('identification', '=', '9999999999999')->first());
             return $customers->toJson();
         } else if (is_string($request->id)) {
-            $customers = Company::where('id', $request->id)->first()->customers()->get();
+            $customers = Company::where('id', $request->id)->first()->customers()->orderBy('social_reason')->get();
             $customers->push(Customer::where('identification', '=', '9999999999999')->first());
             return $customers->toJson();
         }
