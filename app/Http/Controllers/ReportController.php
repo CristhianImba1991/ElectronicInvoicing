@@ -302,7 +302,7 @@ class ReportController extends Controller
                     substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                     ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
-                    substr(mb_convert_encoding($voucher->customer->social_reason, 'ASCII'), 0, 4) . '.xml'
+                    substr(mb_convert_encoding($voucher->customer->social_reason, 'UTF-8'), 0, 4) . '.xml'
                 );
             }
             $html = false;
@@ -310,7 +310,7 @@ class ReportController extends Controller
                 substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                 VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                 ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
-                substr($voucher->customer->social_reason, 0, 4) . '.pdf'
+                substr(mb_convert_encoding($voucher->customer->social_reason, 'UTF-8'), 0, 4) . '.pdf'
             );
         }
         if (File::exists(storage_path('app/' . $tempFolder))) {
