@@ -297,10 +297,20 @@ class ReportController extends Controller
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
             if ($voucher->xml !== NULL) {
-                $zipper->add(storage_path('app/' . $voucher->xml));
+                $zipper->add(storage_path('app/' . $voucher->xml),
+                    substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                    VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                    ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                    substr($voucher->customer->social_reason, 0, 4) . '.xml'
+                );
             }
             $html = false;
-            PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) . $voucher->accessKey() . '.pdf');
+            PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) .
+                substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                substr($voucher->customer->social_reason, 0, 4) . '.pdf'
+            );
         }
         if (File::exists(storage_path('app/' . $tempFolder))) {
             $zipper->add(storage_path('app/' . $tempFolder));

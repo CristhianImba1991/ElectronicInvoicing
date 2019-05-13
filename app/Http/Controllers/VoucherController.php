@@ -1884,11 +1884,21 @@ class VoucherController extends Controller
                 MailController::sendMailNewVoucher($voucher);
                 $zipper = new Zipper;
                 $zipper->make(storage_path('app/') . 'vouchers.zip');
-                $zipper->add(storage_path('app/' . $voucher->xml));
+                $zipper->add(storage_path('app/' . $voucher->xml),
+                    substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                    VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                    ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                    substr($voucher->customer->social_reason, 0, 4) . '.xml'
+                );
                 $tempFolder = round((microtime(true) * 1000)) . '/';
                 Storage::makeDirectory($tempFolder);
                 $html = false;
-                PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) . $voucher->accessKey() . '.pdf');
+                PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) .
+                    substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                    VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                    ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                    substr($voucher->customer->social_reason, 0, 4) . '.pdf'
+                );
                 $zipper->add(storage_path('app/' . $tempFolder));
                 $zipper->close();
                 if (File::exists(storage_path('app/' . $tempFolder))) {
@@ -1924,7 +1934,13 @@ class VoucherController extends Controller
     {
         $user = Auth::user();
         if (self::doesVoucherBelongToUser($voucher, $user)) {
-            return Storage::download($voucher->xml);
+            return Storage::download($voucher->xml,
+                substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                substr($voucher->customer->social_reason, 0, 4) .
+                '.xml'
+            );
         }
         return abort('404');
     }
@@ -1934,7 +1950,13 @@ class VoucherController extends Controller
         $user = Auth::user();
         if (self::doesVoucherBelongToUser($voucher, $user)) {
             $html = false;
-            return PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->download($voucher->accessKey() . '.pdf');
+            return PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->download(
+                substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                substr($voucher->customer->social_reason, 0, 4) .
+                '.pdf'
+            );
         }
         return abort('404');
     }
