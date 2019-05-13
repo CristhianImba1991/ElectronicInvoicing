@@ -297,7 +297,7 @@ class ReportController extends Controller
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
             if ($voucher->xml !== NULL) {
-                info(mb_convert_encoding($voucher->customer->social_reason, 'ASCII'));
+                info(mb_convert_encoding($voucher->customer->social_reason, 'UTF-8'));
                 $zipper->add(storage_path('app/' . $voucher->xml),
                     substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
