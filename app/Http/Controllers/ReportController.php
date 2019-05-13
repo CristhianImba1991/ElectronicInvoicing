@@ -296,13 +296,18 @@ class ReportController extends Controller
         $tempFolder = round((microtime(true) * 1000)) . '/';
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
+            $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'UTF-8');
             if ($voucher->xml !== NULL) {
-                info(mb_convert_encoding($voucher->customer->social_reason, 'UTF-8'));
+                if (strpos('Ñ', $customerSocialReason)) {
+                    info('SI TIENE');
+                } else {
+                    info('NO TIENE');
+                }
                 $zipper->add(storage_path('app/' . $voucher->xml),
                     substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                     ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
-                    substr(mb_convert_encoding($voucher->customer->social_reason, 'UTF-8'), 0, 4) . '.xml'
+                    substr($customerSocialReason, 0, 4) . '.xml'
                 );
             }
             $html = false;
@@ -310,7 +315,7 @@ class ReportController extends Controller
                 substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                 VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                 ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
-                substr(mb_convert_encoding($voucher->customer->social_reason, 'UTF-8'), 0, 4) . '.pdf'
+                substr($customerSocialReason, 0, 4) . '.pdf'
             );
         }
         if (File::exists(storage_path('app/' . $tempFolder))) {
