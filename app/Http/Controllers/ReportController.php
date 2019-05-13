@@ -297,11 +297,7 @@ class ReportController extends Controller
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
             if ($voucher->xml !== NULL) {
-                if (strpos('Ñ', $voucher->customer->social_reason)) {
-                    info('SI TIENE UNA Ñ');
-                } else {
-                    info($voucher->customer->social_reason);
-                }
+                info(mb_detect_encoding($voucher->customer->social_reason));
                 $zipper->add(storage_path('app/' . $voucher->xml),
                     substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
