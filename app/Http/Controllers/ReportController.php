@@ -296,12 +296,12 @@ class ReportController extends Controller
         $tempFolder = round((microtime(true) * 1000)) . '/';
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
-            $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'UTF-8');
+            $customerSocialReason = basename($voucher->customer->social_reason);
             if ($voucher->xml !== NULL) {
                 if (strpos('Ñ', $customerSocialReason)) {
-                    info('SI TIENE');
+                    info('SI TIENE: ' . $customerSocialReason);
                 } else {
-                    info('NO TIENE');
+                    info('NO TIENE: ' . $customerSocialReason);
                 }
                 $zipper->add(storage_path('app/' . $voucher->xml),
                     substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
