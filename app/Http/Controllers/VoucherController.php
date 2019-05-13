@@ -42,7 +42,7 @@ use ElectronicInvoicing\{
 };
 use ElectronicInvoicing\Http\Controllers\CompanyUser;
 use ElectronicInvoicing\Http\Logic\DraftJson;
-use ElectronicInvoicing\StaticClasses\{VoucherStates, ValidationRule};
+use ElectronicInvoicing\StaticClasses\{ValidationRule, VoucherAbbreviations, VoucherStates};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
