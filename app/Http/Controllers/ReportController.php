@@ -17,7 +17,7 @@ use ElectronicInvoicing\{
     VoucherType
 };
 use ElectronicInvoicing\Exports\VouchersExport;
-use ElectronicInvoicing\StaticClasses\VoucherStates;
+use ElectronicInvoicing\StaticClasses\{VoucherAbbreviations, VoucherStates};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Laracsv\Export;
