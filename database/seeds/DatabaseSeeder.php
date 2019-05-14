@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'IN_PROCESS', 'created_at' => Carbon::now()],    // Same as the SENDED state, but the voucher has not been received a response by SRI
             ['name' => 'UNAUTHORIZED', 'created_at' => Carbon::now()],  // Same as the SENDED state, but the voucher has not been authorized by SRI
             ['name' => 'CANCELED', 'created_at' => Carbon::now()],      // Same as the AUTHORIZED state, but the voucher has been canceled in the system
+            ['name' => 'CORRECTED', 'created_at' => Carbon::now()],      // Same as the SAVED state, but the voucher has been corrected after an unautorized, a returned or a rejected response
         ]);
 
         DB::table('environments')->insert([
@@ -446,20 +447,6 @@ class DatabaseSeeder extends Seeder
         $user = User::create($input);
         $user->assignRole('admin');
 
-        $input2['name'] = 'Inti Guzman';
-        $input2['email'] = 'inti.guzman@taotechideas.com';
-        $input2['password'] = Hash::make('inti1234');
-        $user2 = User::create($input2);
-        $user2->assignRole('admin');
-
-        $input3['name'] = 'Ivan Rodriguez';
-        $input3['email'] = 'ivan.rodriguez@taotechideas.com';
-        $input3['password'] = Hash::make('ivan1234');
-        $user3 = User::create($input3);
-        $user3->assignRole('admin');
-
         DraftJson::getInstance()->appendUser($user);
-        DraftJson::getInstance()->appendUser($user2);
-        DraftJson::getInstance()->appendUser($user3);
     }
 }

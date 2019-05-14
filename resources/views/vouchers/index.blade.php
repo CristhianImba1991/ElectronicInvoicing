@@ -6,6 +6,7 @@
 <script src="{{ asset('js/bootstrap-tokenfield.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('js/locales/bootstrap-datepicker.' . str_replace('_', '-', app()->getLocale()) . '.min.js') }}" charset="UTF-8"></script>
+<script id="modal" src="{{ asset('js/app/modal.js') }}"></script>
 <script type="text/javascript">
 $.noConflict();
 jQuery(document).ready(function($) {
@@ -297,6 +298,11 @@ jQuery(document).ready(function($) {
                 </div>
 
                 <div class="card-body">
+                    @if (session('status'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('status') }}
+                        </div>
+                    @endif
                     <table id="vouchers-table" class="display">
                         <thead>
                             <tr>
@@ -354,6 +360,9 @@ jQuery(document).ready(function($) {
                                             @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
                                                 <span class="badge badge-white">
                                                 @break
+                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED)
+                                                <span class="badge badge-secondary">
+                                                @break
                                             @default
                                                 <span class="badge">
                                         @endswitch
@@ -381,33 +390,64 @@ jQuery(document).ready(function($) {
                                         <td>
                                             @switch($voucher->voucher_state_id)
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
-                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">{{ __('view.edit') }}</a>
+                                                    <form action="{{ route('vouchers.edit', $voucher) }}" method="get">
+                                                        <button type="submit" class="btn btn-sm btn-info btn-block"><i class="fas fa-edit"></i></button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-danger btn-block" data-toggle="modal" data-target="#confirmation"
+                                                        data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $voucher->id]), 0) }}"
+                                                        data-body="{{ trans_choice(__('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}"
+                                                        data-form="{{ route('vouchers.destroy', $voucher) }}"
+                                                        data-method="DELETE"
+                                                        data-class="btn btn-sm btn-danger"
+                                                        data-action="{{ __('view.delete') }}"><i class="fas fa-trash-alt"></i></button>
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
                                                     @can('send_vouchers')
                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
                                                             {{ csrf_field() }}
-                                                            <button type="submit" class="btn btn-sm btn-light">{{ __('view.send') }}</button>
+                                                            <button type="submit" class="btn btn-sm btn-success btn-block"><i class="fas fa-paper-plane"></i></button>
                                                         </form>
                                                     @endcan
+                                                    <button type="button" class="btn btn-sm btn-danger btn-block" data-toggle="modal" data-target="#confirmation"
+                                                        data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $voucher->id]), 0) }}"
+                                                        data-body="{{ trans_choice(__('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}"
+                                                        data-form="{{ route('vouchers.destroy', $voucher) }}"
+                                                        data-method="DELETE"
+                                                        data-class="btn btn-sm btn-danger"
+                                                        data-action="{{ __('view.delete') }}"><i class="fas fa-trash-alt"></i></button>
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
-                                                    <a href="{{ route('vouchers.edit', $voucher) }}" class="btn btn-sm">{{ __('view.edit') }}</a>
+                                                    <form action="{{ route('vouchers.edit', $voucher) }}" method="get">
+                                                        <button type="submit" class="btn btn-sm btn-info btn-block"><i class="fas fa-edit"></i></button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-danger btn-block" data-toggle="modal" data-target="#confirmation"
+                                                        data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $voucher->id]), 0) }}"
+                                                        data-body="{{ trans_choice(__('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}"
+                                                        data-form="{{ route('vouchers.destroy', $voucher) }}"
+                                                        data-method="DELETE"
+                                                        data-class="btn btn-sm btn-danger"
+                                                        data-action="{{ __('view.delete') }}"><i class="fas fa-trash-alt"></i></button>
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED)
                                                     @can('send_vouchers')
                                                         <form action="{{ route('vouchers.send', $voucher) }}" method="post">
                                                             {{ csrf_field() }}
-                                                            <button type="submit" class="btn btn-sm btn-light">{{ __('view.send') }}</button>
+                                                            <button type="submit" class="btn btn-sm btn-success btn-block"><i class="fas fa-paper-plane"></i></button>
                                                         </form>
                                                     @endcan
                                                     @break
-                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED)
-
-                                                    @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RECEIVED)
-
+                                                    @can('send_vouchers')
+                                                        <form action="{{ route('vouchers.authorize', $voucher) }}" method="post">
+                                                            {{ csrf_field() }}
+                                                            <button type="submit" class="btn btn-sm btn-primary btn-block"><i class="fas fa-sync-alt"></i></button>
+                                                        </form>
+                                                    @endcan
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RETURNED)
-
+                                                    <form action="{{ route('vouchers.edit', $voucher) }}" method="get">
+                                                        <button type="submit" class="btn btn-sm btn-info btn-block"><i class="fas fa-edit"></i></button>
+                                                    </form>
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::AUTHORIZED)
                                                     <a href="#">
@@ -416,13 +456,34 @@ jQuery(document).ready(function($) {
                                                     </a>
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::IN_PROCESS)
-
+                                                    @can('send_vouchers')
+                                                        <form action="{{ route('vouchers.authorize', $voucher) }}" method="post">
+                                                            {{ csrf_field() }}
+                                                            <button type="submit" class="btn btn-sm btn-primary btn-block"><i class="fas fa-sync-alt"></i></button>
+                                                        </form>
+                                                    @endcan
                                                     @break
                                                 @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
+                                                    <form action="{{ route('vouchers.edit', $voucher) }}" method="get">
+                                                        <button type="submit" class="btn btn-sm btn-info btn-block"><i class="fas fa-edit"></i></button>
+                                                    </form>
+                                                    @break
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
 
                                                     @break
-                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED)
-
+                                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED)
+                                                    <form action="{{ route('vouchers.edit', $voucher) }}" method="get">
+                                                        <button type="submit" class="btn btn-sm btn-info btn-block"><i class="fas fa-edit"></i></button>
+                                                    </form>
+                                                    @if($voucher->renew_sequential)
+                                                        <button type="button" class="btn btn-sm btn-danger btn-block" data-toggle="modal" data-target="#confirmation"
+                                                            data-title="{{ trans_choice(__('view.are_you_sure_you_want_to_delete_the_model', ['model' => trans_choice(__('view.voucher'), 0), 'name' => $voucher->id]), 0) }}"
+                                                            data-body="{{ trans_choice(__('view.warning_all_model_data_will_be_deleted_this_action_can_not_be_undone', ['model' => trans_choice(__('view.voucher'), 0)]), 0) }}"
+                                                            data-form="{{ route('vouchers.destroy', $voucher) }}"
+                                                            data-method="DELETE"
+                                                            data-class="btn btn-sm btn-danger"
+                                                            data-action="{{ __('view.delete') }}"><i class="fas fa-trash-alt"></i></button>
+                                                    @endif
                                                     @break
                                             @endswitch
                                         </td>
@@ -539,6 +600,9 @@ jQuery(document).ready(function($) {
                                     @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
                                         <option data-content="<span class='badge badge-white'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
                                         @break
+                                    @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED)
+                                        <option data-content="<span class='badge badge-secondary'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
+                                        @break
                                     @default
                                         <option data-content="<span class='badge'>{{ __($voucherState->name) }}</span>" value="{{ $voucherState->id }}">{{ __($voucherState->name) }}</option>
                                 @endswitch
@@ -610,4 +674,5 @@ jQuery(document).ready(function($) {
         </div>
     </div>
 @endunlessrole
+@include('layouts.confirmation')
 @endsection

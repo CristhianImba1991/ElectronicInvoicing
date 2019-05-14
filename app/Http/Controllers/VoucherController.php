@@ -280,6 +280,7 @@ class VoucherController extends Controller
     public function index()
     {
         $user = Auth::user();
+
         $vouchers = self::getVouchersAllowedToUserQueryBuilder($user)->get();
         if ($user->hasRole('admin')) {
             $companies = Company::all();
@@ -562,7 +563,74 @@ class VoucherController extends Controller
      */
     public function destroy(Voucher $voucher)
     {
-        //
+        switch ($voucher->voucher_type_id) {
+            case 1:
+                foreach ($voucher->details()->get() as $detail) {
+                    foreach ($detail->taxDetails as $taxDetail) {
+                        $taxDetail->delete();
+                    }
+                    foreach ($detail->additionalDetails as $additionalDetail) {
+                        $additionalDetail->delete();
+                    }
+                    $detail->delete();
+                }
+                foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
+                    $payment->delete();
+                }
+                break;
+            case 2:
+                foreach (Detail::where('voucher_id', '=', $voucher->id)->get() as $detail) {
+                    foreach ($detail->taxDetails as $taxDetail) {
+                        $taxDetail->delete();
+                    }
+                    foreach ($detail->additionalDetails as $additionalDetail) {
+                        $additionalDetail->delete();
+                    }
+                    $detail->delete();
+                }
+                foreach (CreditNote::where('voucher_id', '=', $voucher->id)->get() as $creditNote) {
+                    $creditNote->delete();
+                }
+                break;
+            case 3:
+                foreach (Payment::where('voucher_id', '=', $voucher->id)->get() as $payment) {
+                    $payment->delete();
+                }
+                foreach (DebitNoteTax::where('voucher_id', '=', $voucher->id)->get() as $debitNoteTax) {
+                    foreach ($debitNoteTax->debitNotes as $debitNote) {
+                        $debitNote->delete();
+                    }
+                    $debitNoteTax->delete();
+                }
+                break;
+            case 4:
+                foreach (Waybill::where('voucher_id', '=', $voucher->id)->get() as $waybill) {
+                    foreach ($waybill->addressees as $addressee) {
+                        foreach ($addressee->details as $detail) {
+                            foreach ($detail->additionalDetails as $additionalDetail) {
+                                $additionalDetail->delete();
+                            }
+                            $detail->delete();
+                        }
+                        $addressee->delete();
+                    }
+                    $waybill->delete();
+                }
+                break;
+            case 5:
+                foreach (Retention::where('voucher_id', '=', $voucher->id)->get() as $retention) {
+                    foreach ($retention->details as $detail) {
+                        $detail->delete();
+                    }
+                    $retention->delete();
+                }
+                break;
+        }
+        foreach (AdditionalField::where('voucher_id', '=', $voucher->id)->get() as $additionalField) {
+            $additionalField->delete();
+        }
+        $voucher->delete();
+        return redirect()->route('vouchers.index')->with(['status' => trans_choice(__('message.model_deleted_successfully', ['model' => trans_choice(__('view.voucher'), 0)]), 0)]);
     }
 
     /**
@@ -719,6 +787,9 @@ class VoucherController extends Controller
     {
         $fromFolder = substr($voucher->xml, 19, strpos(substr($voucher->xml, 19), '/'));
         $toFolder = VoucherState::find($to)->name;
+        if (File::exists(storage_path('app/' . str_replace('/' . $fromFolder . '/', '/' . $toFolder . '/', $voucher->xml)))) {
+            File::delete(storage_path('app/' . str_replace('/' . $fromFolder . '/', '/' . $toFolder . '/', $voucher->xml)));
+        }
         Storage::move($voucher->xml, str_replace('/' . $fromFolder . '/', '/' . $toFolder . '/', $voucher->xml));
         $voucher->xml = str_replace('/' . $fromFolder . '/', '/' . $toFolder . '/', $voucher->xml);
         $voucher->save();
@@ -734,8 +805,19 @@ class VoucherController extends Controller
         $environment = Environment::find($request->environment);
         $voucherType = VoucherType::find($request->voucher_type);
         $issueDate = DateTime::createFromFormat('Y-m-d', $request->issue_date);
+
         if ($isUpdate) {
             $voucher = Voucher::find($id);
+            switch ($voucher->voucher_state_id) {
+                case VoucherStates::REJECTED:
+                    $voucher->voucher_state_id = VoucherStates::CORRECTED;
+                    $voucher->renew_sequential = 1;
+                    break;
+                case VoucherStates::RETURNED: case VoucherStates::UNAUTHORIZED:
+                    $voucher->voucher_state_id = VoucherStates::CORRECTED;
+                    $voucher->renew_sequential = 0;
+                    break;
+            }
         } else {
             $voucherState = VoucherState::find(VoucherStates::SAVED);
             $sequential = Voucher::where([
@@ -744,11 +826,15 @@ class VoucherController extends Controller
                 ['environment_id', '=', $environment->id],
                 ['voucher_state_id', '<', VoucherStates::SENDED],
             ])->max('sequential') + 1;
+            $lastAttempt = new DateTime('now', new DateTimeZone('America/Guayaquil'));
             $voucher = new Voucher;
             $voucher->voucher_state_id = $voucherState->id;
             $voucher->sequential = $sequential;
             $voucher->user_id = Auth::user()->id;
             $voucher->numeric_code = self::generateRandomNumericCode();
+            $voucher->attempts = 0;
+            $voucher->last_attempt_at = $lastAttempt->format('Y-m-d');
+            $voucher->renew_sequential = 1;
         }
 
         $voucher->emission_point_id = $emissionPoint->id;
@@ -1104,7 +1190,7 @@ class VoucherController extends Controller
         $voucher->save();
     }
 
-    private static function signVoucher($voucher)
+    public static function signVoucher($voucher)
     {
         $version = $voucher->version();
         $issueDate = DateTime::createFromFormat('Y-m-d', $voucher->issue_date);
@@ -1123,7 +1209,7 @@ class VoucherController extends Controller
             'ruc'               => $voucher->emissionPoint->branch->company->ruc,
             'claveAcceso'       => $accessKey,
             'codDoc'            => $voucherTypeCode,
-            'estab'             => $establishment,
+            'estab'             => 555,//$establishment,
             'ptoEmi'            => $emissionPoint,
             'secuencial'        => $sequential,
             'dirMatriz'         => $voucher->emissionPoint->branch->company->address,
@@ -1722,26 +1808,38 @@ class VoucherController extends Controller
     public static function sendVoucher($voucher)
     {
         $voucher->voucher_state_id = VoucherStates::SENDED;
-        $sequential = Voucher::where([
-            ['emission_point_id', '=', $voucher->emission_point_id],
-            ['voucher_type_id', '=', $voucher->voucher_type_id],
-            ['environment_id', '=', $voucher->environment_id],
-            ['voucher_state_id', '>=', VoucherStates::SENDED],
-        ])->max('sequential') + 1;
-        $voucher->sequential = $sequential;
+        if ($voucher->renew_sequential) {
+            $sequential = Voucher::where([
+                ['emission_point_id', '=', $voucher->emission_point_id],
+                ['voucher_type_id', '=', $voucher->voucher_type_id],
+                ['environment_id', '=', $voucher->environment_id],
+                ['voucher_state_id', '>=', VoucherStates::SENDED],
+            ])->max('sequential') + 1;
+            $voucher->sequential = $sequential;
+        }
         $voucher->save();
         self::signVoucher($voucher);
         self::moveXmlFile($voucher, VoucherStates::SENDED);
-        $wsdlReceipt = '';
-        $wsdlAuthorization = '';
-        switch ($voucher->environment->code) {
-            case 1:
-                $wsdlReceipt = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl';
-                break;
-            case 2:
-                $wsdlReceipt = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/RecepcionComprobantesOffline?wsdl';
-                break;
+
+        self::validateVoucher($voucher);
+        if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
+            self::authorizeVoucher($voucher);
+        } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
+            info('#### RETURNED VOUCHER #####################################');
+            info(' *** ' . $voucher->extra_detail . ' *** ');
+            info('#### END RETURNED VOUCHER #################################');
         }
+    }
+
+    public function send(Voucher $voucher)
+    {
+        self::sendVoucher($voucher);
+        return redirect()->route('vouchers.index')->with(['status' => 'Voucher sended successfully.']);
+    }
+
+    public static function validateVoucher(Voucher $voucher)
+    {
+        $wsdlReceipt = config('ei.ws_validate.' . $voucher->environment->code);
         $options = array(
             'connection_timeout' => 3,
         );
@@ -1749,9 +1847,9 @@ class VoucherController extends Controller
         $xml['xml'] = file_get_contents(storage_path('app/' . $voucher->xml));
         try {
             $resultReceipt = json_decode(json_encode($soapClientReceipt->validarComprobante($xml)), True);
-            info('**** RECEIPT RESULT *******************************************');
+            info('**** RECEIPT RESULT ***************************************');
             info($resultReceipt);
-            info('**** END RECEIPT RESULT ***************************************');
+            info('**** END RECEIPT RESULT ***********************************');
             switch ($resultReceipt['RespuestaRecepcionComprobante']['estado']) {
                 case 'RECIBIDA':
                     $voucher->voucher_state_id = VoucherStates::RECEIVED;
@@ -1779,35 +1877,14 @@ class VoucherController extends Controller
             info(' MESSAGE: ' . $e->getMessage());
             info('#### END ERROR IN VALIDARCOMPROBANTE WS ###################');
         }
-
-        if ($voucher->voucher_state_id === VoucherStates::RECEIVED) {
-            self::authorizeVoucher($voucher, $wsdlAuthorization);
-        } elseif ($voucher->voucher_state_id === VoucherStates::RETURNED) {
-            info('#### RETURNED VOUCHER #######################');
-            info(' *** ' . $voucher->extra_detail . ' *** ');
-            info('#### END RETURNED VOUCHER #######################');
-        }
     }
 
-    public function send(Voucher $voucher)
-    {
-        self::sendVoucher($voucher);
-        return redirect()->route('vouchers.index')->with(['status' => 'Voucher sended successfully.']);
-    }
-
-    public static function authorizeVoucher($voucher)
+    public static function authorizeVoucher(Voucher $voucher)
     {
         if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED || $voucher->voucher_state_id === VoucherStates::CANCELED) {
             return;
         }
-        switch ($voucher->environment->code) {
-            case 1:
-                $wsdlAuthorization = 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
-                break;
-            case 2:
-                $wsdlAuthorization = 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl';
-                break;
-        }
+        $wsdlAuthorization = config('ei.ws_authorize.' . $voucher->environment->code);
         $soapClientValidation = new SoapClient($wsdlAuthorization);
         $accessKey = array(
             'autorizacionComprobante' => array(
@@ -1861,6 +1938,7 @@ class VoucherController extends Controller
                     $voucher->extra_detail = $message;
                     $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
                     $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
+                    $voucher->attempts = $voucher->attempts + 1;
                     break;
                 default:
                     unset($xmlReponse['numeroAutorizacion']);
