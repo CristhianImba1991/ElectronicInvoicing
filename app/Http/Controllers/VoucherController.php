@@ -1882,22 +1882,24 @@ class VoucherController extends Controller
             $voucher->save();
             if ($voucher->voucher_state_id === VoucherStates::AUTHORIZED && $voucher->environment->code === 2) {
                 MailController::sendMailNewVoucher($voucher);
+                $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
+                $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
                 $zipper = new Zipper;
                 $zipper->make(storage_path('app/') . 'vouchers.zip');
                 $zipper->add(storage_path('app/' . $voucher->xml),
-                    substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                    substr($companySocialReason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                     ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
-                    substr($voucher->customer->social_reason, 0, 4) . '.xml'
+                    substr($customerSocialReason, 0, 4) . '.xml'
                 );
                 $tempFolder = round((microtime(true) * 1000)) . '/';
                 Storage::makeDirectory($tempFolder);
                 $html = false;
                 PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) .
-                    substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                    substr($companySocialReason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                     ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
-                    substr($voucher->customer->social_reason, 0, 4) . '.pdf'
+                    substr($customerSocialReason, 0, 4) . '.pdf'
                 );
                 $zipper->add(storage_path('app/' . $tempFolder));
                 $zipper->close();

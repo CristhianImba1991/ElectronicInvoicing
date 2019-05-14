@@ -296,11 +296,11 @@ class ReportController extends Controller
         $tempFolder = round((microtime(true) * 1000)) . '/';
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
+            $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
             $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
             if ($voucher->xml !== NULL) {
-                info($voucher->id . ' > ' . $customerSocialReason);
                 $zipper->add(storage_path('app/' . $voucher->xml),
-                    substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                    substr($companySocialReason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                     ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
                     substr($customerSocialReason, 0, 4) . '.xml'
@@ -308,7 +308,7 @@ class ReportController extends Controller
             }
             $html = false;
             PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save(storage_path('app/' . $tempFolder) .
-                substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
+                substr($companySocialReason, 0, 4) . '_' .
                 VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                 ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
                 substr($customerSocialReason, 0, 4) . '.pdf'
