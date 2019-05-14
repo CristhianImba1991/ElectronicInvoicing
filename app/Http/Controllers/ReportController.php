@@ -298,7 +298,7 @@ class ReportController extends Controller
         foreach ($vouchers as $voucher) {
             $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
             if ($voucher->xml !== NULL) {
-                info($customerSocialReason);
+                info($voucher->id . ' > ' . $customerSocialReason);
                 $zipper->add(storage_path('app/' . $voucher->xml),
                     substr($voucher->emissionPoint->branch->company->social_reason, 0, 4) . '_' .
                     VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
