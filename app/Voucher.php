@@ -27,6 +27,9 @@ class Voucher extends Model
         'user_id',
         'support_document',
         'support_document_date'
+        'attempts',
+        'last_attempt_at',
+        'renew_sequential',
     ];
 
     public function emissionPoint()
