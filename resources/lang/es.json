@@ -10,7 +10,6 @@
     "IN_PROCESS" : "EN PROCESO",
     "UNAUTHORIZED" : "NO AUTORIZADO",
     "CANCELED" : "ANULADO",
-    "CORRECTED" : "CORREGIDO",
 
     "admin" : "administrador",
     "api" : "api",
