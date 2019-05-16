@@ -9,6 +9,6 @@ Facturación Electrónica V2.0
 6. Create your database in your MySQL server with the previous parameters.
 7. Run ```php artisan key:generate```.
 8. Run ```php artisan migrate```.
-9. Run ```php artisan db:seed```.
-10. Run ```php artisan serve```.
-11. Go to ```localhost:8000```
+9. Run ```php artisan serve```.
+10. Go to ```localhost:8000```
+
