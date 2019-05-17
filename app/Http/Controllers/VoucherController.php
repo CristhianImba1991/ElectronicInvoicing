@@ -204,7 +204,7 @@ class VoucherController extends Controller
         return $limit === NULL ? $query : $query->limit($limit);
     }
 
-    private static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
+    public static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
     {
         $query = self::getVouchersAllowedToUserQueryBuilder($user);
         if ($criteria->has('company')) {
