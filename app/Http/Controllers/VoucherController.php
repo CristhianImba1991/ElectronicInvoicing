@@ -188,7 +188,7 @@ class VoucherController extends Controller
                 ->where('vouchers.user_id', $user->id);
             $query = self::getVoucherQueryBuilder()
                 ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'))
-                ->where('voucher_state_id', VoucherStates::AUTHORIZED)
+                ->where('vouchers.voucher_state_id', VoucherStates::AUTHORIZED)
                 ->where('vouchers.user_id', '<>', $user->id)
                 ->latest('vouchers.created_at')
                 ->union($union);
@@ -262,7 +262,6 @@ class VoucherController extends Controller
                 $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
             }
         }
-        info($query->toSql());
         return $query;
     }
 
