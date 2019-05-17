@@ -427,15 +427,20 @@ class ReportController extends Controller
                 File::copy(storage_path('app/') . 'vouchers.zip', storage_path('app/') . $headers['File-Name']);
                 $zipper = new Zipper;
                 $zipper->make(storage_path('app/') . $headers['File-Name']);
-                info($vouchers->get()->pluck('id'));
-                foreach (Voucher::whereNotIn('id', $vouchers->get()->pluck('id'))->get() as $voucher) {
+                $vouchersZipped = Voucher::join('environments', 'environments.id', '=', 'vouchers.environment_id')
+                    ->join('voucher_states', 'voucher_states.id', '=', 'vouchers.voucher_state_id')
+                    ->select('vouchers.*')
+                    ->where('environments.id', '=', '2')
+                    ->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
+                    ->whereNotIn('id', $vouchers->get()->pluck('id'))
+                    ->get();
+                foreach ($vouchersZipped as $voucher) {
                     $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
                     $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
                     $file = substr($companySocialReason, 0, 4) . '_' .
                         VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
                         ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
                         substr($customerSocialReason, 0, 4);
-                    info('DELETING VOUCHER FILES [' . $voucher->id . ']: ' . $file);
                     $zipper->remove($file . '.xml');
                     $zipper->remove($file . '.pdf');
                 }
