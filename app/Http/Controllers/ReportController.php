@@ -432,7 +432,7 @@ class ReportController extends Controller
                     ->select('vouchers.*')
                     ->where('environments.id', '=', '2')
                     ->whereIn('voucher_states.id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
-                    ->whereNotIn('id', $vouchers->get()->pluck('id'))
+                    ->whereNotIn('vouchers.id', $vouchers->get()->pluck('id'))
                     ->get();
                 foreach ($vouchersZipped as $voucher) {
                     $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
