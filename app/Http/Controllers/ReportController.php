@@ -427,6 +427,7 @@ class ReportController extends Controller
                 File::copy(storage_path('app/') . 'vouchers.zip', storage_path('app/') . $headers['File-Name']);
                 $zipper = new Zipper;
                 $zipper->make(storage_path('app/') . $headers['File-Name']);
+                info($vouchers->get()->pluck('id'));
                 foreach (Voucher::whereNotIn('id', $vouchers->get()->pluck('id'))->get() as $voucher) {
                     $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
                     $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
