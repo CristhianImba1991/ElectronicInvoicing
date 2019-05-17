@@ -262,6 +262,7 @@ class VoucherController extends Controller
                 $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
             }
         }
+        info($query->toSql());
         return $query;
     }
 
