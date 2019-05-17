@@ -296,7 +296,7 @@ class ReportController extends Controller
         $tempFolder = round((microtime(true) * 1000)) . '/';
         Storage::makeDirectory($tempFolder);
         foreach ($vouchers as $voucher) {
-            info($voucher->id)
+            info($voucher->id);
             $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
             $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
             if ($voucher->xml !== NULL) {
