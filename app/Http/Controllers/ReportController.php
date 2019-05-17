@@ -428,8 +428,20 @@ class ReportController extends Controller
                 $zipper = new Zipper;
                 $zipper->make(storage_path('app/') . $headers['File-Name']);
                 foreach (Voucher::whereNotIn('id', $vouchers->get()->pluck('id'))->get() as $voucher) {
-                    $zipper->remove($voucher->accessKey() . '.xml');
-                    $zipper->remove($voucher->accessKey() . '.pdf');
+                    $companySocialReason = mb_convert_encoding($voucher->emissionPoint->branch->company->social_reason, 'ASCII');
+                    $customerSocialReason = mb_convert_encoding($voucher->customer->social_reason, 'ASCII');
+                    $zipper->remove(
+                        substr($companySocialReason, 0, 4) . '_' .
+                        VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                        ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                        substr($customerSocialReason, 0, 4) . '.xml'
+                    );
+                    $zipper->remove(
+                        substr($companySocialReason, 0, 4) . '_' .
+                        VoucherAbbreviations::getAbbreviation($voucher->voucher_type_id) . '_' .
+                        ($voucher->sequential > 99999 ? substr(strval($voucher->sequential), -5) : str_pad(strval($voucher->sequential), 5, '0', STR_PAD_LEFT)) . '_' .
+                        substr($customerSocialReason, 0, 4) . '.pdf'
+                    );
                 }
                 $zipper->close();
                 if (File::exists(storage_path('app/') . $headers['File-Name'])) {
