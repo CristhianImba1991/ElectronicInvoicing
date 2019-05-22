@@ -28,81 +28,9 @@ use Storage;
 
 class ReportController extends Controller
 {
-    /*private static function getVoucherQueryBuilder()
-    {
-        return Voucher::join('emission_points', 'emission_points.id', '=', 'vouchers.emission_point_id')
-            ->join('branches', 'branches.id', '=', 'emission_points.branch_id')
-            ->join('companies', 'companies.id', '=', 'branches.company_id')
-            ->join('users', 'users.id', '=', 'vouchers.user_id')
-            ->join('customers', 'customers.id', '=', 'vouchers.customer_id')
-            ->join('identification_types', 'identification_types.id', '=', 'customer.identification_type_id')
-            ->join('environments', 'environments.id', '=', 'vouchers.environment_id')
-            ->join('voucher_states', 'voucher_states.id', '=', 'vouchers.voucher_state_id')
-            ->join('voucher_types', 'voucher_types.id', '=', 'vouchers.voucher_type_id')
-            ->join('currencies', 'currencies.id', '=', 'vouchers.currency_id')
-            ->join('additional_fields', 'vouchers.id', '=', 'additional_fields.voucher_id')
-            ->select('vouchers.*');
-    }*/
-
     private static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
     {
-        $query = VoucherController::getVouchersAllowedToUserQueryBuilder($user);
-        if ($criteria->has('company')) {
-            $query = $query->whereIn('companies.id', $criteria->company);
-        }
-        if ($criteria->has('branch')) {
-            $query = $query->whereIn('branches.id', $criteria->branch);
-        }
-        if ($criteria->has('emission_point')) {
-            $query = $query->whereIn('emission_points.id', $criteria->emission_point);
-        }
-        if ($criteria->has('customer')) {
-            $query = $query->whereIn('customers.id', $criteria->customer);
-        }
-        if ($criteria->has('environment')) {
-            $query = $query->whereIn('environments.id', $criteria->environment);
-        }
-        if ($criteria->has('voucher_state')) {
-            $query = $query->whereIn('voucher_states.id', $criteria->voucher_state);
-        }
-        if ($criteria->has('voucher_type')) {
-            $query = $query->whereIn('voucher_types.id', $criteria->voucher_type);
-        }
-        if ($criteria->has('issue_date_from') && $criteria->has('issue_date_to')) {
-            if ($criteria->issue_date_from !== NULL && $criteria->issue_date_to !== NULL) {
-                $query = $query->whereBetween('vouchers.issue_date', [$criteria->issue_date_from, $criteria->issue_date_to]);
-            } else if ($criteria->issue_date_from !== NULL && $criteria->issue_date_to === NULL) {
-                $query = $query->where('vouchers.issue_date', '>=', $criteria->issue_date_from);
-            } else if ($criteria->issue_date_from === NULL && $criteria->issue_date_to !== NULL) {
-                $query = $query->where('vouchers.issue_date', '<=', $criteria->issue_date_to);
-            }
-        } else if ($criteria->has('issue_date_from') && !$criteria->has('issue_date_to')) {
-            if ($criteria->issue_date_from !== NULL && $criteria->issue_date_to === NULL) {
-                $query = $query->where('vouchers.issue_date', '>=', $criteria->issue_date_from);
-            }
-        } else if (!$criteria->has('issue_date_from') && $criteria->has('issue_date_to')) {
-            if ($criteria->issue_date_from === NULL && $criteria->issue_date_to !== NULL) {
-                $query = $query->where('vouchers.issue_date', '<=', $criteria->issue_date_to);
-            }
-        }
-        if ($criteria->has('sequential_from') && $criteria->has('sequential_to')) {
-            if ($criteria->sequential_from !== NULL && $criteria->sequential_to !== NULL) {
-                $query = $query->whereBetween('vouchers.sequential', [$criteria->sequential_from, $criteria->sequential_to]);
-            } else if ($criteria->sequential_from !== NULL && $criteria->sequential_to === NULL) {
-                $query = $query->where('vouchers.sequential', '>=', $criteria->sequential_from);
-            } else if ($criteria->sequential_from === NULL && $criteria->sequential_to !== NULL) {
-                $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
-            }
-        } else if ($criteria->has('sequential_from') && !$criteria->has('sequential_to')) {
-            if ($criteria->sequential_from !== NULL && $criteria->sequential_to === NULL) {
-                $query = $query->where('vouchers.sequential', '>=', $criteria->sequential_from);
-            }
-        } else if (!$criteria->has('sequential_from') && $criteria->has('sequential_to')) {
-            if ($criteria->sequential_from === NULL && $criteria->sequential_to !== NULL) {
-                $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
-            }
-        }
-        return $query;
+        return VoucherController::getFilteredVouchersAllowedToUserQueryBuilder($user, $criteria);
     }
 
     private static function getVouchersCollection($vouchers)

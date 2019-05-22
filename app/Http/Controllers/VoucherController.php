@@ -171,32 +171,13 @@ class VoucherController extends Controller
             $query = self::getVoucherQueryBuilder()
                 ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'));
         } elseif ($user->hasRole('employee')) {
-            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
-            $allEmissionPoints = collect();
-            foreach ($branches as $branch) {
-                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
-                    $allEmissionPoints->push($emissionPoint);
-                }
-            }
-            $emissionPoints = collect();
-            foreach ($allEmissionPoints as $emissionPoint) {
-                if (in_array($emissionPoint->id, $user->emissionPoints()->pluck('id')->toArray(), true)) {
-                    $emissionPoints->push($emissionPoint);
-                }
-            }
-            $union = self::getVoucherQueryBuilder()
-                ->where('vouchers.user_id', $user->id);
             $query = self::getVoucherQueryBuilder()
-                ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'))
-                ->where('vouchers.voucher_state_id', VoucherStates::AUTHORIZED)
-                ->where('vouchers.user_id', '<>', $user->id)
-                ->latest('vouchers.created_at')
-                ->union($union);
+                ->where('vouchers.user_id', $user->id);
         } elseif ($user->hasRole('customer')) {
             $query = self::getVoucherQueryBuilder()
                 ->whereIn('vouchers.customer_id', $user->customers->pluck('id'))
-                ->whereIn('voucher_state_id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
-                ->where('environment_id', 2);
+                ->whereIn('vouchers.voucher_state_id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
+                ->where('vouchers.environment_id', 2);
         }
         if (!$user->hasRole('employee')) {
             $query = $query->latest('vouchers.created_at');
@@ -204,9 +185,8 @@ class VoucherController extends Controller
         return $limit === NULL ? $query : $query->limit($limit);
     }
 
-    public static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
+    private static function appendConditionsToQuery($query, Request $criteria)
     {
-        $query = self::getVouchersAllowedToUserQueryBuilder($user);
         if ($criteria->has('company')) {
             $query = $query->whereIn('companies.id', $criteria->company);
         }
@@ -261,6 +241,35 @@ class VoucherController extends Controller
             if ($criteria->sequential_from === NULL && $criteria->sequential_to !== NULL) {
                 $query = $query->where('vouchers.sequential', '<=', $criteria->sequential_to);
             }
+        }
+        return $query;
+    }
+
+    public static function getFilteredVouchersAllowedToUserQueryBuilder(User $user, Request $criteria)
+    {
+        $query = self::getVouchersAllowedToUserQueryBuilder($user);
+        $query = self::appendConditionsToQuery($query, $criteria);
+        if ($user->hasRole('employee')) {
+            $branches = CompanyUser::getBranchesAllowedToUser($user, false);
+            $allEmissionPoints = collect();
+            foreach ($branches as $branch) {
+                foreach ($branch->emissionPoints()->get() as $emissionPoint) {
+                    $allEmissionPoints->push($emissionPoint);
+                }
+            }
+            $emissionPoints = collect();
+            foreach ($allEmissionPoints as $emissionPoint) {
+                if (in_array($emissionPoint->id, $user->emissionPoints()->pluck('id')->toArray(), true)) {
+                    $emissionPoints->push($emissionPoint);
+                }
+            }
+            $union = self::getVoucherQueryBuilder()
+                ->whereIn('vouchers.emission_point_id', $emissionPoints->pluck('id'))
+                ->whereIn('vouchers.voucher_state_id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
+                ->where('vouchers.environment_id', 2)
+                ->where('vouchers.user_id', '<>', $user->id);
+            $query = $query->latest('vouchers.created_at')
+                ->union(self::appendConditionsToQuery($union, $criteria));
         }
         return $query;
     }
