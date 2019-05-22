@@ -179,9 +179,7 @@ class VoucherController extends Controller
                 ->whereIn('vouchers.voucher_state_id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
                 ->where('vouchers.environment_id', 2);
         }
-        if (!$user->hasRole('employee')) {
-            $query = $query->latest('vouchers.created_at');
-        }
+        $query = $query->latest('vouchers.created_at');
         return $limit === NULL ? $query : $query->limit($limit);
     }
 
@@ -268,8 +266,7 @@ class VoucherController extends Controller
                 ->whereIn('vouchers.voucher_state_id', [VoucherStates::AUTHORIZED, VoucherStates::CANCELED])
                 ->where('vouchers.environment_id', 2)
                 ->where('vouchers.user_id', '<>', $user->id);
-            $query = $query->latest('vouchers.created_at')
-                ->union(self::appendConditionsToQuery($union, $criteria));
+            $query = $query->union(self::appendConditionsToQuery($union, $criteria));
         }
         return $query;
     }
