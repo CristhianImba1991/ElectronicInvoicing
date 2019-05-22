@@ -64,7 +64,7 @@ class MailController extends Controller
                 str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT);
             Mail::to(explode(',', $request->email))
                 ->queue(new NewVoucherIssued(array(
-                    'subject' => __('notification.new_voucher_number_from_company_to_customer', ['voucher' => strtoupper(VoucherType::find($voucher->voucher_type_id)->name), 'number' => $number, 'company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]),
+                    'subject' => trans_choice(__('notification.new_voucher_number_from_company_to_customer', ['voucher' => strtoupper(VoucherType::find($voucher->voucher_type_id)->name), 'number' => $number, 'company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]), in_array($voucher->voucher_type_id, [1, 2, 3, 4]) ? 1 : 0),
                     'greeting' => __('notification.hello_name', ['name' => $voucher->customer->social_reason]),
                     'level' => 'primary',
                     'introLines' => [__('notification.you_can_find_the_voucher_files_in_the_attachments_of_this_email')],
