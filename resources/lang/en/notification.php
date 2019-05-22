@@ -19,7 +19,8 @@ return [
     'your_user_has_been_created_and_you_can_use_the_following_credentials_to_login' => 'Your user has been created and you can use the following credentials to login.',
     'for_your_service_questions_and_information_write_an_email_to_infotaotechideascom' => 'For your service, questions and information write an email to info@taotechideas.com.',
     'email_address_password' => '        E-Mail Address: :email' . "\n" . '        Password: :password',
-    'new_voucher_from_company_to_customer' => 'NEW VOUCHER FROM :company TO :customer',
+    //'new_voucher_from_company_to_customer' => 'NEW VOUCHER FROM :company TO :customer',
+    'new_voucher_number_from_company_to_customer' => 'NEW :voucher (:number) FROM :company TO :customer',
     'you_can_find_the_voucher_files_in_the_attachments_of_this_email' => 'You can find the voucher files in the attachments of this email, or you can view or download them from our system by clicking the following link.',
 
 ];
