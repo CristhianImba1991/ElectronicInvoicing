@@ -286,12 +286,7 @@ class VoucherController extends Controller
     public function index()
     {
         $user = Auth::user();
-<<<<<<< HEAD
-
-        $vouchers = self::getVouchersAllowedToUserQueryBuilder($user)->get();
-=======
         $vouchers = self::getFilteredVouchersAllowedToUserQueryBuilder($user, new Request)->get();
->>>>>>> master
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
