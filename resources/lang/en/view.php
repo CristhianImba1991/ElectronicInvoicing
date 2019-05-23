@@ -13,6 +13,7 @@ return [
     'customer' => '{0} customer|{1} customers',
     'emission_point' => '{0} emission point|{1} emission points',
     'product' => '{0} product|{1} products',
+    'quota' => '{0} quota|{1} quotas',
     'user' => '{0} user|{1} users',
     'voucher' => '{0} voucher|{1} vouchers',
 
@@ -115,6 +116,12 @@ return [
     'retained_value' => 'Retained value',
     'total_retained' => 'Total retained',
     'fiscal_period' => 'Fiscal period',
+    'description' => 'Description'
+    'max_users_owner' => 'Maximum of owners',
+    'max_users_supervisor' => 'Maximum of de supervisors',
+    'max_users_employee' => 'Maximum of employees',
+    'max_branches' => 'Maximim of branches',
+    'max_emission_points' => 'Maximum of emission points',
 
     'new_model' => 'New :model',
     'edit_model' => 'Edit :model',

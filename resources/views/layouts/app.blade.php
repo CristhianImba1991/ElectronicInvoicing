@@ -47,6 +47,9 @@
                                         {{ __('view.manage') }} <span class="caret"></span>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-left" aria-labelledby="navbarDropdown">
+                                      @role('admin')
+                                          <a href="{{ route('quotas.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.quota'), 1)) }}</a>
+                                      @endrole
                                         @can('read_companies')
                                             <a href="{{ route('companies.index') }}" class="dropdown-item">{{ ucfirst(trans_choice(__('view.company'), 1)) }}</a>
                                         @endcan

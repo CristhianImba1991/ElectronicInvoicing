@@ -21,10 +21,10 @@ class DatabaseSeeder extends Seeder
             ['code' => 4, 'name' => 'NOTA DE CRÉDITO', 'created_at' => Carbon::now()],
             ['code' => 5, 'name' => 'NOTA DE DÉBITO', 'created_at' => Carbon::now()],
             ['code' => 6, 'name' => 'GUÍA DE REMISIÓN', 'created_at' => Carbon::now()],
-            ['code' => 7, 'name' => 'COMPROBANTE DE RETENCIÓN', 'created_at' => Carbon::now()]
-            ['code' => 2, 'name' => 'NOTA O BOLETA DE VENTA', 'created_at' => Carbon::now()]
-            ['code' => 3, 'name' => 'LIQUIDACIÓN DE COMPRA', 'created_at' => Carbon::now()]
-            ['code' => 8, 'name' => 'BOLETO DE ESPECTÁCULO PÚBLICO', 'created_at' => Carbon::now()]
+            ['code' => 7, 'name' => 'COMPROBANTE DE RETENCIÓN', 'created_at' => Carbon::now()],
+            ['code' => 2, 'name' => 'NOTA O BOLETA DE VENTA', 'created_at' => Carbon::now()],
+            ['code' => 3, 'name' => 'LIQUIDACIÓN DE COMPRA', 'created_at' => Carbon::now()],
+            ['code' => 8, 'name' => 'BOLETO DE ESPECTÁCULO PÚBLICO', 'created_at' => Carbon::now()],
             ['code' => 9, 'name' => 'TIQUETE DE MÁQ. REGISTRADORA', 'created_at' => Carbon::now()]
         ]);
 
@@ -270,6 +270,12 @@ class DatabaseSeeder extends Seeder
             ['retention_tax_id' => 1, 'code' => '521', 'description' => 'Pago a no residentes - Enajenación de derechos representativos de capital y otros derechos', 'rate' => 5.0, 'min_rate' => 5.0, 'max_rate' => 35.0, 'created_at' => Carbon::now()],
             ['retention_tax_id' => 1, 'code' => '523A', 'description' => 'Pago a no residentes - Seguros y reaseguros (primas y cesiones)', 'rate' => 0.0, 'min_rate' => 0.0, 'max_rate' => 35.0, 'created_at' => Carbon::now()],
             ['retention_tax_id' => 1, 'code' => '525', 'description' => 'Pago a no residentes- Donaciones en dinero -Impuesto a la donaciones', 'rate' => 0.0, 'min_rate' => 0.0, 'max_rate' => 100.0, 'created_at' => Carbon::now()]
+        ]);
+
+        DB::table('quotas')->insert([
+            ['description' => 'BASIC', 'max_users_owner' => 1, 'max_users_supervisor' => 1, 'max_users_employee' => NULL, 'max_branches' => 1, 'max_emission_points'=> 3 , 'created_at'=>Carbon::now()],
+            ['description' => 'GOLD', 'max_users_owner' => 1, 'max_users_supervisor' => 5, 'max_users_employee' => 25, 'max_branches' => 3, 'max_emission_points'=> 15 , 'created_at'=>Carbon::now()],
+            ['description' => 'PLATINUM', 'max_users_owner' => 1, 'max_users_supervisor' => 10, 'max_users_employee' => 50, 'max_branches' => 5, 'max_emission_points'=> 30, 'created_at' =>Carbon::now()],
         ]);
 
         $role_admin = Role::create(['name' => 'admin']);
