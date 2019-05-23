@@ -2,7 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\{User, Voucher};
+use ElectronicInvoicing\{User, Voucher, VoucherType};
 use ElectronicInvoicing\Mail\{NewUserCreated, NewVoucherIssued};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -31,11 +31,14 @@ class MailController extends Controller
     {
         $html = false;
         PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($voucher->accessKey() . '.pdf');
+        $number = str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) . '-' .
+            str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) . '-' .
+            str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT);
         Mail::to($voucher->customer->users->first()->email)
             ->cc(explode(',', $voucher->customer->email))
             ->bcc($voucher->user->email)
             ->queue(new NewVoucherIssued(array(
-                'subject' => __('notification.new_voucher_from_company_to_customer', ['company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]),
+                'subject' => trans_choice(__('notification.new_voucher_number_from_company_to_customer', ['voucher' => strtoupper(VoucherType::find($voucher->voucher_type_id)->name), 'number' => $number, 'company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]), in_array($voucher->voucher_type_id, [1, 2, 3, 4]) ? 1 : 0),
                 'greeting' => __('notification.hello_name', ['name' => $voucher->customer->social_reason]),
                 'level' => 'primary',
                 'introLines' => [__('notification.you_can_find_the_voucher_files_in_the_attachments_of_this_email')],
@@ -59,9 +62,12 @@ class MailController extends Controller
             $html = false;
             $voucher = Voucher::find($request->voucher);
             PDF::loadView('vouchers.ride.' . $voucher->getViewType(), compact(['voucher', 'html']))->save($voucher->accessKey() . '.pdf');
+            $number = str_pad(strval($voucher->emissionPoint->branch->establishment), 3, '0', STR_PAD_LEFT) . '-' .
+                str_pad(strval($voucher->emissionPoint->code), 3, '0', STR_PAD_LEFT) . '-' .
+                str_pad(strval($voucher->sequential), 9, '0', STR_PAD_LEFT);
             Mail::to(explode(',', $request->email))
                 ->queue(new NewVoucherIssued(array(
-                    'subject' => __('notification.new_voucher_from_company_to_customer', ['company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]),
+                    'subject' => trans_choice(__('notification.new_voucher_number_from_company_to_customer', ['voucher' => strtoupper(VoucherType::find($voucher->voucher_type_id)->name), 'number' => $number, 'company' => strtoupper($voucher->emissionPoint->branch->company->social_reason), 'customer' => strtoupper($voucher->customer->social_reason)]), in_array($voucher->voucher_type_id, [1, 2, 3, 4]) ? 1 : 0),
                     'greeting' => __('notification.hello_name', ['name' => $voucher->customer->social_reason]),
                     'level' => 'primary',
                     'introLines' => [__('notification.you_can_find_the_voucher_files_in_the_attachments_of_this_email')],

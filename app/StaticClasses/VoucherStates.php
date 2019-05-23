@@ -15,5 +15,4 @@ class VoucherStates
     const IN_PROCESS    = 9;
     const UNAUTHORIZED  = 10;
     const CANCELED      = 11;
-    const CORRECTED     = 12;
 }

@@ -41,15 +41,13 @@ $(document).ready(function(){
                         </div>
                     @endif
 
-                    @unlessrole('customer')
-                        @if (count($notification) > 0)
-                            @foreach($notification as $alert)
-                                <div class="alert alert-{{ $alert['status'] }}" role="alert">
-                                    {{ $alert['message'] }}
-                                </div>
-                            @endforeach
-                        @endif
-                    @endunlessrole
+                    @if (count($notification) > 0)
+                        @foreach($notification as $alert)
+                            <div class="alert alert-{{ $alert['status'] }}" role="alert">
+                                {{ $alert['message'] }}
+                            </div>
+                        @endforeach
+                    @endif
 
                     <div class="row">
                         <div class="col-sm-12">
@@ -111,9 +109,6 @@ $(document).ready(function(){
                                                                 @break
                                                             @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CANCELED)
                                                                 <span class="badge badge-white">
-                                                                @break
-                                                            @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED)
-                                                                <span class="badge badge-secondary">
                                                                 @break
                                                             @default
                                                                 <span class="badge">

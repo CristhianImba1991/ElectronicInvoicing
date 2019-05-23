@@ -228,9 +228,6 @@ Route::group(['prefix' => 'manage'], function () {
         Route::delete('/vouchers/{id}/destroy_draft', 'VoucherController@destroyDraft')->name('vouchers.destroy_draft');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
-        Route::delete('/vouchers/{voucher}/destroy', 'VoucherController@destroy')->name('vouchers.destroy');
-    });
-    Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/vouchers/{id}/edit_draft', 'VoucherController@editDraft')->name('vouchers.edit_draft');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
@@ -288,9 +285,6 @@ Route::group(['prefix' => 'voucher'], function () {
     });
     Route::group(['middleware' => ['permission:send_vouchers']], function () {
         Route::post('/send/{voucher}', 'VoucherController@send')->name('vouchers.send');
-    });
-    Route::group(['middleware' => ['permission:send_vouchers']], function () {
-        Route::post('/authorize/{voucher}', 'VoucherController@authorizeVoucher')->name('vouchers.authorize');
     });
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/{voucher}/edit', 'VoucherController@edit')->name('vouchers.edit');
