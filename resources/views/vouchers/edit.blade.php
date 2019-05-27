@@ -176,11 +176,46 @@
                             @if($action === 'draft')
                                 <button type="button" id="draft" class="btn btn-sm btn-secondary">{{ __('view.update') }}</button>
                             @endif
-                            <button type="button" id="save" class="btn btn-sm btn-info">{{ __('view.save') }}</button>
+                            @switch($voucher->voucher_state_id)
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
+                                    <button type="button" id="save" class="btn btn-sm btn-info">{{ __('view.save') }}</button>
+                                    @break
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RETURNED)
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED)
+                                    <button type="button" id="correct" class="btn btn-sm btn-secondary">{{ __('view.correct') }}</button>
+                                    @break
+                            @endswitch
                         @endcan
                         @can('send_vouchers')
-                            <button type="button" id="accept" class="btn btn-sm btn-primary">{{ __('view.save_and_accept') }}</button>
-                            <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.save_accept_and_send') }}</button>
+                            @switch($voucher->voucher_state_id)
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED)
+                                    <button type="button" id="reject" class="btn btn-sm btn-dark">{{ __('view.save_and_reject') }}</button>
+                                    <button type="button" id="accept" class="btn btn-sm btn-primary">{{ __('view.save_and_accept') }}</button>
+                                    <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.save_accept_and_send') }}</button>
+                                    @break
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED)
+                                    <button type="button" id="accept" class="btn btn-sm btn-primary">{{ __('view.correct_and_accept') }}</button>
+                                    <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.correct_accept_and_send') }}</button>
+                                    @break
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::RETURNED)
+                                    <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.correct_and_send') }}</button>
+                                    @break
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::UNAUTHORIZED)
+                                    <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.correct_and_send') }}</button>
+                                    @break
+                                @case(\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED)
+                                    @if($voucher->renew_sequential)
+                                        <button type="button" id="reject" class="btn btn-sm btn-dark">{{ __('view.save_and_reject') }}</button>
+                                        <button type="button" id="accept" class="btn btn-sm btn-primary">{{ __('view.save_and_accept') }}</button>
+                                        <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.correct_accept_and_send') }}</button>
+                                    @else
+                                        <button type="button" id="send" class="btn btn-sm btn-success">{{ __('view.correct_and_send') }}</button>
+                                    @endif
+                                    @break
+                            @endswitch
+
                         @endcan
                     </div>
 

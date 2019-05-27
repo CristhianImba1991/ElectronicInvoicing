@@ -493,9 +493,16 @@ class VoucherController extends Controller
             case VoucherStates::SAVED:
                 self::saveVoucher($request, $state, true, $id);
                 break;
+            case VoucherStates::CORRECTED:
+                self::saveVoucher($request, $state, true, $id);
+                break;
             case VoucherStates::ACCEPTED:
                 self::saveVoucher($request, $state, true, $id);
                 self::acceptVoucher(Voucher::find($id));
+                break;
+            case VoucherStates::REJECTED:
+                self::saveVoucher($request, $state, true, $id);
+                self::rejectVoucher(Voucher::find($id));
                 break;
             case VoucherStates::SENDED:
                 self::saveVoucher($request, $state, true, $id);
@@ -1189,7 +1196,7 @@ class VoucherController extends Controller
         $voucher->save();
     }
 
-    private static function rejectVoucher()
+    private static function rejectVoucher($voucher)
     {
         $voucher->voucher_state_id = VoucherStates::REJECTED;
         $voucher->save();

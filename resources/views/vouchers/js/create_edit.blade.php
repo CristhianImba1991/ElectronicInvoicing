@@ -379,10 +379,16 @@ $(document).ready(function(){
             $('#save').on('click', function() {
                 submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SAVED, $voucher->id]) }}");
             });
+            $('#correct').on('click', function() {
+                submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::CORRECTED, $voucher->id]) }}");
+            });
         @endcan
         @can('send_vouchers')
             $('#accept').on('click', function() {
                 submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::ACCEPTED, $voucher->id]) }}");
+            });
+            $('#reject').on('click', function() {
+                submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::REJECTED, $voucher->id]) }}");
             });
             $('#send').on('click', function() {
                 submit("{{ route('vouchers.update', [\ElectronicInvoicing\StaticClasses\VoucherStates::SENDED, $voucher->id]) }}");
