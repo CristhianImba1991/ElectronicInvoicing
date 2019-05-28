@@ -35,4 +35,11 @@ class Company extends Model
             'ElectronicInvoicing\Customer',
             'company_customers')->withTimestamps();
     }
+
+    public function quotas()
+    {
+        return $this->belongsToMany(
+            'ElectronicInvoicing\Quotas',
+            'company_quotas')->withTimestamps();
+    }
 }

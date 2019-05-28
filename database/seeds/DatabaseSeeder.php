@@ -272,6 +272,12 @@ class DatabaseSeeder extends Seeder
             ['retention_tax_id' => 1, 'code' => '525', 'description' => 'Pago a no residentes- Donaciones en dinero -Impuesto a la donaciones', 'rate' => 0.0, 'min_rate' => 0.0, 'max_rate' => 100.0, 'created_at' => Carbon::now()]
         ]);
 
+        DB::table('quotas')->insert([
+            ['description' => 'BASIC', 'max_users_owner' => 1, 'max_users_supervisor' => 1, 'max_users_employee' => NULL, 'max_branches' => 1, 'max_emission_points'=> 3 , 'created_at'=>Carbon::now()],
+            ['description' => 'GOLD', 'max_users_owner' => 1, 'max_users_supervisor' => 5, 'max_users_employee' => 25, 'max_branches' => 3, 'max_emission_points'=> 15 , 'created_at'=>Carbon::now()],
+            ['description' => 'PLATINUM', 'max_users_owner' => 1, 'max_users_supervisor' => 10, 'max_users_employee' => 50, 'max_branches' => 5, 'max_emission_points'=> 30, 'created_at' =>Carbon::now()],
+        ]);
+
         $role_admin = Role::create(['name' => 'admin']);
         $role_api = Role::create(['name' => 'api']);
         $role_owner = Role::create(['name' => 'owner']);
