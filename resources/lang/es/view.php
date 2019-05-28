@@ -13,6 +13,7 @@ return [
     'customer' => '{0} cliente|{1} clientes',
     'emission_point' => '{0} punto de emisión|{1} puntos de emisión',
     'product' => '{0} producto|{1} productos',
+    'quota'=> '{0} cuota |{1} cuotas',
     'user' => '{0} usuario|{1} usuarios',
     'voucher' => '{0} comprobante|{1} comprobantes',
 
@@ -115,6 +116,12 @@ return [
     'retained_value' => 'Valor retenido',
     'total_retained' => 'Total retenido',
     'fiscal_period' => 'Período fiscal',
+    'description' => 'Descripción',
+    'max_users_owner' => 'Máximo de propietarios',
+    'max_users_supervisor' => 'Máximo de supervisores',
+    'max_users_employee' => 'Máximo de empleados',
+    'max_branches' => 'Máximo de sucursales',
+    'max_emission_points' => 'Máximo de puntos de emisión',
 
     'new_model' => '{0} Nuevo :model|{1} Nueva :model',
     'edit_model' => 'Editar :model',

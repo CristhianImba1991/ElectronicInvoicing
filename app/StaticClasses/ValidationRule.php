@@ -151,6 +151,30 @@ class ValidationRule
                     }
                 }
                 break;
+
+                case 'quotas':
+                    if ($request->method() === 'PUT') {
+                        $rules = [
+                            'description' => 'required|max:30',
+                            'max_users_owner' => 'nullable|integer',
+                            'max_users_supervisor' => 'nullable|integer',
+                            'max_users_employee' => 'nullable|integer',
+                            'max_branches' => 'nullable|integer',
+                            'max_emission_points' => 'nullable|integer',
+
+                        ];
+                    } else {
+                        $rules = [
+                            'description' => 'required|max:30',
+                            'max_users_owner' => 'nullable|integer',
+                            'max_users_supervisor' => 'nullable|integer',
+                            'max_users_employee' => 'nullable|integer',
+                            'max_branches' => 'nullable|integer',
+                            'max_emission_points' => 'nullable|integer',
+
+                        ];
+                    }
+                    break;
             case 'user':
                 if ($request->method() === 'PUT') {
                     $rules = [

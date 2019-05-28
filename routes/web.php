@@ -239,6 +239,27 @@ Route::group(['prefix' => 'manage'], function () {
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/vouchers/draft', 'VoucherController@indexDraft')->name('vouchers.index_draft');
     });
+
+    //Routes for quotas
+    Route::post('/quotas/store', 'QuotasController@validateRequest')->name('quotas.store');
+    Route::put('/quotas/update/{quotas}', 'QuotasController@validateRequest')->name('quotas.update');
+
+    Route::group(['middleware' => ['role:admin']], function () {
+        Route::get('/quotas', 'QuotasController@index')->name('quotas.index');
+    });
+    Route::group(['middleware' => ['role:admin']], function () {
+        Route::get('/quotas/create', 'QuotasController@create')->name('quotas.create');
+    });
+    Route::group(['middleware' => ['role:admin']], function () {
+        Route::get('/quotas/{quota}', 'QuotasController@show')->name('quotas.show');
+    });
+    Route::group(['middleware' => ['role:admin']], function () {
+        Route::get('/quotas/{quota}/edit', 'QuotasController@edit')->name('quotas.edit');
+    });
+    Route::group(['middleware' => ['role:admin']], function () {
+        Route::delete('/quotas/{quota}/delete', 'QuotasController@delete')->name('quotas.delete');
+    });
+
 });
 
 Route::group(['prefix' => 'voucher'], function () {
@@ -283,4 +304,5 @@ Route::group(['prefix' => 'voucher'], function () {
     Route::group(['middleware' => ['permission:report_vouchers']], function () {
         Route::get('/{voucher}/pdf', 'VoucherController@pdf')->name('vouchers.pdf');
     });
+
 });
