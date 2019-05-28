@@ -195,7 +195,7 @@ class ValidationRule
                     'voucher_type' => $isApiRequest ? 'required|numeric|exists:voucher_types,code' : 'required|numeric|exists:voucher_types,id'
                 ];
                 if ($state !== NULL) {
-                    if ($state >= VoucherStates::SENDED) {
+                    if ($state >= VoucherStates::SENDED && $state != VoucherStates::CORRECTED) {
                         $rules['company'] .= $isApiRequest ? '|sign_not_expired:ruc' : '|sign_not_expired:id';
                     }
                 }
