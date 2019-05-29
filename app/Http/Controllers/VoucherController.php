@@ -845,7 +845,7 @@ class VoucherController extends Controller
             $voucher->user_id = Auth::user()->id;
             $voucher->numeric_code = self::generateRandomNumericCode();
             $voucher->attempts = 0;
-            $voucher->last_attempt_at = $lastAttempt->format('Y-m-d');
+            //$voucher->last_attempt_at = $lastAttempt->format('Y-m-d');
             $voucher->renew_sequential = 1;
         }
 
@@ -1951,6 +1951,8 @@ class VoucherController extends Controller
                     $authorizationDate = DateTime::createFromFormat('Y-m-d\TH:i:sP', $resultAuthorization['RespuestaAutorizacionComprobante']['autorizaciones']['autorizacion']['fechaAutorizacion']);
                     $voucher->authorization_date = $authorizationDate->format('Y-m-d H:i:s');
                     $voucher->attempts = $voucher->attempts + 1;
+                    $lastAttempt = new DateTime('now', new DateTimeZone('America/Guayaquil'));
+                    $voucher->last_attempt_at = $lastAttempt->format('Y-m-d');
                     break;
                 default:
                     unset($xmlReponse['numeroAutorizacion']);
