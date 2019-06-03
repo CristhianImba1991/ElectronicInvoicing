@@ -273,7 +273,7 @@ class VoucherController extends Controller
 
     private static function doesVoucherBelongToUser(Voucher $voucher, User $user)
     {
-        return self::getVouchersAllowedToUserQueryBuilder($user)
+        return self::getFilteredVouchersAllowedToUserQueryBuilder($user, new Request)
             ->where('vouchers.id', '=', $voucher->id)
             ->exists();
     }
