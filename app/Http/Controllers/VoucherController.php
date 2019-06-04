@@ -640,7 +640,7 @@ class VoucherController extends Controller
                 $data = ['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes'];
                 break;
             case 5:
-                $voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9, 20])->get();
+                $voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9, 20, 12])->get();
                 $data = ['action', 'voucherTypes'];
                 break;
         }
