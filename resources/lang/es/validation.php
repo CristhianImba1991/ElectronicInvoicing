@@ -188,6 +188,7 @@ return [
         'sign' => 'Firma electrónica',
         'password' => 'Contraseña',
         'company' => 'Compañía',
+        'quota' => 'Cuota',
         'establishment' => 'Establecimiento',
         'name' => 'Nombre',
         'branch' => 'Sucursal',

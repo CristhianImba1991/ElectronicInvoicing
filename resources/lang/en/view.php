@@ -116,7 +116,7 @@ return [
     'retained_value' => 'Retained value',
     'total_retained' => 'Total retained',
     'fiscal_period' => 'Fiscal period',
-    'description' => 'Description'
+    'description' => 'Description',
     'max_users_owner' => 'Maximum of owners',
     'max_users_supervisor' => 'Maximum of de supervisors',
     'max_users_employee' => 'Maximum of employees',

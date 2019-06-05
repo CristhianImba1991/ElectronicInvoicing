@@ -58,7 +58,50 @@ class ValidQuotaServiceProvider extends ServiceProvider
 
       });
 
+<<<<<<< HEAD
       
+=======
+      Validator::extend('validquotaUsers', function ($attribute, $value, $parameters, $validator) {
+
+        info($attribute);
+        info($value);
+        info($parameters);
+
+        $company = Company::find($value);
+        $quota = $company->quotas()->first();
+        $role = Role::findByName($parameters[0]);
+        $valor = QuotasController::queryRoles($company, $role);
+
+        switch ($parameters[0]) {
+          case 'owner':
+            if($quota->max_users_owner == null)
+            {
+              return true;
+            }
+            return $valor < $quota->max_users_owner;
+            break;
+
+          case 'supervisor':
+          if($quota->max_users_supervisor == null)
+          {
+            return $valor < $quota->max_users_supervisor;
+
+          }
+            break;
+          case 'employee':
+          if($quota->max_users_employee == null)
+          {
+            return $valor < $quota->max_users_employee;
+
+          }
+
+            break;
+        }
+
+
+
+      });
+>>>>>>> actualizacion
     }
 
     /**

@@ -19,12 +19,13 @@ class Quotas extends Model
 
     protected $dates = ['deleted_at'];
 
-    public function quota()
+    public function companies()
     {
         return $this->belongsToMany(
-            'ElectronicInvoicing\Quotas',
+            'ElectronicInvoicing\Company',
             'company_quotas')->withTimestamps();
     }
+
 
 
 

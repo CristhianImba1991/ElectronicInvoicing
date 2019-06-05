@@ -1,8 +1,7 @@
 <?php
-
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\{Company, Customer, Branch};
+use ElectronicInvoicing\{Company, Customer, Branch, Quotas};
 use ElectronicInvoicing\Rules\{ValidRUC, ValidSign};
 use ElectronicInvoicing\StaticClasses\ValidationRule;
 use Illuminate\Http\Request;
@@ -68,7 +67,9 @@ class CompanyController extends Controller
      */
     public function create()
     {
-        return view('companies.create');
+        $quota=Quotas::all();
+        return view('companies.create', compact ('quota'));
+
     }
 
     /**
@@ -103,8 +104,8 @@ class CompanyController extends Controller
         $results = array();
         openssl_pkcs12_read(file_get_contents($request->sign), $results, $request->password);
         $cert = $results['cert'];
-		$pkey = $results['pkey'];
-		openssl_x509_export($cert, $certout);
+    		$pkey = $results['pkey'];
+    		openssl_x509_export($cert, $certout);
         Storage::put('signs/' . $request->ruc . '_cert.pem', $certout);
         Storage::put('signs/' . $request->ruc . '_pkey.pem', $pkey);
         $data = openssl_x509_parse($certout);
@@ -114,7 +115,8 @@ class CompanyController extends Controller
         $validTo = \DateTime::createFromFormat('U', strval($data['validTo_time_t']));
         $validTo->setTimeZone(new \DateTimeZone('America/Guayaquil'));
         $input['sign_valid_to'] = $validTo->format('Y/m/d H:i:s');
-        Company::create($input);
+        $company = Company::create($input);
+        $company->quotas()->save(Quotas::find($request->quota));
         return true;
     }
 
@@ -127,13 +129,15 @@ class CompanyController extends Controller
     public function show(Company $company)
     {
         $user = Auth::user();
+        $quota=Quotas::all();
+
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }
         if (in_array($company->id, $companies->pluck('id')->toArray())) {
-            return view('companies.show', compact('company'));
+            return view('companies.show', compact('company','quota'));
         }
         return abort('404');
     }
@@ -146,14 +150,18 @@ class CompanyController extends Controller
      */
     public function edit(Company $company)
     {
+        $quota= Quotas::all();
+
         $user = Auth::user();
+
         if ($user->hasRole('admin')) {
             $companies = Company::all();
         } else {
             $companies = CompanyUser::getCompaniesAllowedToUser($user);
         }
         if (in_array($company->id, $companies->pluck('id')->toArray())) {
-            return view('companies.edit', compact('company'));
+            return view('companies.edit', compact('company','quota'));
+
         }
         return abort('404');
     }
@@ -216,10 +224,13 @@ class CompanyController extends Controller
             $validTo = \DateTime::createFromFormat('U', strval($data['validTo_time_t']));
             $validTo->setTimeZone(new \DateTimeZone('America/Guayaquil'));
             $input['sign_valid_to'] = $validTo->format('Y/m/d H:i:s');
+
         }
         $company->fill($input)->save();
+        $company->quotas()->detach();
+        $company->quotas()->save(Quotas::find($request->quota));
         return true;
-    }
+}
 
     /**
      * Deactivate the specified resource.
@@ -274,6 +285,23 @@ class CompanyController extends Controller
     /**
      * @param  \Illuminate\Http\Request  $request
      */
+
+     public function quotas (Request $request){
+       if (is_array($request->id)) {
+           $quotas = collect();
+           $companies = Company::whereIn('id', $request->id)->orderBy('social_reason')->get();
+           foreach ($companies as $company) {
+               foreach ($company->quotas()->get() as $quota) {
+                   $quotas->push($quota);
+               }
+           }
+           return $quotas->toJson();
+       } else if (is_string($request->id)) {
+           $quotas = Company::where('id', $request->id)->orderBy('social_reason')->first()->quotas()->get();
+           return $quotas->toJson();
+       }
+  }
+
     public function branches(Request $request) {
         $user = Auth::user();
         if (is_array($request->id)) {
