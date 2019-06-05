@@ -16,7 +16,7 @@ class ValidationRule
             case 'branch':
                 if ($request->method() === 'PUT') {
                     $rules = [
-                        'company' => 'required|exists:companies,id',
+                        'company' => 'required|exists:companies,id|validquotaBranches',
                         'establishment' => 'required|min:1|max:999|integer',
                         'name' => 'required|max:300',
                         'address' => 'required|max:300',
@@ -24,7 +24,7 @@ class ValidationRule
                     ];
                 } else {
                     $rules = [
-                        'company' => 'required|exists:companies,id',
+                        'company' => 'required|exists:companies,id|validquotaBranches',
                         //'establishment' => 'required|min:1|max:999|integer|uniquemultiple:branches,company_id,' . $request->company . ',establishment,' . $request->establishment,
                         'establishment' => ['required', 'min:1', 'max:999', 'integer', 'uniquemultiple:branches,company_id,"' . $request->company . '",establishment,"' . $request->establishment . '"'],
                         'name' => 'required|max:300',
@@ -46,6 +46,7 @@ class ValidationRule
                         'logo' => 'mimes:jpeg,jpg,png|max:2048',
                         'sign' => 'mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32',
                         'password' => 'required_with:sign',
+                        'quota' => 'required',
                     ];
                     if ($request->has('sign')) {
                         //$rules['sign'] .= '|validsign:' . $request->password;
@@ -64,6 +65,7 @@ class ValidationRule
                         //'sign' => 'required|mimetypes:application/x-pkcs12,application/octet-stream|mimes:p12,bin|max:32|validsign:' . $request->password,
                         'sign' => ['required', 'mimetypes:application/x-pkcs12,application/octet-stream', 'mimes:p12,bin', 'max:32', 'validsign:"' . $request->password . '"'],
                         'password' => 'required',
+                        'quota' => 'required',
                     ];
                 }
                 break;
@@ -102,13 +104,13 @@ class ValidationRule
             case 'emission_point':
                 if ($request->method() === 'PUT') {
                     $rules = [
-                        'company' => 'required|exists:companies,id',
+                        'company' => 'required|exists:companies,id|validquotaEmissionPoints',
                         'branch' => 'required|exists:branches,id',
                         'code' => 'required|min:1|max:999|integer',
                     ];
                 } else {
                     $rules = [
-                        'company' => 'required|exists:companies,id',
+                        'company' => 'required|exists:companies,id|validquotaEmissionPoints',
                         'branch' => 'required|exists:branches,id',
                         //'code' => 'required|min:1|max:999|integer|uniquemultiple:emission_points,branch_id,' . $request->branch . ',code,' . $request->code,
                         'code' => ['required', 'min:1', 'max:999', 'integer', 'uniquemultiple:emission_points,branch_id,"' . $request->branch . '",code,"' . $request->code. '"'],
@@ -183,7 +185,7 @@ class ValidationRule
                         'email' => 'required|email|max:191',
                         'password' => 'nullable|min:6|confirmed',
                         'company' => 'nullable|min:1',
-                        'company.*' => 'exists:companies,id',
+                        'company.*' => 'exists:companies,id|validquotaUsers:' . $request->role,
                         'branch' => 'nullable|min:1',
                         'branch.*' => 'exists:branches,id',
                         'emission_point' => 'nullable|min:1',
@@ -196,7 +198,7 @@ class ValidationRule
                         'email' => 'required|email|max:191|unique:users',
                         'password' => 'required|min:6|confirmed',
                         'company' => 'required_unless:role,api,admin|min:1',
-                        'company.*' => 'exists:companies,id',
+                        'company.*' => 'exists:companies,id|validquotaUsers:' . $request->role,
                         'branch' => 'required_unless:role,admin,api,owner|min:1',
                         'branch.*' => 'exists:branches,id',
                         'emission_point' => 'required_unless:role,admin,api,owner|min:1',

@@ -1,9 +1,28 @@
 @extends('layouts.app')
-
 @section('scripts')
+<script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script type="text/javascript">
     $.noConflict();
     jQuery(document).ready(function($) {
+      var _token = $('input[name = "_token"]').val();
+      var id = "{{ $company->id}}";
+      if (id != '') {
+          $.ajax({
+              url: "{{ route('companies.quotas') }}",
+              method: "POST",
+              data: {
+                  _token: _token,
+                  id: id,
+              },
+              success: function(result) {
+
+                  var quota = JSON.parse(result);
+                  console.log(quota);
+
+                  $('#quota').selectpicker('val', quota[0]['id']);
+
+                  }
+              });
         $("#submit").click(function() {
             $.ajax({
                 url: "{{ url('/manage/companies/update') }}/{{ $company->id }}",
@@ -18,6 +37,7 @@
                 data: new FormData($('#update_form')[0]),
                 success: function(result) {
                     var validator = JSON.parse(result);
+                    console.log(validator);
                     if (validator['status']) {
                         window.location.href = "{{ route('companies.index') }}";
                     } else {
@@ -33,9 +53,15 @@
                     }
                 }
             });
-        });
-    });
+          });
+        }
+      });
+
 </script>
+@endsection
+
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 @endsection
 
 @section('content')
@@ -102,6 +128,14 @@
                         <div class="form-group">
                             <label for="password">{{ __('view.password') }}</label>
                             <input type="password" class="form-control" id="password" name="password" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="quota">{{ ucfirst(trans_choice(__('view.quota'), 0)) }}</label>
+                            <select class="form-control selectpicker input-lg dynamic" id="quota" name="quota" data-live-search="true" data-dependent="quota" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.quota'), 0)]), 1) }}">
+                              @foreach ($quota as $quotas)
+                              <option value="{{ $quotas->id }}">{{ $quotas->description }}</option>
+                              @endforeach
+                            </select>
                         </div>
                     </div>
 

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('scripts')
+<script src="{{ asset('js/bootstrap-select.min.js') }}"></script>
 <script type="text/javascript">
     $.noConflict();
     jQuery(document).ready(function($) {
@@ -15,6 +16,8 @@
                 data: new FormData($('#create_form')[0]),
                 success: function(result) {
                     var validator = JSON.parse(result);
+                    console.log(validator);
+
                     if (validator['status']) {
                         window.location.href = "{{ route('companies.index') }}";
                     } else {
@@ -33,6 +36,10 @@
         });
     });
 </script>
+@endsection
+
+@section('styles')
+<link rel="stylesheet" href="{{ asset('css/bootstrap-select.min.css') }}">
 @endsection
 
 @section('content')
@@ -94,9 +101,15 @@
                             <label for="password">{{ __('view.password') }}</label>
                             <input type="password" class="form-control" id="password" name="password" value="">
                         </div>
-                    </div>
-
-                    <div class="card-footer">
+                        <div class="form-group">
+                            <label for="quota">{{ ucfirst(trans_choice(__('view.quota'), 0)) }}</label>
+                            <select class="form-control selectpicker" id="quota" name="quota" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.quota'), 0)]), 1) }}">
+                              @foreach ($quota as $quotas)
+                                <option value="{{ $quotas->id }}">{{ $quotas->description }}</option>
+                              @endforeach
+                            </select>
+                        </div>
+                      <div class="card-footer">
                         <button id="submit" type="button" class="btn btn-sm btn-success">{{ __('view.add') }}</button>
                     </div>
 
@@ -105,6 +118,7 @@
         </div>
     </div>
 </div>
+
 
 @include('layouts.validation')
 @endsection

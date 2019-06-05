@@ -30,7 +30,7 @@
                     }
                 }
             });
-        }
+
         $("#submit").click(function() {
             $.ajax({
                 url: "{{ url('/manage/products/update') }}/{{ $product->id }}",
@@ -53,7 +53,8 @@
                 }
             });
         });
-    });
+    }
+  });
 </script>
 @endsection
 

@@ -164,6 +164,7 @@ return [
         ElectronicInvoicing\Providers\ValidAccessKeyServiceProvider::class,
         ElectronicInvoicing\Providers\ValidCedulaServiceProvider::class,
         ElectronicInvoicing\Providers\ValidEmailMultipleServiceProvider::class,
+        ElectronicInvoicing\Providers\ValidQuotaServiceProvider::class,
         ElectronicInvoicing\Providers\ValidRUCServiceProvider::class,
         ElectronicInvoicing\Providers\ValidSignServiceProvider::class,
 

@@ -47,6 +47,14 @@
                         <label for="current_logo">{{ __('view.logo') }}</label><br>
                         <img class="img-fluid img-thumbnail" src="{{ url('storage/logo/images/'.$company->logo) }}" alt="">
                     </div>
+                    <div class="form-group">
+                        <label for="quota">{{ ucfirst(trans_choice(__('view.quota'), 0)) }}</label>
+                        <select class="form-control selectpicker input-lg dynamic" id="quota" name="quota" data-live-search="true" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.quota'), 0)]), 1) }}">
+                          @foreach ($quota as $quotas)
+                          <option value="{{ $quotas->id }}">{{ $quotas->description }}</option>
+                          @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>

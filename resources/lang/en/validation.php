@@ -192,6 +192,7 @@ return [
         'paymentMethod_value.*' => 'Value of the payment method',
         'paymentMethod_timeunit.*' => 'Unit time of payment',
         'paymentMethod_term.*' => 'Payment term',
+        'quota' => 'Quota',
         'additionaldetail_name.*' => 'Name of the additional information',
         'additionaldetail_value.*' => 'Value of the additional information',
         'tax.*' => 'Retention tax',
