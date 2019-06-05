@@ -58,9 +58,6 @@ class ValidQuotaServiceProvider extends ServiceProvider
 
       });
 
-<<<<<<< HEAD
-      
-=======
       Validator::extend('validquotaUsers', function ($attribute, $value, $parameters, $validator) {
 
         info($attribute);
@@ -101,7 +98,6 @@ class ValidQuotaServiceProvider extends ServiceProvider
 
 
       });
->>>>>>> actualizacion
     }
 
     /**
