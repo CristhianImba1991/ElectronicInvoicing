@@ -124,6 +124,7 @@ class ApiController extends Controller
         $productExists = Product::where([['branch_id', ($branch === NULL ? $branch : $branch->id)], ['main_code', $request->main_code]])->exists();
         $request['_method'] = $productExists ? 'PUT' : 'POST';
         $validator = Validator::make($request->all(), ValidationRule::makeRule('product', $request));
+        $request['_method'] = $productExists ? 'POST' : 'PUT';
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsProduct($request);
@@ -156,6 +157,7 @@ class ApiController extends Controller
             ->exists();
         $request['_method'] = $customerExists ? 'PUT' : 'POST';
         $validator = Validator::make($request->all(), ValidationRule::makeRule('customer', $request));
+        $request['_method'] = $customerExists ? 'POST' : 'PUT';
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsCustomer($request);
