@@ -119,11 +119,19 @@ class ApiController extends Controller
 
     public function createProduct(Request $request)
     {
+        $company = Company::where('ruc', '=', $request->company)->first();
+        $branch = Branch::where([['company_id', '=', ($company === NULL ? $company : $company->id)], ['establishment', '=', $request->branch]])->first();
+        $productExists = Product::where([['branch_id', ($branch === NULL ? $branch : $branch->id)], ['main_code', $request->main_code]])->exists();
+        $request['_method'] = $productExists ? 'PUT' : 'POST';
         $validator = Validator::make($request->all(), ValidationRule::makeRule('product', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsProduct($request);
-            (new ProductController)->store($request);
+            if ($productExists) {
+                (new ProductController)->update($request);
+            } else {
+                (new ProductController)->store($request);
+            }
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
@@ -142,11 +150,20 @@ class ApiController extends Controller
 
     public function createCustomer(Request $request)
     {
+        $company = Company::where('ruc', '=', $request->company)->first();
+        $customerExists = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')
+            ->where([['customers.identification', '=', $request->identification], ['company_customers.company_id', '=', ($company === NULL ? $company : $company->id)]])
+            ->exists();
+        $request['_method'] = $customerExists ? 'PUT' : 'POST';
         $validator = Validator::make($request->all(), ValidationRule::makeRule('customer', $request));
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsCustomer($request);
-            (new CustomerController)->store($request);
+            if ($customerExists) {
+                (new CustomerController)->update($request);
+            } else {
+                (new CustomerController)->store($request);
+            }
             return response()->json([
                 'code' => 200,
                 'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)

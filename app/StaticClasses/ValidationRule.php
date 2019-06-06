@@ -71,7 +71,7 @@ class ValidationRule
                 break;
             case 'customer':
                 $isApiRequest = Str::startsWith($request->decodedPath(), 'api/auth');
-                if ($request->method() === 'PUT') {
+                if ($request['_method'] === 'PUT') {
                     $rules = [
                         'company' => $isApiRequest ? 'required|digits:13|validruc|exists:companies,ruc' : 'required|exists:companies,id',
                         'identification_type' => $isApiRequest ? 'required|exists:identification_types,code' : 'required|exists:identification_types,id',
@@ -119,7 +119,7 @@ class ValidationRule
                 break;
             case 'product':
                 $isApiRequest = Str::startsWith($request->decodedPath(), 'api/auth');
-                if ($request->method() === 'PUT') {
+                if ($request['_method'] === 'PUT') {
                     $rules = [
                         'main_code' => 'required|max:25',
                         'auxiliary_code' => 'required|max:25',
