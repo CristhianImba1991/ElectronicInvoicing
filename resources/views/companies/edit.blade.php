@@ -129,14 +129,16 @@
                             <label for="password">{{ __('view.password') }}</label>
                             <input type="password" class="form-control" id="password" name="password" value="">
                         </div>
-                        <div class="form-group">
-                            <label for="quota">{{ ucfirst(trans_choice(__('view.quota'), 0)) }}</label>
-                            <select class="form-control selectpicker input-lg dynamic" id="quota" name="quota" data-live-search="true" data-dependent="quota" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.quota'), 0)]), 1) }}">
-                              @foreach ($quota as $quotas)
-                              <option value="{{ $quotas->id }}">{{ $quotas->description }}</option>
-                              @endforeach
-                            </select>
-                        </div>
+                        @role('admin')
+                            <div class="form-group">
+                                <label for="quota">{{ ucfirst(trans_choice(__('view.quota'), 0)) }}</label>
+                                <select class="form-control selectpicker input-lg dynamic" id="quota" name="quota" data-live-search="true" data-dependent="quota" title="{{ trans_choice(__('view.select_a_model', ['model' => trans_choice(__('view.quota'), 0)]), 1) }}">
+                                    @foreach ($quota as $quotas)
+                                        <option value="{{ $quotas->id }}">{{ $quotas->description }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endrole
                     </div>
 
                     <div class="card-footer">
