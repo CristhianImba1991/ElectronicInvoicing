@@ -142,7 +142,7 @@ class ProductController extends Controller
      * @param  \ElectronicInvoicing\Product  $product
      * @return \Illuminate\Http\Response
      */
-    private function update(Request $request, Product $product)
+    public function update(Request $request, Product $product)
     {
         $product->fill($request->except(['company', 'branch']))->save();
         foreach ($product->taxes as $taxes) {

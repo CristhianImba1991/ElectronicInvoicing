@@ -143,7 +143,7 @@ class CustomerController extends Controller
      * @param  \ElectronicInvoicing\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    private function update(Request $request, Customer $customer)
+    public function update(Request $request, Customer $customer)
     {
         $customer->fill($request->except(['ruc', 'company', 'identification_type_name', 'identification_type', 'identification']))->save();
         return redirect()->route('customers.index')->with(['status' => trans_choice(__('message.model_updated_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)]);
