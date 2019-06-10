@@ -121,15 +121,15 @@ class ApiController extends Controller
     {
         $company = Company::where('ruc', '=', $request->company)->first();
         $branch = Branch::where([['company_id', '=', ($company === NULL ? $company : $company->id)], ['establishment', '=', $request->branch]])->first();
-        $productExists = Product::where([['branch_id', ($branch === NULL ? $branch : $branch->id)], ['main_code', $request->main_code]])->exists();
-        $request['_method'] = $productExists ? 'PUT' : 'POST';
+        $productQueryBuilder = Product::where([['branch_id', ($branch === NULL ? $branch : $branch->id)], ['main_code', $request->main_code]]);
+        $request['_method'] = $productQueryBuilder->exists() ? 'PUT' : 'POST';
         $validator = Validator::make($request->all(), ValidationRule::makeRule('product', $request));
-        $request['_method'] = $productExists ? 'POST' : 'PUT';
+        $request['_method'] = $productQueryBuilder->exists() ? 'POST' : 'PUT';
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsProduct($request);
-            if ($productExists) {
-                (new ProductController)->update($request);
+            if ($productQueryBuilder->exists()) {
+                (new ProductController)->update($request, $productQueryBuilder->first());
             } else {
                 (new ProductController)->store($request);
             }
@@ -152,17 +152,16 @@ class ApiController extends Controller
     public function createCustomer(Request $request)
     {
         $company = Company::where('ruc', '=', $request->company)->first();
-        $customerExists = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')
-            ->where([['customers.identification', '=', $request->identification], ['company_customers.company_id', '=', ($company === NULL ? $company : $company->id)]])
-            ->exists();
-        $request['_method'] = $customerExists ? 'PUT' : 'POST';
+        $customerQueryBuilder = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')
+            ->where([['customers.identification', '=', $request->identification], ['company_customers.company_id', '=', ($company === NULL ? $company : $company->id)]]);
+        $request['_method'] = $customerQueryBuilder->exists() ? 'PUT' : 'POST';
         $validator = Validator::make($request->all(), ValidationRule::makeRule('customer', $request));
-        $request['_method'] = $customerExists ? 'POST' : 'PUT';
+        $request['_method'] = $customerQueryBuilder->exists() ? 'POST' : 'PUT';
         $isValid = !$validator->fails();
         if ($isValid) {
             self::changeToIdsCustomer($request);
-            if ($customerExists) {
-                (new CustomerController)->update($request);
+            if ($customerQueryBuilder->exists()) {
+                (new CustomerController)->update($request, $customerQueryBuilder->first());
             } else {
                 (new CustomerController)->store($request);
             }
