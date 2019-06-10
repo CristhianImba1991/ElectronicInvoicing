@@ -32,10 +32,7 @@ class ValidQuotaServiceProvider extends ServiceProvider
           return true;
 
         }
-        if ($valor < $quota->max_branches){
-          return true;
-
-        }
+        return $valor < $quota->max_branches;
 
       });
       Validator::extend('validquotaEmissionPoints', function ($attribute, $value, $parameters, $validator) {
@@ -51,19 +48,11 @@ class ValidQuotaServiceProvider extends ServiceProvider
           return true;
 
         }
-        if ($valor < $quota->max_emission_points){
-          return true;
-
-        }
+        return $valor < $quota->max_emission_points;
 
       });
 
       Validator::extend('validquotaUsers', function ($attribute, $value, $parameters, $validator) {
-
-        info($attribute);
-        info($value);
-        info($parameters);
-
         $company = Company::find($value);
         $quota = $company->quotas()->first();
         $role = Role::findByName($parameters[0]);
@@ -81,16 +70,16 @@ class ValidQuotaServiceProvider extends ServiceProvider
           case 'supervisor':
           if($quota->max_users_supervisor == null)
           {
-            return $valor < $quota->max_users_supervisor;
-
-          }
+              return true;
+            }
+          return $valor < $quota->max_users_supervisor;
             break;
           case 'employee':
           if($quota->max_users_employee == null)
           {
-            return $valor < $quota->max_users_employee;
-
+                  return true;
           }
+          return $valor < $quota->max_users_employee;
 
             break;
         }
