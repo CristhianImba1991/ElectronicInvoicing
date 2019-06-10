@@ -350,11 +350,13 @@ class ApiController extends Controller
     }
 
     private static function changeToIdsVoucher(Request $request)
-    {info($request);
+    {
+        info($request->company);
+        info(Company::where('ruc', '=', $request->company)->first()->id);
         $request->company = Company::where('ruc', '=', $request->company)->first()->id;
+        info($request->company);
         $request->branch = Branch::where([['company_id', '=', $request->company], ['establishment', '=', $request->branch]])->first()->id;
         $request->emission_point = EmissionPoint::where([['branch_id', '=', $request->branch], ['code', '=', $request->emission_point]])->first()->id;
-        info($request);
         $request->customer = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')->where([['customers.identification', '=', $request->customer], ['company_customers.company_id', '=', $request->company]])->first()->id;
         $request->environment = Environment::where('code', '=', $request->environment)->first()->id;
         $request->voucher_type = VoucherType::where('code', '=', $request->voucher_type)->first()->id;
