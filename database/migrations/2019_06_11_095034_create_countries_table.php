@@ -15,11 +15,12 @@ class CreateCountriesTable extends Migration
     {
         Schema::create('countries', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedSmallInteger('code')->unique();
+            $table->unsignedSmallInteger('code');
             $table->string('name', 30);
             $table->unsignedSmallInteger('tax_haven_code')->nullable();
             $table->string('tax_haven_name', 300)->nullable();
             $table->timestamps();
+            $table->unique(['code', 'tax_haven_code'], 'country_unique');
         });
     }
 
