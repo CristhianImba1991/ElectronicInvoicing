@@ -39,7 +39,7 @@
                 <td class="align-middle">{{ $detail->product->auxiliary_code }}</td>
                 <td class="text-center align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->quantity, 2, '.', '') : rtrim(rtrim($detail->quantity, '0'), '.') }}</td>
                 <td class="align-middle">{{ $detail->product->description }}</td>
-                <td class="align-middle">{{ $detail->additionalDetails->first()->value }}</td>
+                <td class="align-middle">{{ $detail->additionalDetails->first() === NULL ? '' : $detail->additionalDetails->first()->value }}</td>
                 <td class="text-right align-middle">{{ $voucher->version() === '1.0.0' ? number_format($detail->unit_price, 2, '.', '') : rtrim(rtrim($detail->unit_price, '0'), '.') }}</td>
                 <td class="text-right align-middle">{{ number_format($detail->discount, 2, '.', '') }}</td>
                 <td class="text-right align-middle">{{ number_format($detail->quantity * $detail->unit_price - $detail->discount, 2, '.', '') }}</td>
