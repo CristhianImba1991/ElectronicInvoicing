@@ -12,6 +12,8 @@ use ElectronicInvoicing\{
     Environment,
     IdentificationType,
     IvaTax,
+    IceTax,
+    IrbpnrTax,
     PaymentMethod,
     Product,
     RetentionTax,
