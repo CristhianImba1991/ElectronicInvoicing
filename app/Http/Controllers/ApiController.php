@@ -422,6 +422,8 @@ class ApiController extends Controller
         $request['company'] = Company::where('ruc', '=', $request->company)->first()->id;
         $request['branch'] = Branch::where([['company_id', '=', $request->company], ['establishment', '=', $request->branch]])->first()->id;
         $request['iva_tax'] = IvaTax::where('auxiliary_code', '=', $request->iva_tax)->first()->id;
+        $iceTaxQueryBuilder = IceTax::where('auxiliary_code', '=', $request->ice_tax);
+        $irbpnrTaxQueryBuilder = IrbpnrTax::where('auxiliary_code', '=', $request->irbpnr_tax);
         $request['ice_tax'] = $iceTaxQueryBuilder->exists() ? $iceTaxQueryBuilder->first()->id : NULL;
         $request['irbpnr_tax'] = $irbpnrTaxQueryBuilder->exists() ? $irbpnrTaxQueryBuilder->first()->id : NULL;
         return $request;
