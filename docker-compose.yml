@@ -26,9 +26,6 @@ services:
     container_name: webserver
     restart: unless-stopped
     tty: true
-    ports:
-      - "1966:80"
-      - "2329:443"
     volumes:
       - ./:/var/www
       - ./config_service/conf.d/:/etc/nginx/conf.d/
