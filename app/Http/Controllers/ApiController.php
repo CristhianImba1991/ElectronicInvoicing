@@ -135,7 +135,7 @@ class ApiController extends Controller
             }
             return response()->json([
                 'code' => 200,
-                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
+                'message' => trans_choice(__($productQueryBuilder->exists() ? 'message.model_updated_successfully' : 'message.model_added_successfully', ['model' => trans_choice(__('view.product'), 0)]), 0)
             ], 200);
         } else {
             return response()->json([
@@ -167,7 +167,7 @@ class ApiController extends Controller
             }
             return response()->json([
                 'code' => 200,
-                'message' => trans_choice(__('message.model_added_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)
+                'message' => trans_choice(__($customerQueryBuilder->exists() ? 'message.model_updated_successfully' : 'message.model_added_successfully', ['model' => trans_choice(__('view.customer'), 0)]), 0)
             ], 200);
         } else {
             return response()->json([
