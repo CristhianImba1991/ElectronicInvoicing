@@ -21,17 +21,21 @@ use ElectronicInvoicing\{
     DetailAddressee,
     EmissionPoint,
     Environment,
+    ForeignFiscalRegimeType,
     IceTax,
     IdentificationType,
     IrbpnrTax,
     IvaTax,
     Payment,
     PaymentMethod,
+    PaymentType,
     Product,
     Retention,
     RetentionDetail,
     RetentionTax,
     RetentionTaxDescription,
+    SupplierIdentificationType,
+    SupportVoucher,
     TaxDetail,
     TimeUnit,
     User,
@@ -42,7 +46,12 @@ use ElectronicInvoicing\{
 };
 use ElectronicInvoicing\Http\Controllers\CompanyUser;
 use ElectronicInvoicing\Http\Logic\DraftJson;
-use ElectronicInvoicing\StaticClasses\{ValidationRule, VoucherAbbreviations, VoucherStates};
+use ElectronicInvoicing\StaticClasses\{
+    RetentionType,
+    ValidationRule,
+    VoucherAbbreviations,
+    VoucherStates
+};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -640,8 +649,9 @@ class VoucherController extends Controller
                 $data = ['action', 'companiesproduct', 'iva_taxes', 'ice_taxes', 'irbpnr_taxes', 'identificationTypes'];
                 break;
             case 5:
-                $voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9, 20, 12])->get();
-                $data = ['action', 'voucherTypes'];
+                //$voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9, 12, 20])->get();
+                $retentionTypes = RetentionType::getRetentionTypes();
+                $data = ['action', /*'voucherTypes',*/ 'retentionTypes'];
                 break;
         }
         if ($action === 'edit') {
@@ -649,6 +659,43 @@ class VoucherController extends Controller
             array_push($data, 'voucher');
         }
         return view('vouchers.' . $id, compact($data));
+    }
+
+    /**
+     * Return the requested voucher
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getRetentionView($id, $voucherId = null)
+    {
+        $action = $voucherId == null ? 'create' : 'edit';
+        $user = Auth::user();
+        switch ($id) {
+            case 1:
+                $voucherTypes = VoucherType::whereIn('code', [1, 2, 3, 5, 8, 9, 12, 20])->get();
+                $data = ['action', 'voucherTypes'];
+                break;
+            case 2:
+                $supplierIdentificationTypes = SupplierIdentificationType::all();
+                $supportVouchers = SupportVoucher::all();
+                $supportDocumentTypes = VoucherType::all();
+                $paymentTypes = PaymentType::all();
+                $foreignFiscalRegimeTypes = ForeignFiscalRegimeType::all();
+                $data = [
+                    'action',
+                    'foreignFiscalRegimeTypes',
+                    'paymentTypes',
+                    'supplierIdentificationTypes',
+                    'supportDocumentTypes',
+                    'supportVouchers'
+                ];
+                break;
+        }
+        if ($action === 'edit') {
+            $voucher = Voucher::find($voucherId);
+            array_push($data, 'voucher');
+        }
+        return view('vouchers.5_' . $id, compact($data));
     }
 
     /**

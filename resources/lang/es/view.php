@@ -65,6 +65,8 @@ return [
     'issue_date' => 'Fecha emisión',
     'view' => 'Ver',
     'voucher_type' => '{0} Tipo de comprobante|{1} Tipos de comprobante',
+    'retention_type' => '{0} Tipo de retención|{1} Tipos de retenciones',
+    'ats_retention' => 'Retención ATS',
     'voucher_type_of_the_support_document' => 'Tipo de comprobante del documento de soporte',
     'issue_date_of_the_support_document' => 'Fecha de emisión del documento de soporte',
     'reason' => 'Razón',

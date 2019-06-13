@@ -2,8 +2,10 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
-use ElectronicInvoicing\ForeignFiscalRegimeType;
+use ElectronicInvoicing\{Country, ForeignFiscalRegimeType};
+use ElectronicInvoicing\StaticClasses\Tax;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ForeignFiscalRegimeTypeController extends Controller
 {
@@ -81,5 +83,34 @@ class ForeignFiscalRegimeTypeController extends Controller
     public function destroy(ForeignFiscalRegimeType $foreignFiscalRegimeType)
     {
         //
+    }
+
+    public function countries(Request $request)
+    {
+        if (is_string($request->id)) {
+            switch ($request->id) {
+                case ForeignFiscalRegimeType::where('code', 1)->first()->id:
+                    $countries = Country::select('code', DB::raw('min(id)'), 'name')
+                        ->distinct('code')
+                        ->groupBy('code', 'name')
+                        ->orderBy('name')
+                        ->get();
+                    break;
+                case ForeignFiscalRegimeType::where('code', 2)->first()->id:
+                    $countries = Country::whereNotNull('tax_haven_code')
+                        ->orderBy('name')
+                        ->get();
+                    break;
+                case ForeignFiscalRegimeType::where('code', 3)->first()->id:
+                    $countries = Country::select('code', DB::raw('min(id)'), 'name')
+                        ->distinct('code')
+                        ->where('code', '<>', 593)
+                        ->groupBy('code', 'name')
+                        ->orderBy('name')
+                        ->get();
+                    break;
+            }
+            return $countries->toJson();
+        }
     }
 }

@@ -65,6 +65,8 @@ return [
     'issue_date' => 'Issue date',
     'view' => 'View',
     'voucher_type' => '{0} Voucher type|{1} Voucher types',
+    'retention_type' => '{0} Retention type|{1} Retention types',
+    'ats_retention' => 'ATS Retention',
     'voucher_type_of_the_support_document' => 'Voucher type of the support document',
     'issue_date_of_the_support_document' => 'Issue date of the support document',
     'reason' => 'Reason',

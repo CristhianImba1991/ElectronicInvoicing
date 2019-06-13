@@ -2,6 +2,7 @@
 
 namespace ElectronicInvoicing\Http\Controllers;
 
+use ElectronicInvoicing\StaticClasses\Tax;
 use ElectronicInvoicing\SupportDocument;
 use Illuminate\Http\Request;
 
@@ -81,5 +82,11 @@ class SupportDocumentController extends Controller
     public function destroy(SupportDocument $supportDocument)
     {
         //
+    }
+
+    public function taxes(Request $request)
+    {
+        $taxes = Tax::getTaxTypes();
+        return $taxes->toJson();
     }
 }

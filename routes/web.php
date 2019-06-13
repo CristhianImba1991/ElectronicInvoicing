@@ -51,6 +51,8 @@ Route::group(['prefix' => 'resource'], function () {
     Route::get('/paymentmethods', 'PaymentMethodController@paymentMethods')->name('paymentmethods');
     Route::get('/timeunits', 'TimeUnitController@timeUnits')->name('timeunits');
     Route::post('/ivataxes', 'IvaTaxController@tax')->name('ivataxes');
+    Route::post('/foreign_fiscal_regime_types/countries', 'ForeignFiscalRegimeTypeController@countries')->name('foreignFiscalRegimeTypes.countries');
+    Route::post('/support_documents/taxes', 'SupportDocumentController@taxes')->name('supportDocument.taxes');
 });
 
 Route::group(['prefix' => 'manage'], function () {
@@ -221,6 +223,9 @@ Route::group(['prefix' => 'manage'], function () {
      */
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/vouchers/{id}', 'VoucherController@getVoucherView')->where('id', '[1-5]{1}');
+    });
+    Route::group(['middleware' => ['permission:create_vouchers']], function () {
+        Route::get('/vouchers/retention/{id}', 'VoucherController@getRetentionView')->where('id', '[1-2]{1}');
     });
     Route::group(['middleware' => ['permission:create_vouchers']], function () {
         Route::get('/vouchers/{id}/draft/{voucherId}', 'VoucherController@getDraftVoucherView')->where('id', '[1-5]{1}');
