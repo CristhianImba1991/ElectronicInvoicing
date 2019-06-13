@@ -144,6 +144,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        info($request);
         $product->fill($request->except(['company', 'branch']))->save();
         foreach ($product->taxes as $taxes) {
             $taxes->delete();
@@ -152,6 +153,10 @@ class ProductController extends Controller
         $input_product_taxes['iva_tax_id'] = $request->iva_tax;
         $input_product_taxes['ice_tax_id'] = $request->ice_tax;
         $input_product_taxes['irbpnr_tax_id'] = $request->irbpnr_tax;
+        info($input_product_taxes);
+        $input_product_taxes['ice_tax_id'] = $input_product_taxes['ice_tax_id'] == '' ? NULL : $input_product_taxes['ice_tax_id'];
+        $input_product_taxes['irbpnr_tax_id'] = $input_product_taxes['irbpnr_tax_id'] == '' ? NULL : $input_product_taxes['irbpnr_tax_id'];;
+        info($input_product_taxes);
         $product = ProductTax::create($input_product_taxes);
         return true;
     }
