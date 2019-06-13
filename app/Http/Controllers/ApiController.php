@@ -133,7 +133,7 @@ class ApiController extends Controller
         $request['_method'] = $productQueryBuilder->exists() ? 'POST' : 'PUT';
         $isValid = !$validator->fails();
         if ($isValid) {
-            self::changeToIdsProduct($request);
+            $request = self::changeToIdsProduct($request);
             info($request);
             info('***************************************************************');
             if ($productQueryBuilder->exists()) {
@@ -426,6 +426,7 @@ class ApiController extends Controller
         $irbpnrTaxQueryBuilder = IrbpnrTax::where('auxiliary_code', '=', $request->irbpnr_tax);
         $request->iva_tax = $iceTaxQueryBuilder->exists() ? $iceTaxQueryBuilder->first()->id : NULL;
         $request->irbpnr_tax = $irbpnrTaxQueryBuilder->exists() ? $irbpnrTaxQueryBuilder->first()->id : NULL;
+        return $request;
     }
 
     private static function changeToIdsCustomer(Request $request)
