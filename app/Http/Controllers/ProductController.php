@@ -148,6 +148,7 @@ class ProductController extends Controller
         foreach ($product->taxes as $taxes) {
             $taxes->delete();
         }
+        info($request);
         $input_product_taxes['product_id'] = $product->id;
         $input_product_taxes['iva_tax_id'] = $request->iva_tax;
         $input_product_taxes['ice_tax_id'] = $request->ice_tax;
