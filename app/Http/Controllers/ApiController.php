@@ -121,10 +121,6 @@ class ApiController extends Controller
 
     public function createProduct(Request $request)
     {
-        info('***************************************************************');
-        info('    API CREATE PRODUCT REQUEST:');
-        info($request);
-        info('***************************************************************');
         $company = Company::where('ruc', '=', $request->company)->first();
         $branch = Branch::where([['company_id', '=', ($company === NULL ? $company : $company->id)], ['establishment', '=', $request->branch]])->first();
         $productQueryBuilder = Product::where([['branch_id', ($branch === NULL ? $branch : $branch->id)], ['main_code', $request->main_code]]);
@@ -134,8 +130,6 @@ class ApiController extends Controller
         $isValid = !$validator->fails();
         if ($isValid) {
             $request = self::changeToIdsProduct($request);
-            info($request);
-            info('***************************************************************');
             if ($productQueryBuilder->exists()) {
                 (new ProductController)->update($request, $productQueryBuilder->first());
             } else {
@@ -167,7 +161,7 @@ class ApiController extends Controller
         $request['_method'] = $customerQueryBuilder->exists() ? 'POST' : 'PUT';
         $isValid = !$validator->fails();
         if ($isValid) {
-            self::changeToIdsCustomer($request);
+            $request = self::changeToIdsCustomer($request);
             if ($customerQueryBuilder->exists()) {
                 (new CustomerController)->update($request, $customerQueryBuilder->first());
             } else {
@@ -431,7 +425,8 @@ class ApiController extends Controller
 
     private static function changeToIdsCustomer(Request $request)
     {
-        $request->company = Company::where('ruc', '=', $request->company)->first()->id;
-        $request->identification_type = IdentificationType::where('code', '=', $request->identification_type)->first()->id;
+        $request['company'] = Company::where('ruc', '=', $request->company)->first()->id;
+        $request['identification_type'] = IdentificationType::where('code', '=', $request->identification_type)->first()->id;
+        return $request;
     }
 }
