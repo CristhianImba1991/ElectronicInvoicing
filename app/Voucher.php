@@ -135,6 +135,9 @@ class Voucher extends Model
                 foreach ($this->details()->get() as $detail) {
                     $total += $detail->taxDetails()->first()->value;
                 }
+                if ($this->voucher_type_id === 1) {
+                    $total += $this->tip;
+                }
                 break;
             case 3:
                 $total *= (1 + $this->debitNotesTaxes()->first()->rate / 100.0);
