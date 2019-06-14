@@ -90,6 +90,9 @@ class ApiController extends Controller
 
     public function sendVoucher(Request $request)
     {
+        info('**** SEND VOUCHER *********************************************');
+        info($request);
+        info('***************************************************************');
         $validator = VoucherController::isValidRequest($request, VoucherStates::SENDED);
         $isValid = !$validator->fails();
         if ($isValid) {
@@ -121,6 +124,9 @@ class ApiController extends Controller
 
     public function createProduct(Request $request)
     {
+        info('**** CREATE PRODUCT *******************************************');
+        info($request);
+        info('***************************************************************');
         $company = Company::where('ruc', '=', $request->company)->first();
         $branch = Branch::where([['company_id', '=', ($company === NULL ? $company : $company->id)], ['establishment', '=', $request->branch]])->first();
         $productQueryBuilder = Product::where([['branch_id', ($branch === NULL ? $branch : $branch->id)], ['main_code', $request->main_code]]);
@@ -153,6 +159,9 @@ class ApiController extends Controller
 
     public function createCustomer(Request $request)
     {
+        info('**** CREATE CUSTOMER ******************************************');
+        info($request);
+        info('***************************************************************');
         $company = Company::where('ruc', '=', $request->company)->first();
         $customerQueryBuilder = Customer::join('company_customers', 'customers.id', '=', 'company_customers.customer_id')
             ->where([['customers.identification', '=', $request->identification], ['company_customers.company_id', '=', ($company === NULL ? $company : $company->id)]]);
